@@ -1,26 +1,185 @@
 @import "tailwindcss";
 
 :root {
+  /* Brand Colors */
+  --snow-primary: #0f172a;
+  --snow-primary-light: #1e293b;
+  --snow-accent: #3b82f6;
+  --snow-accent-light: #60a5fa;
+  --snow-white: #ffffff;
+  --snow-gray: #94a3b8;
+  --snow-gray-light: #f1f5f9;
+  --snow-success: #22c55e;
+  --snow-gradient-start: #0B1120;
+  /* Darker blue */
+  --snow-gradient-end: #1e3a5f;
+
+  /* Base */
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #0f172a;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-snow-primary: var(--snow-primary);
+  --color-snow-primary-light: var(--snow-primary-light);
+  --color-snow-accent: var(--snow-accent);
+  --color-snow-accent-light: var(--snow-accent-light);
+  --color-snow-white: var(--snow-white);
+  --color-snow-gray: var(--snow-gray);
+  --color-snow-gray-light: var(--snow-gray-light);
+  --color-snow-success: var(--snow-success);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Ice Background */
+.ice-background-overlay {
+  background-image: url('/ice-background.png');
+  background-size: cover;
+  background-position: center;
+  mix-blend-mode: overlay;
+  opacity: 0.15;
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+/* Snow Particles Animation */
+@keyframes snow-fall {
+  0% {
+    transform: translateY(-10px) translateX(0);
+    opacity: 0;
+  }
+
+  10% {
+    opacity: 1;
+  }
+
+  90% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(100vh) translateX(20px);
+    opacity: 0;
+  }
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+
+  50% {
+    transform: translateY(-20px) rotate(5deg);
+  }
+}
+
+@keyframes pulse-glow {
+
+  0%,
+  100% {
+    filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.5));
+  }
+
+  50% {
+    filter: drop-shadow(0 0 40px rgba(59, 130, 246, 0.8));
+  }
+}
+
+.snow-particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: white;
+  border-radius: 50%;
+  animation: snow-fall linear infinite;
+  opacity: 0;
+}
+
+.float-animation {
+  animation: float 6s ease-in-out infinite;
+}
+
+.pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Hero Gradient */
+.hero-gradient {
+  background: radial-gradient(circle at center, #1e293b 0%, var(--snow-gradient-start) 100%);
+}
+
+/* Glass Card */
+.glass-card {
+  background: rgba(255, 255, 255, 0.03);
+  /* More transparent */
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+/* Button Styles */
+.btn-primary {
+  background: linear-gradient(135deg, var(--snow-accent) 0%, var(--snow-accent-light) 100%);
+  color: white;
+  padding: 0.75rem 2rem;
+  border-radius: 9999px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+  /* Glowing shadow */
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 0 30px rgba(59, 130, 246, 0.7);
+}
+
+/* Discount Badge */
+.discount-badge {
+  background: rgba(34, 197, 94, 0.2);
+  color: #4ade80;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+}
+
+/* Switcher Button */
+.switcher-btn {
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.switcher-btn.active {
+  background: var(--snow-accent);
+  color: white;
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.4);
+}
+
+.switcher-btn:not(.active) {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.switcher-btn:not(.active):hover {
+  color: white;
 }
