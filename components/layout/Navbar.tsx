@@ -1,18 +1,24 @@
 "use client";
 
-import Link from "next/link";
+import { Link, usePathname, useRouter } from "@/navigation";
 import { useState } from "react";
+import { useCurrency, CurrencyCode } from "@/components/providers/CurrencyProvider";
+import { useLocale, useTranslations } from "next-intl";
 
-const currencies = ["SAR", "AED", "USD"] as const;
-const languages = ["EN", "AR"] as const;
-
-type Currency = (typeof currencies)[number];
-type Language = (typeof languages)[number];
+const currencies: CurrencyCode[] = ["USD", "EUR", "GBP"];
+const languages = ["en", "fr"] as const;
 
 export function Navbar() {
-    const [activeCurrency, setActiveCurrency] = useState<Currency>("SAR");
-    const [activeLanguage, setActiveLanguage] = useState<Language>("EN");
+    const { currency, setCurrency } = useCurrency();
+    const locale = useLocale();
+    const t = useTranslations('Navbar');
+    const router = useRouter();
+    const pathname = usePathname();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+    const handleLanguageChange = (newLocale: string) => {
+        router.replace(pathname, { locale: newLocale });
+    };
 
     return (
         <nav className="fixed top-0 left-0 right-0 z-50 bg-snow-primary/95 backdrop-blur-md border-b border-white/10">
@@ -41,21 +47,16 @@ export function Navbar() {
                     {/* Desktop Navigation */}
                     <div className="hidden md:flex items-center gap-8">
                         <Link href="/" className="text-white/80 hover:text-white transition-colors text-sm font-medium">
-                            Home
+                            {t('home')}
                         </Link>
-                        <div className="relative group">
-                            <button className="text-white/80 hover:text-white transition-colors flex items-center gap-1 text-sm font-medium">
-                                Products
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                </svg>
-                            </button>
-                        </div>
+                        <Link href="/products" className="text-white/80 hover:text-white transition-colors text-sm font-medium">
+                            {t('products')}
+                        </Link>
                         <Link href="/about" className="text-white/80 hover:text-white transition-colors text-sm font-medium">
-                            About
+                            {t('about')}
                         </Link>
                         <Link href="/support" className="text-white/80 hover:text-white transition-colors text-sm font-medium">
-                            Support
+                            {t('support')}
                         </Link>
                     </div>
 
@@ -63,18 +64,18 @@ export function Navbar() {
                     <div className="hidden md:flex items-center gap-3">
                         {/* Currency Switcher */}
                         <div className="flex items-center bg-white rounded-full p-1 h-8">
-                            {currencies.map((currency) => (
+                            {currencies.map((c) => (
                                 <button
-                                    key={currency}
-                                    onClick={() => setActiveCurrency(currency)}
+                                    key={c}
+                                    onClick={() => setCurrency(c)}
                                     className={`
                     px-3 py-0.5 rounded-full text-xs font-bold transition-all duration-200
-                    ${activeCurrency === currency
-                                            ? "bg-transparent text-black"
+                    ${currency === c
+                                            ? "bg-black text-white"
                                             : "bg-transparent text-gray-400 hover:text-gray-600"}
                   `}
                                 >
-                                    {currency}
+                                    {c}
                                 </button>
                             ))}
                         </div>
@@ -84,10 +85,10 @@ export function Navbar() {
                             {languages.map((lang) => (
                                 <button
                                     key={lang}
-                                    onClick={() => setActiveLanguage(lang)}
+                                    onClick={() => handleLanguageChange(lang)}
                                     className={`
-                    px-3 py-0.5 rounded-full text-xs font-bold transition-all duration-200
-                    ${activeLanguage === lang
+                    px-3 py-0.5 rounded-full text-xs font-bold transition-all duration-200 uppercase
+                    ${locale === lang
                                             ? "bg-black text-white"
                                             : "bg-transparent text-gray-400 hover:text-gray-600"}
                   `}
@@ -118,27 +119,28 @@ export function Navbar() {
                     <div className="md:hidden pb-4">
                         <div className="flex flex-col gap-4">
                             <Link href="/" className="text-white hover:text-snow-accent transition-colors">
-                                Home
+                                {t('home')}
                             </Link>
                             <Link href="/products" className="text-white hover:text-snow-accent transition-colors">
-                                Products
+                                {t('products')}
                             </Link>
                             <Link href="/about" className="text-white hover:text-snow-accent transition-colors">
-                                About
+                                {t('about')}
                             </Link>
                             <Link href="/support" className="text-white hover:text-snow-accent transition-colors">
-                                Support
+                                {t('support')}
                             </Link>
+
 
                             <div className="flex items-center gap-4 pt-4 border-t border-white/10">
                                 <div className="flex items-center gap-1 bg-white/5 rounded-lg p-1">
-                                    {currencies.map((currency) => (
+                                    {currencies.map((c) => (
                                         <button
-                                            key={currency}
-                                            onClick={() => setActiveCurrency(currency)}
-                                            className={`switcher-btn ${activeCurrency === currency ? "active" : ""}`}
+                                            key={c}
+                                            onClick={() => setCurrency(c)}
+                                            className={`px-3 py-1 rounded text-xs font-bold text-white ${currency === c ? "bg-snow-accent text-black" : ""}`}
                                         >
-                                            {currency}
+                                            {c}
                                         </button>
                                     ))}
                                 </div>
@@ -146,8 +148,8 @@ export function Navbar() {
                                     {languages.map((lang) => (
                                         <button
                                             key={lang}
-                                            onClick={() => setActiveLanguage(lang)}
-                                            className={`switcher-btn ${activeLanguage === lang ? "active" : ""}`}
+                                            onClick={() => handleLanguageChange(lang)}
+                                            className={`px-3 py-1 rounded text-xs font-bold text-white uppercase ${locale === lang ? "bg-snow-accent text-black" : ""}`}
                                         >
                                             {lang}
                                         </button>

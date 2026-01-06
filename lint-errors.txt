@@ -2,10 +2,6 @@
 D:\Snow x\app\(shop)\cart\page.tsx
   48:37  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
 
-D:\Snow x\app\(shop)\checkout\page.tsx
-  63:21  error    Do not use an `<a>` element to navigate to `/products/`. Use `<Link />` from `next/link` instead. See: https://nextjs.org/docs/messages/no-html-link-for-pages                                                                                                                           @next/next/no-html-link-for-pages
-  87:41  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
-
 D:\Snow x\app\(shop)\orders\page.tsx
   70:49  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
 
@@ -21,70 +17,13 @@ D:\Snow x\app\admin\customers\page.tsx
   39:49  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
 
 D:\Snow x\app\admin\orders\[id]\page.tsx
-   1:24  warning  'updateOrderStatus' is defined but never used                                                                                                                                                                                                                                            @typescript-eslint/no-unused-vars
   53:45  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
 
 D:\Snow x\app\admin\products\page.tsx
   62:53  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
 
-D:\Snow x\components\landing\HeroSection.tsx
-  35:9  error  Error: Calling setState synchronously within an effect can trigger cascading renders
-
-Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
-* Update external systems with the latest state from React.
-* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
-
-Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
-
-D:\Snow x\components\landing\HeroSection.tsx:35:9
-  33 |             duration: 12 + Math.random() * 8,
-  34 |         }));
-> 35 |         setParticles(newParticles);
-     |         ^^^^^^^^^^^^ Avoid calling setState() directly within an effect
-  36 |     }, []);
-  37 |
-  38 |     return (  react-hooks/set-state-in-effect
-
-D:\Snow x\components\landing\ThreeDViewer.tsx
-  30:32  error  Error: Cannot call impure function during render
-
-`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
-
-D:\Snow x\components\landing\ThreeDViewer.tsx:30:32
-  28 |         for (let i = 0; i < count; i++) {
-  29 |             const angle = (i / count) * Math.PI * 20;
-> 30 |             const radius = 2 + Math.random() * 3;
-     |                                ^^^^^^^^^^^^^ Cannot call impure function
-  31 |             const speed = 0.03 + Math.random() * 0.07;
-  32 |
-  33 |             temp.push({  react-hooks/purity
-  31:34  error  Error: Cannot call impure function during render
-
-`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
-
-D:\Snow x\components\landing\ThreeDViewer.tsx:31:34
-  29 |             const angle = (i / count) * Math.PI * 20;
-  30 |             const radius = 2 + Math.random() * 3;
-> 31 |             const speed = 0.03 + Math.random() * 0.07;
-     |                                  ^^^^^^^^^^^^^ Cannot call impure function
-  32 |
-  33 |             temp.push({
-  34 |                 speed,                   react-hooks/purity
-  35:20  error  Error: Cannot call impure function during render
-
-`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
-
-D:\Snow x\components\landing\ThreeDViewer.tsx:35:20
-  33 |             temp.push({
-  34 |                 speed,
-> 35 |                 y: Math.random() * 30,
-     |                    ^^^^^^^^^^^^^ Cannot call impure function
-  36 |                 originalAngle: angle,
-  37 |                 originalRadius: radius
-  38 |             });                                                            react-hooks/purity
-
 D:\Snow x\components\providers\CartProvider.tsx
-  41:17  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+  48:9  error  Error: Calling setState synchronously within an effect can trigger cascading renders
 
 Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
 * Update external systems with the latest state from React.
@@ -92,14 +31,14 @@ Effects are intended to synchronize state between React and external systems suc
 
 Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
 
-D:\Snow x\components\providers\CartProvider.tsx:41:17
-  39 |         if (stored) {
-  40 |             try {
-> 41 |                 setItems(JSON.parse(stored));
-     |                 ^^^^^^^^ Avoid calling setState() directly within an effect
-  42 |             } catch {
-  43 |                 localStorage.removeItem(CART_STORAGE_KEY);
-  44 |             }  react-hooks/set-state-in-effect
+D:\Snow x\components\providers\CartProvider.tsx:48:9
+  46 |     // Mark as hydrated on mount
+  47 |     useEffect(() => {
+> 48 |         setIsHydrated(true);
+     |         ^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  49 |     }, []);
+  50 |
+  51 |     // Save cart to localStorage when items change  react-hooks/set-state-in-effect
 
 D:\Snow x\components\shop\CartSidebar.tsx
   112:21  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
@@ -108,7 +47,7 @@ D:\Snow x\components\shop\ProductCard.tsx
   53:25  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
 
 D:\Snow x\middleware.ts
-  4:51  warning  'request' is defined but never used  @typescript-eslint/no-unused-vars
+  4:51  warning  '_request' is defined but never used  @typescript-eslint/no-unused-vars
 
-Γ£û 20 problems (6 errors, 14 warnings)
+Γ£û 13 problems (1 error, 12 warnings)
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, useCallback, ReactNode, useRef } from "react";
 
 export interface CartItem {
     id: string;
@@ -28,30 +28,32 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 const CART_STORAGE_KEY = "snowx-cart";
 
-export function CartProvider({ children }: { children: ReactNode }) {
-    const [items, setItems] = useState<CartItem[]>([]);
-    const [isOpen, setIsOpen] = useState(false);
-    const [isHydrated, setIsHydrated] = useState(false);
-
-    // Load cart from localStorage on mount
-    useEffect(() => {
+function getInitialCart(): CartItem[] {
+    if (typeof window === "undefined") return [];
+    try {
         const stored = localStorage.getItem(CART_STORAGE_KEY);
-        if (stored) {
-            try {
-                setItems(JSON.parse(stored));
-            } catch {
-                localStorage.removeItem(CART_STORAGE_KEY);
-            }
-        }
-        setIsHydrated(true);
+        return stored ? JSON.parse(stored) : [];
+    } catch {
+        return [];
+    }
+}
+
+export function CartProvider({ children }: { children: ReactNode }) {
+    const [items, setItems] = useState<CartItem[]>(getInitialCart);
+    const [isOpen, setIsOpen] = useState(false);
+    const isHydratedRef = useRef(false);
+
+    // Mark as hydrated on mount - using ref to avoid setState in effect
+    useEffect(() => {
+        isHydratedRef.current = true;
     }, []);
 
     // Save cart to localStorage when items change
     useEffect(() => {
-        if (isHydrated) {
+        if (isHydratedRef.current) {
             localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
         }
-    }, [items, isHydrated]);
+    }, [items]);
 
     const addItem = useCallback((item: Omit<CartItem, "quantity">) => {
         setItems((prev) => {

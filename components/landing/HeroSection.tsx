@@ -1,7 +1,8 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useState, useEffect } from "react";
+import { useMemo } from "react";
+import { useTranslations } from "next-intl";
 
 // Dynamically import ThreeDViewer to avoid SSR issues with Three.js
 const ThreeDViewer = dynamic(
@@ -21,19 +22,17 @@ function SnowParticle({ style }: { style: React.CSSProperties }) {
     return <div className="snow-particle" style={style} />;
 }
 
-export function HeroSection() {
-    const [particles, setParticles] = useState<{ id: number; left: number; delay: number; duration: number }[]>([]);
+// Pre-generate particle data outside component to avoid purity issues
+const PARTICLE_DATA = Array.from({ length: 60 }, (_, i) => ({
+    id: i,
+    left: (i * 17 + 5) % 100, // Deterministic spread
+    delay: (i * 0.2) % 12,
+    duration: 12 + (i % 8),
+}));
 
-    useEffect(() => {
-        // Generate snow particles
-        const newParticles = Array.from({ length: 60 }, (_, i) => ({
-            id: i,
-            left: Math.random() * 100,
-            delay: Math.random() * 12,
-            duration: 12 + Math.random() * 8,
-        }));
-        setParticles(newParticles);
-    }, []);
+export function HeroSection() {
+    const t = useTranslations('Hero');
+    const particles = useMemo(() => PARTICLE_DATA, []);
 
     return (
         <section className="relative min-h-screen hero-gradient overflow-hidden flex flex-col items-center justify-center pt-20 pb-16">
@@ -62,20 +61,19 @@ export function HeroSection() {
             <div className="relative z-30 text-center px-4 max-w-4xl mx-auto -mt-8">
                 {/* Headline */}
                 <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight drop-shadow-lg">
-                    Your Premium Digital Subscriptions,
+                    {t('title')}
                     <br />
-                    <span className="text-snow-accent">Delivered Cold.</span>
+                    <span className="text-snow-accent">{t('subtitle')}</span>
                 </h1>
 
                 {/* Subtitle */}
                 <p className="text-snow-gray text-lg md:text-xl mb-8 max-w-2xl mx-auto">
-                    Get discounted access to GPT, Netflix, Spotify, and more.
-                    Premium subscriptions at frozen prices.
+                    {t('description')}
                 </p>
 
                 {/* CTA Button */}
                 <button className="btn-primary text-lg px-8 py-4">
-                    Get Started
+                    {t('cta')}
                 </button>
             </div>
         </section>

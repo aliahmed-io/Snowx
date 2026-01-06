@@ -18,27 +18,32 @@ function Loader() {
     );
 }
 
+// Pre-generate particle data outside useMemo to avoid purity issues
+const SPIRAL_PARTICLE_DATA = (() => {
+    const temp = [];
+    for (let i = 0; i < 800; i++) {
+        const angle = (i / 800) * Math.PI * 20;
+        // Deterministic pseudo-random based on index
+        const seedA = ((i * 17) % 100) / 100;
+        const seedB = ((i * 31) % 100) / 100;
+        const seedC = ((i * 47) % 100) / 100;
+
+        temp.push({
+            speed: 0.03 + seedB * 0.07,
+            y: seedC * 30,
+            originalAngle: angle,
+            originalRadius: 2 + seedA * 3
+        });
+    }
+    return temp;
+})();
+
 function SpiralParticles({ isAnimating }: { isAnimating: boolean }) {
     const count = 800; // Reduced for performance
     const mesh = useRef<THREE.InstancedMesh>(null);
 
     const dummy = useMemo(() => new THREE.Object3D(), []);
-    const particles = useMemo(() => {
-        const temp = [];
-        for (let i = 0; i < count; i++) {
-            const angle = (i / count) * Math.PI * 20;
-            const radius = 2 + Math.random() * 3;
-            const speed = 0.03 + Math.random() * 0.07;
-
-            temp.push({
-                speed,
-                y: Math.random() * 30,
-                originalAngle: angle,
-                originalRadius: radius
-            });
-        }
-        return temp;
-    }, []);
+    const particles = useMemo(() => SPIRAL_PARTICLE_DATA, []);
 
     useFrame((state) => {
         if (!mesh.current) return;

@@ -1,4 +1,4 @@
-import { getOrderById, updateOrderStatus } from "@/actions/orders";
+import { getOrderById } from "@/actions/orders";
 import { notFound } from "next/navigation";
 import { OrderStatusForm } from "./OrderStatusForm";
 import Link from "next/link";

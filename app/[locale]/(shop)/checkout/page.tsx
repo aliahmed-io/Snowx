@@ -2,6 +2,8 @@
 
 import { useCart } from "@/components/providers/CartProvider";
 import { useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
 
 export default function CheckoutPage() {
     const { items, subtotal } = useCart();
@@ -60,12 +62,12 @@ export default function CheckoutPage() {
                     </svg>
                     <h1 className="text-3xl font-bold text-white mb-4">Nothing to checkout</h1>
                     <p className="text-gray-400 mb-8">Add some items to your cart first.</p>
-                    <a
+                    <Link
                         href="/products"
                         className="inline-flex items-center gap-2 bg-gradient-to-r from-snow-accent to-cyan-400 text-gray-900 font-bold px-8 py-3 rounded-xl hover:shadow-[0_0_30px_rgba(56,189,248,0.4)] transition-all"
                     >
                         Browse Products
-                    </a>
+                    </Link>
                 </div>
             </div>
         );
@@ -82,9 +84,9 @@ export default function CheckoutPage() {
                     <div className="bg-white/5 rounded-xl border border-white/10 p-6 space-y-4">
                         {items.map((item) => (
                             <div key={item.id} className="flex gap-4">
-                                <div className="w-16 h-16 bg-gray-800 rounded-lg overflow-hidden flex-shrink-0">
+                                <div className="w-16 h-16 bg-gray-800 rounded-lg overflow-hidden shrink-0 relative">
                                     {item.image ? (
-                                        <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                                        <Image src={item.image} alt={item.name} fill className="object-cover" />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center text-gray-600">
                                             <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
