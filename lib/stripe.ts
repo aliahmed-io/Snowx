@@ -1,9 +1,20 @@
 import Stripe from "stripe";
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-    apiVersion: "2025-12-15.clover",
-    typescript: true,
-});
+let stripeInstance: Stripe | null = null;
+
+export function getStripe(): Stripe {
+    if (!stripeInstance) {
+        const key = process.env.STRIPE_SECRET_KEY;
+        if (!key) {
+            throw new Error("STRIPE_SECRET_KEY environment variable is not set");
+        }
+        stripeInstance = new Stripe(key, {
+            apiVersion: "2025-12-15.clover",
+            typescript: true,
+        });
+    }
+    return stripeInstance;
+}
 
 export async function createCheckoutSession({
     lineItems,
@@ -20,6 +31,7 @@ export async function createCheckoutSession({
     cancelUrl: string;
     metadata?: Record<string, string>;
 }) {
+    const stripe = getStripe();
     const session = await stripe.checkout.sessions.create({
         mode: "payment",
         line_items: lineItems,
