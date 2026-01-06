@@ -1,18 +1,20 @@
 "use client";
 
 import React, { useRef, useState, useMemo, Suspense, useEffect, useCallback } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useGLTF, Environment, Float, Sparkles, Html, useProgress, Center } from "@react-three/drei";
 import * as THREE from "three";
 import gsap from "gsap";
+import { useTranslations } from "next-intl";
 
 // Loading component
 function Loader() {
     const { progress } = useProgress();
+    const t = useTranslations("Common");
     return (
         <Html center>
             <div className="text-snow-accent text-lg font-medium">
-                Loading 3D Model... {progress.toFixed(0)}%
+                {t("loading3DModel")} {progress.toFixed(0)}%
             </div>
         </Html>
     );
@@ -39,42 +41,53 @@ const SPIRAL_PARTICLE_DATA = (() => {
 })();
 
 function SpiralParticles({ isAnimating }: { isAnimating: boolean }) {
-    const count = 800; // Reduced for performance
+    const count = 800;
     const mesh = useRef<THREE.InstancedMesh>(null);
 
     const dummy = useMemo(() => new THREE.Object3D(), []);
     const particles = useMemo(() => SPIRAL_PARTICLE_DATA, []);
+    const transition = useRef(0); // 0 = Snow, 1 = Spiral
 
-    useFrame((state) => {
+    useFrame((state, delta) => {
         if (!mesh.current) return;
+
+        // Smoothly transition between states
+        const target = isAnimating ? 1 : 0;
+        transition.current = THREE.MathUtils.lerp(transition.current, target, delta * 2);
+
+        const t = state.clock.getElapsedTime();
 
         particles.forEach((particle, i) => {
             const { speed, originalAngle, originalRadius } = particle;
 
-            if (isAnimating) {
-                // Spiral to center
-                const t = state.clock.getElapsedTime() * 3;
-                const currentRadius = originalRadius * Math.max(0.1, 1 - (Math.sin(t) + 1) / 4);
-                const currentAngle = originalAngle + t * 6;
+            // 1. Calculate Snow Position
+            const snowTime = t * speed;
+            const snowY = 10 - ((snowTime * 6 + particle.y) % 20);
+            const snowX = Math.cos(originalAngle + snowTime * 0.2) * originalRadius * 1.2;
+            const snowZ = Math.sin(originalAngle + snowTime * 0.2) * originalRadius * 1.2;
+            const snowScale = 0.025;
 
-                dummy.position.set(
-                    Math.cos(currentAngle) * currentRadius * 2,
-                    Math.sin(t * 2 + i * 0.01) * 2,
-                    Math.sin(currentAngle) * currentRadius * 2
-                );
-                dummy.scale.setScalar(0.05);
-            } else {
-                // Falling snow
-                const t = state.clock.getElapsedTime() * speed;
-                const yPos = 10 - ((t * 6 + particle.y) % 20);
+            // 2. Calculate Spiral Position
+            const spiralTime = t * 3;
+            // Easing radius for spiral effect
+            const spiralRadius = originalRadius * Math.max(0.1, 1 - (Math.sin(spiralTime) + 1) / 4);
+            const spiralAngle = originalAngle + spiralTime * 6;
 
-                dummy.position.set(
-                    Math.cos(originalAngle + t * 0.2) * originalRadius * 1.2,
-                    yPos,
-                    Math.sin(originalAngle + t * 0.2) * originalRadius * 1.2
-                );
-                dummy.scale.setScalar(0.025);
-            }
+            const spiralX = Math.cos(spiralAngle) * spiralRadius * 2;
+            const spiralY = Math.sin(spiralTime * 2 + i * 0.01) * 2;
+            const spiralZ = Math.sin(spiralAngle) * spiralRadius * 2;
+            const spiralScale = 0.05;
+
+            // 3. Lerp between positions
+            const f = transition.current;
+            dummy.position.set(
+                THREE.MathUtils.lerp(snowX, spiralX, f),
+                THREE.MathUtils.lerp(snowY, spiralY, f),
+                THREE.MathUtils.lerp(snowZ, spiralZ, f)
+            );
+
+            // Lerp scale
+            dummy.scale.setScalar(THREE.MathUtils.lerp(snowScale, spiralScale, f));
 
             dummy.updateMatrix();
             mesh.current!.setMatrixAt(i, dummy.matrix);
@@ -92,42 +105,19 @@ function SpiralParticles({ isAnimating }: { isAnimating: boolean }) {
 
 function Model({ onClick, isAnimating }: { onClick: () => void, isAnimating: boolean }) {
     const { scene } = useGLTF("/3d-model.glb");
+    // Fix: Clone scene to prevent mutation of cached asset
+    const clonedScene = useMemo(() => scene.clone(), [scene]);
     const groupRef = useRef<THREE.Group>(null);
 
-    // Apply ice material - DISABLED for debugging
-    /*
-    useEffect(() => {
-        scene.traverse((child) => {
-            if ((child as THREE.Mesh).isMesh) {
-                const mesh = child as THREE.Mesh;
-                const iceMaterial = new THREE.MeshPhysicalMaterial({
-                    color: new THREE.Color(0x88d4ff),
-                    metalness: 0.0,
-                    roughness: 0.15,
-                    transmission: 0.8,
-                    thickness: 1.5,
-                    ior: 1.4,
-                    envMapIntensity: 1.5,
-                    clearcoat: 0.3,
-                    transparent: true,
-                    opacity: 0.9,
-                });
-                mesh.material = iceMaterial;
-            }
-        });
-    }, [scene]);
-    */
-
-    // GSAP click animation
     useEffect(() => {
         if (!groupRef.current || !isAnimating) return;
 
-        gsap.timeline()
-            .to(groupRef.current.rotation, {
-                y: groupRef.current.rotation.y + Math.PI * 4,
-                duration: 1.5,
-                ease: "power2.out"
-            })
+        const tl = gsap.timeline();
+        tl.to(groupRef.current.rotation, {
+            y: groupRef.current.rotation.y + Math.PI * 4,
+            duration: 1.5,
+            ease: "power2.out"
+        })
             .to(groupRef.current.scale, {
                 x: 1.2, y: 1.2, z: 1.2,
                 duration: 0.2,
@@ -138,20 +128,27 @@ function Model({ onClick, isAnimating }: { onClick: () => void, isAnimating: boo
                 duration: 0.4,
                 ease: "elastic.out(1, 0.5)"
             }, 0.2);
+
+        return () => {
+            tl.kill();
+        };
     }, [isAnimating]);
 
-    // Floating
     useFrame((state) => {
+        // Fix: Avoid conflict between GSAP and useFrame for position/rotation
         if (groupRef.current && !isAnimating) {
             groupRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.5) * 0.1;
         }
     });
 
     return (
-        <group ref={groupRef} onClick={onClick}>
+        <group ref={groupRef} onClick={(e) => {
+            e.stopPropagation();
+            onClick();
+        }}>
             <Center>
                 <primitive
-                    object={scene}
+                    object={clonedScene}
                     scale={2.5}
                     rotation={[0, 0.8, 0]}
                 />
@@ -160,10 +157,36 @@ function Model({ onClick, isAnimating }: { onClick: () => void, isAnimating: boo
     );
 }
 
+function ContextHandler({ onLost, onRestored }: { onLost: (e: Event) => void, onRestored: () => void }) {
+    const { gl } = useThree();
+    useEffect(() => {
+        const canvas = gl.domElement;
+
+        const handleLost = (event: Event) => {
+            event.preventDefault(); // Important: Allows context to be restored
+            onLost(event);
+        };
+
+        const handleRestored = () => {
+            onRestored();
+        };
+
+        canvas.addEventListener('webglcontextlost', handleLost);
+        canvas.addEventListener('webglcontextrestored', handleRestored);
+
+        return () => {
+            canvas.removeEventListener('webglcontextlost', handleLost);
+            canvas.removeEventListener('webglcontextrestored', handleRestored);
+        };
+    }, [gl, onLost, onRestored]);
+    return null;
+}
+
 // Preload
 useGLTF.preload("/3d-model.glb");
 
 export function ThreeDViewer() {
+    const t = useTranslations("Common");
     const [isAnimating, setIsAnimating] = useState(false);
     const [contextLost, setContextLost] = useState(false);
     const [key, setKey] = useState(0);
@@ -201,7 +224,7 @@ export function ThreeDViewer() {
     if (contextLost) {
         return (
             <div className="w-full h-[500px] flex items-center justify-center bg-snow-primary/50 rounded-xl">
-                <div className="text-snow-accent animate-pulse">Recovering 3D view...</div>
+                <div className="text-snow-accent animate-pulse">{t("recovering3DView")}</div>
             </div>
         );
     }
@@ -217,11 +240,9 @@ export function ThreeDViewer() {
                     powerPreference: "high-performance",
                     failIfMajorPerformanceCaveat: false
                 }}
-                onCreated={({ gl }) => {
-                    gl.domElement.addEventListener('webglcontextlost', handleContextLost);
-                    gl.domElement.addEventListener('webglcontextrestored', handleContextRestored);
-                }}
             >
+                <ContextHandler onLost={handleContextLost} onRestored={handleContextRestored} />
+
                 <fog attach="fog" args={['#0a1628', 8, 18]} />
 
                 {/* Lighting */}
@@ -246,9 +267,8 @@ export function ThreeDViewer() {
                 {/* Sparkles */}
                 <Sparkles count={100} scale={10} size={1.5} speed={0.2} opacity={0.4} color="#ffffff" />
             </Canvas>
-
             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-snow-accent/60 text-sm">
-                Click to interact
+                {t("clickToInteract")}
             </div>
         </div>
     );

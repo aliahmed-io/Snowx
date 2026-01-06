@@ -5,7 +5,8 @@
         "pay": "Pay",
         "free": "Free",
         "loading3DModel": "Loading 3D Model...",
-        "clickToInteract": "Click to interact"
+        "clickToInteract": "Click to interact",
+        "recovering3DView": "Recovering 3D view..."
     },
     "Hero": {
         "title": "Your Premium Digital Subscriptions,",

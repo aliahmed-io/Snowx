@@ -1,0 +1,11 @@
+1. we are using next 16, we dont use middleware instead we use proxy
+2. we are using kinde auth and stripe built in webhooks connection
+3. everything in this project should be build for multi-language support 
+4. fix all errors and warnings even if they are safe to ignore
+5. this is a production ready project so focus on lightouse tests and seo 
+6. this project should handle 300 users at the same time without any issues
+7.  3d parties you will use: uploadthing, redis, zod, prisma, kinde auth, stripe, gsap, three.js, resend
+8. male sure every change you do respect types 
+9. always do build, and lint test after each change in the code 
+10. always use proxy never use middleware
+

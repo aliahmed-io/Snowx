@@ -1,231 +1,164 @@
-import { getAdminStats } from "@/actions/admin";
-import Link from "next/link";
+import { db } from "@/lib/db";
+import { formatPrice, cn } from "@/lib/utils";
+import { StatsCard } from "@/components/admin/StatsCard";
+import {
+    CreditCard,
+    Users,
+    Package,
+    DollarSign,
+    AlertTriangle,
+    Activity
+} from "lucide-react";
+import { OrderStatus } from "@prisma/client";
 
-export const metadata = {
-    title: "Admin Dashboard | SnowX",
-};
+async function getStats() {
+    // Parallel data fetching
+    const [
+        orderStats,
+        userCount,
+        productStats,
+        recentOrders
+    ] = await Promise.all([
+        // Order Stats (Total count and Revenue)
+        db.order.aggregate({
+            _count: { id: true },
+            _sum: { total: true },
+            where: { status: OrderStatus.DELIVERED } // Using DELIVERED as 'Completed'
+        }),
+        // User Count
+        db.user.count(),
+        // Active Stock (Sum of inventory)
+        db.product.aggregate({
+            _sum: { inventory: true },
+            where: { isActive: true }
+        }),
+        // Recent Orders
+        db.order.findMany({
+            take: 5,
+            orderBy: { createdAt: 'desc' },
+            include: { user: true },
+            where: { status: { not: OrderStatus.PENDING } }
+        })
+    ]);
+
+    return {
+        totalSales: orderStats._count.id,
+        totalRevenue: Number(orderStats._sum.total || 0),
+        totalUsers: userCount,
+        activeStock: productStats._sum.inventory || 0,
+        recentOrders
+    };
+}
 
 export default async function AdminDashboard() {
-    const stats = await getAdminStats();
+    const stats = await getStats();
 
     return (
-        <div>
-            <h1 className="text-3xl font-bold text-white mb-8">Dashboard</h1>
+        <div className="space-y-8">
+            <div>
+                <h2 className="text-3xl font-bold text-white tracking-tight">Dashboard</h2>
+                <p className="text-gray-400 mt-2">Overview of your store's performance</p>
+            </div>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <StatCard
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <StatsCard
                     title="Total Revenue"
-                    value={`$${stats.revenue.toLocaleString("en-US", { minimumFractionDigits: 2 })}`}
-                    icon="revenue"
-                    color="green"
+                    value={formatPrice(stats.totalRevenue)}
+                    icon={DollarSign}
+                    description="Lifetime revenue"
                 />
-                <StatCard
-                    title="Total Orders"
-                    value={stats.orders.toString()}
-                    icon="orders"
-                    color="blue"
+                <StatsCard
+                    title="Total Sales"
+                    value={stats.totalSales}
+                    icon={CreditCard}
+                    description="Completed orders"
                 />
-                <StatCard
-                    title="Total Customers"
-                    value={stats.customers.toString()}
-                    icon="customers"
-                    color="purple"
+                <StatsCard
+                    title="Active Users"
+                    value={stats.totalUsers}
+                    icon={Users}
+                    description="Registered accounts"
                 />
-                <StatCard
-                    title="Active Products"
-                    value={stats.products.toString()}
-                    icon="products"
-                    color="orange"
+                <StatsCard
+                    title="Active Stock"
+                    value={stats.activeStock}
+                    icon={Package}
+                    description="Available products"
+                    trend={stats.activeStock < 10 ? { value: 0, label: "Low Stock", positive: false } : undefined}
                 />
             </div>
 
-            {/* Orders by Status */}
-            <div className="grid lg:grid-cols-2 gap-6 mb-8">
-                <div className="bg-white/5 rounded-xl border border-white/10 p-6">
-                    <h2 className="text-xl font-semibold text-white mb-4">Orders by Status</h2>
-                    <div className="space-y-3">
-                        {[
-                            { status: "PENDING", label: "Pending", color: "yellow" },
-                            { status: "PROCESSING", label: "Processing", color: "blue" },
-                            { status: "SHIPPED", label: "Shipped", color: "purple" },
-                            { status: "DELIVERED", label: "Delivered", color: "green" },
-                            { status: "CANCELLED", label: "Cancelled", color: "red" },
-                        ].map((item) => (
-                            <div key={item.status} className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    <span className={`w-3 h-3 rounded-full bg-${item.color}-500`} />
-                                    <span className="text-gray-400">{item.label}</span>
-                                </div>
-                                <span className="text-white font-medium">
-                                    {stats.ordersByStatus[item.status] || 0}
-                                </span>
-                            </div>
-                        ))}
+            {/* Alerts Section */}
+            {stats.activeStock < 10 && (
+                <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 flex items-center gap-3 text-red-400">
+                    <AlertTriangle className="w-5 h-5 shrink-0" />
+                    <div>
+                        <p className="font-semibold">Low Stock Warning</p>
+                        <p className="text-sm opacity-90">Total active stock is below 10 items. Please restock soon.</p>
                     </div>
                 </div>
+            )}
 
-                {/* Quick Actions */}
-                <div className="bg-white/5 rounded-xl border border-white/10 p-6">
-                    <h2 className="text-xl font-semibold text-white mb-4">Quick Actions</h2>
-                    <div className="grid grid-cols-2 gap-4">
-                        <Link
-                            href="/admin/products/new"
-                            className="flex flex-col items-center gap-2 p-4 bg-white/5 hover:bg-white/10 rounded-xl transition-colors text-center"
-                        >
-                            <svg className="w-8 h-8 text-snow-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                            </svg>
-                            <span className="text-white text-sm font-medium">Add Product</span>
-                        </Link>
-                        <Link
-                            href="/admin/categories"
-                            className="flex flex-col items-center gap-2 p-4 bg-white/5 hover:bg-white/10 rounded-xl transition-colors text-center"
-                        >
-                            <svg className="w-8 h-8 text-snow-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z" />
-                            </svg>
-                            <span className="text-white text-sm font-medium">Categories</span>
-                        </Link>
-                        <Link
-                            href="/admin/orders"
-                            className="flex flex-col items-center gap-2 p-4 bg-white/5 hover:bg-white/10 rounded-xl transition-colors text-center"
-                        >
-                            <svg className="w-8 h-8 text-snow-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                            </svg>
-                            <span className="text-white text-sm font-medium">View Orders</span>
-                        </Link>
-                        <Link
-                            href="/admin/customers"
-                            className="flex flex-col items-center gap-2 p-4 bg-white/5 hover:bg-white/10 rounded-xl transition-colors text-center"
-                        >
-                            <svg className="w-8 h-8 text-snow-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                            </svg>
-                            <span className="text-white text-sm font-medium">Customers</span>
-                        </Link>
-                    </div>
+            {/* Recent Activity */}
+            <div className="bg-[#0a1628] border border-snow-primary/20 rounded-xl overflow-hidden">
+                <div className="p-6 border-b border-snow-primary/20 flex items-center justify-between">
+                    <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                        <Activity className="w-5 h-5 text-snow-accent" />
+                        Recent Orders
+                    </h3>
                 </div>
-            </div>
-
-            {/* Recent Orders */}
-            <div className="bg-white/5 rounded-xl border border-white/10 p-6">
-                <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xl font-semibold text-white">Recent Orders</h2>
-                    <Link href="/admin/orders" className="text-snow-accent hover:underline text-sm">
-                        View all
-                    </Link>
-                </div>
-
-                {stats.recentOrders.length === 0 ? (
-                    <p className="text-gray-500 text-center py-8">No orders yet</p>
-                ) : (
-                    <div className="overflow-x-auto">
-                        <table className="w-full">
-                            <thead>
-                                <tr className="text-left text-gray-500 text-sm border-b border-white/10">
-                                    <th className="pb-3 font-medium">Order</th>
-                                    <th className="pb-3 font-medium">Customer</th>
-                                    <th className="pb-3 font-medium">Status</th>
-                                    <th className="pb-3 font-medium text-right">Total</th>
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left text-sm text-gray-400">
+                        <thead className="bg-white/5 text-gray-200 uppercase font-medium">
+                            <tr>
+                                <th className="px-6 py-4">Order ID</th>
+                                <th className="px-6 py-4">Customer</th>
+                                <th className="px-6 py-4">Status</th>
+                                <th className="px-6 py-4">Amount</th>
+                                <th className="px-6 py-4">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-snow-primary/10">
+                            {stats.recentOrders.length === 0 ? (
+                                <tr>
+                                    <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
+                                        No recent orders found
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                {stats.recentOrders.map((order) => (
-                                    <tr key={order.id} className="border-b border-white/5">
-                                        <td className="py-3">
-                                            <Link href={`/admin/orders/${order.id}`} className="text-white hover:text-snow-accent transition-colors">
-                                                #{order.orderNumber.slice(0, 8)}
-                                            </Link>
+                            ) : (
+                                stats.recentOrders.map((order) => (
+                                    <tr key={order.id} className="hover:bg-white/5 transition-colors">
+                                        <td className="px-6 py-4 font-mono text-white">#{order.orderNumber.slice(-6)}</td>
+                                        <td className="px-6 py-4 flex items-center gap-2">
+                                            {order.user.profileImage ? (
+                                                <img src={order.user.profileImage} alt="" className="w-6 h-6 rounded-full" />
+                                            ) : (
+                                                <div className="w-6 h-6 rounded-full bg-snow-accent/20" />
+                                            )}
+                                            {order.user.firstName || order.user.email}
                                         </td>
-                                        <td className="py-3 text-gray-400">
-                                            {order.user.firstName} {order.user.lastName}
+                                        <td className="px-6 py-4">
+                                            <span className={cn(
+                                                "px-2 py-1 rounded-full text-xs font-medium",
+                                                order.status === OrderStatus.DELIVERED ? "bg-green-500/10 text-green-400" :
+                                                    order.status === OrderStatus.PENDING ? "bg-yellow-500/10 text-yellow-400" :
+                                                        "bg-gray-500/10 text-gray-400"
+                                            )}>
+                                                {order.status}
+                                            </span>
                                         </td>
-                                        <td className="py-3">
-                                            <OrderStatusBadge status={order.status} />
-                                        </td>
-                                        <td className="py-3 text-white text-right font-medium">
-                                            ${order.total.toFixed(2)}
+                                        <td className="px-6 py-4 text-white">{formatPrice(Number(order.total))}</td>
+                                        <td className="px-6 py-4">
+                                            {new Date(order.createdAt).toLocaleDateString()}
                                         </td>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                )}
-            </div>
-        </div>
-    );
-}
-
-function StatCard({
-    title,
-    value,
-    icon,
-    color,
-}: {
-    title: string;
-    value: string;
-    icon: string;
-    color: "green" | "blue" | "purple" | "orange";
-}) {
-    const colorClasses = {
-        green: "from-green-500/20 to-emerald-500/20 text-green-400",
-        blue: "from-blue-500/20 to-cyan-500/20 text-blue-400",
-        purple: "from-purple-500/20 to-pink-500/20 text-purple-400",
-        orange: "from-orange-500/20 to-amber-500/20 text-orange-400",
-    };
-
-    const icons: Record<string, React.ReactNode> = {
-        revenue: (
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-        ),
-        orders: (
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-            </svg>
-        ),
-        customers: (
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-            </svg>
-        ),
-        products: (
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-            </svg>
-        ),
-    };
-
-    return (
-        <div className="bg-white/5 rounded-xl border border-white/10 p-6">
-            <div className="flex items-center justify-between mb-4">
-                <div className={`p-3 rounded-lg bg-gradient-to-br ${colorClasses[color]}`}>
-                    {icons[icon]}
+                                ))
+                            )}
+                        </tbody>
+                    </table>
                 </div>
             </div>
-            <p className="text-gray-400 text-sm mb-1">{title}</p>
-            <p className="text-2xl font-bold text-white">{value}</p>
         </div>
-    );
-}
-
-function OrderStatusBadge({ status }: { status: string }) {
-    const statusStyles: Record<string, string> = {
-        PENDING: "bg-yellow-500/20 text-yellow-400",
-        PROCESSING: "bg-blue-500/20 text-blue-400",
-        SHIPPED: "bg-purple-500/20 text-purple-400",
-        DELIVERED: "bg-green-500/20 text-green-400",
-        CANCELLED: "bg-red-500/20 text-red-400",
-        REFUNDED: "bg-gray-500/20 text-gray-400",
-    };
-
-    return (
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusStyles[status] || statusStyles.PENDING}`}>
-            {status.charAt(0) + status.slice(1).toLowerCase()}
-        </span>
     );
 }

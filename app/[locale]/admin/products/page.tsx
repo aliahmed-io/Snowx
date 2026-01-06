@@ -1,132 +1,163 @@
 import { db } from "@/lib/db";
-import Link from "next/link";
+import { formatPrice } from "@/lib/utils";
+import { Link } from "@/navigation";
+import {
+    Plus,
+    Search,
+    MoreHorizontal,
+    Edit,
+    Trash,
+    Package,
+    Key
+} from "lucide-react";
 
-export const metadata = {
-    title: "Products | Admin | SnowX",
-};
-
-export default async function AdminProductsPage() {
-    const products = await db.product.findMany({
-        include: { category: true },
-        orderBy: { createdAt: "desc" },
+async function getProducts() {
+    return await db.product.findMany({
+        include: {
+            category: true,
+            _count: {
+                select: { accounts: { where: { isSold: false } } }
+            }
+        },
+        orderBy: { createdAt: 'desc' }
     });
+}
+
+export default async function ProductsPage() {
+    const products = await getProducts();
 
     return (
-        <div>
-            <div className="flex items-center justify-between mb-8">
-                <h1 className="text-3xl font-bold text-white">Products</h1>
+        <div className="space-y-8">
+            <div className="flex items-center justify-between">
+                <div>
+                    <h2 className="text-3xl font-bold text-white tracking-tight">Products</h2>
+                    <p className="text-gray-400 mt-2">Manage your digital products and inventory</p>
+                </div>
                 <Link
                     href="/admin/products/new"
-                    className="flex items-center gap-2 bg-snow-accent text-gray-900 font-bold px-4 py-2 rounded-lg hover:bg-cyan-400 transition-colors"
+                    className="flex items-center gap-2 bg-snow-accent text-[#020817] px-4 py-2 rounded-lg font-medium hover:bg-snow-accent/90 transition-colors"
                 >
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                    </svg>
-                    Add Product
+                    <Plus className="w-5 h-5" />
+                    New Product
                 </Link>
             </div>
 
-            {products.length === 0 ? (
-                <div className="text-center py-20 bg-white/5 rounded-xl border border-white/10">
-                    <svg className="w-16 h-16 mx-auto text-gray-600 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                    </svg>
-                    <p className="text-gray-400 mb-4">No products yet</p>
-                    <Link
-                        href="/admin/products/new"
-                        className="text-snow-accent hover:underline"
-                    >
-                        Create your first product
-                    </Link>
+            {/* Filters & Search */}
+            <div className="flex items-center gap-4 bg-[#0a1628] border border-snow-primary/20 p-4 rounded-xl">
+                <div className="relative flex-1 max-w-md">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                    <input
+                        type="text"
+                        placeholder="Search products..."
+                        className="w-full bg-snow-primary/10 border border-snow-primary/20 rounded-lg pl-10 pr-4 py-2 text-sm text-gray-300 focus:outline-none focus:border-snow-accent/50 transition-colors"
+                    />
                 </div>
-            ) : (
-                <div className="bg-white/5 rounded-xl border border-white/10 overflow-hidden">
-                    <table className="w-full">
-                        <thead>
-                            <tr className="text-left text-gray-500 text-sm border-b border-white/10 bg-white/5">
-                                <th className="p-4 font-medium">Product</th>
-                                <th className="p-4 font-medium">Category</th>
-                                <th className="p-4 font-medium">Price</th>
-                                <th className="p-4 font-medium">Inventory</th>
-                                <th className="p-4 font-medium">Status</th>
-                                <th className="p-4 font-medium text-right">Actions</th>
+            </div>
+
+            {/* Products Table */}
+            <div className="bg-[#0a1628] border border-snow-primary/20 rounded-xl overflow-hidden">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left text-sm text-gray-400">
+                        <thead className="bg-white/5 text-gray-200 uppercase font-medium">
+                            <tr>
+                                <th className="px-6 py-4">Product</th>
+                                <th className="px-6 py-4">Category</th>
+                                <th className="px-6 py-4">Price</th>
+                                <th className="px-6 py-4">Inventory (Active)</th>
+                                <th className="px-6 py-4">Status</th>
+                                <th className="px-6 py-4 text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            {products.map((product) => (
-                                <tr key={product.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                                    <td className="p-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-12 h-12 bg-gray-800 rounded-lg overflow-hidden flex-shrink-0">
-                                                {product.images[0] ? (
-                                                    <img src={product.images[0]} alt="" className="w-full h-full object-cover" />
-                                                ) : (
-                                                    <div className="w-full h-full flex items-center justify-center text-gray-600">
-                                                        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                        </svg>
-                                                    </div>
-                                                )}
+                        <tbody className="divide-y divide-snow-primary/10">
+                            {products.length === 0 ? (
+                                <tr>
+                                    <td colSpan={6} className="px-6 py-12 text-center">
+                                        <div className="flex flex-col items-center gap-3">
+                                            <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center">
+                                                <Package className="w-6 h-6 text-gray-500" />
                                             </div>
-                                            <div>
-                                                <p className="text-white font-medium">{product.name}</p>
-                                                <p className="text-gray-500 text-sm">{product.slug}</p>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="p-4 text-gray-400">{product.category.name}</td>
-                                    <td className="p-4">
-                                        <span className="text-white font-medium">${Number(product.price).toFixed(2)}</span>
-                                        {product.comparePrice && (
-                                            <span className="text-gray-500 line-through text-sm ml-2">
-                                                ${Number(product.comparePrice).toFixed(2)}
-                                            </span>
-                                        )}
-                                    </td>
-                                    <td className="p-4">
-                                        <span className={`${product.inventory === 0 ? "text-red-400" : product.inventory < 10 ? "text-yellow-400" : "text-gray-400"}`}>
-                                            {product.inventory}
-                                        </span>
-                                    </td>
-                                    <td className="p-4">
-                                        <div className="flex items-center gap-2">
-                                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${product.isActive ? "bg-green-500/20 text-green-400" : "bg-gray-500/20 text-gray-400"}`}>
-                                                {product.isActive ? "Active" : "Inactive"}
-                                            </span>
-                                            {product.isFeatured && (
-                                                <span className="px-2 py-1 rounded-full text-xs font-medium bg-snow-accent/20 text-snow-accent">
-                                                    Featured
-                                                </span>
-                                            )}
-                                        </div>
-                                    </td>
-                                    <td className="p-4 text-right">
-                                        <div className="flex items-center justify-end gap-2">
-                                            <Link
-                                                href={`/admin/products/${product.id}/edit`}
-                                                className="p-2 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors"
-                                            >
-                                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                </svg>
-                                            </Link>
-                                            <Link
-                                                href={`/products/${product.slug}`}
-                                                target="_blank"
-                                                className="p-2 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors"
-                                            >
-                                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                                                </svg>
-                                            </Link>
+                                            <p className="text-gray-400 font-medium">No products found</p>
+                                            <p className="text-gray-500 text-xs">Get started by creating your first product.</p>
                                         </div>
                                     </td>
                                 </tr>
-                            ))}
+                            ) : (
+                                products.map((product) => (
+                                    <tr key={product.id} className="hover:bg-white/5 transition-colors group">
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-center gap-3">
+                                                {product.images[0] ? ( // Simple check, ideally use next/image
+                                                    <div className="w-10 h-10 rounded-lg bg-white/5 overflow-hidden">
+                                                        <img src={product.images[0]} alt="" className="w-full h-full object-cover" />
+                                                    </div>
+                                                ) : (
+                                                    <div className="w-10 h-10 rounded-lg bg-snow-accent/10 flex items-center justify-center text-snow-accent">
+                                                        <Package className="w-5 h-5" />
+                                                    </div>
+                                                )}
+                                                <div>
+                                                    <p className="text-white font-medium">{product.name}</p>
+                                                    <p className="text-xs text-gray-500">/{product.slug}</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <span className="bg-white/5 px-2 py-1 rounded-md text-xs font-medium">
+                                                {product.category.name}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 font-mono text-white">
+                                            {formatPrice(Number(product.price))}
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-center gap-2">
+                                                <Key className="w-4 h-4 text-gray-500" />
+                                                <span className={product._count.accounts > 0 ? "text-green-400" : "text-red-400"}>
+                                                    {product._count.accounts}
+                                                </span>
+                                                <span className="text-gray-600">/ {product.inventory} Total</span>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            {product.isActive ? (
+                                                <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium bg-green-500/10 text-green-400">
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                                                    Active
+                                                </span>
+                                            ) : (
+                                                <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium bg-gray-500/10 text-gray-400">
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-gray-500" />
+                                                    Draft
+                                                </span>
+                                            )}
+                                        </td>
+                                        <td className="px-6 py-4 text-right">
+                                            <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <Link
+                                                    href={`/admin/products/${product.id}/stock`}
+                                                    className="p-2 hover:bg-white/10 rounded-lg text-gray-400 hover:text-snow-accent transition-colors"
+                                                    title="Manage Stock"
+                                                >
+                                                    <Key className="w-4 h-4" />
+                                                </Link>
+                                                <Link
+                                                    href={`/admin/products/${product.id}/edit`}
+                                                    className="p-2 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors"
+                                                >
+                                                    <Edit className="w-4 h-4" />
+                                                </Link>
+                                                <button className="p-2 hover:bg-red-500/10 rounded-lg text-gray-400 hover:text-red-400 transition-colors">
+                                                    <Trash className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
                         </tbody>
                     </table>
                 </div>
-            )}
+            </div>
         </div>
     );
 }

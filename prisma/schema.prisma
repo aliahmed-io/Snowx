@@ -7,17 +7,22 @@ datasource db {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  kindeId      String   @unique
-  email        String   @unique
-  firstName    String?
-  lastName     String?
-  profileImage String?
-  role         Role     @default(CUSTOMER)
-  orders       Order[]
-  reviews      Review[]
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id               String   @id @default(cuid())
+  kindeId          String   @unique
+  email            String   @unique
+  firstName        String?
+  lastName         String?
+  profileImage     String?
+  stripeCustomerId String?  @unique
+  role             Role     @default(CUSTOMER)
+  isSuspended      Boolean  @default(false)
+  orders           Order[]
+  reviews          Review[]
+  tickets          Ticket[]
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([role, createdAt])
 }
 
 enum Role {
@@ -38,6 +43,7 @@ model Product {
   inventory    Int         @default(0)
   isActive     Boolean     @default(true)
   isFeatured   Boolean     @default(false)
+  accounts     Account[]
   orderItems   OrderItem[]
   reviews      Review[]
   createdAt    DateTime    @default(now())
@@ -76,9 +82,11 @@ model Order {
   billingAddress  Json?
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
+  accounts        Account[]
 
   @@index([userId])
   @@index([orderNumber])
+  @@index([status, createdAt])
 }
 
 enum OrderStatus {
@@ -119,4 +127,83 @@ model Review {
 
   @@unique([userId, productId])
   @@index([productId])
+}
+
+model Account {
+  id          String  @id @default(cuid())
+  credentials String  @db.Text
+  isSold      Boolean @default(false)
+
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId String
+
+  order   Order?  @relation(fields: [orderId], references: [id])
+  orderId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([productId])
+  @@index([orderId])
+}
+
+model Ticket {
+  id      String       @id @default(cuid())
+  subject String
+  message String       @db.Text
+  status  TicketStatus @default(OPEN)
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+enum TicketStatus {
+  OPEN
+  PENDING
+  CLOSED
+}
+
+model ContentBlock {
+  id      String  @id @default(cuid())
+  key     String
+  title   String?
+  content String  @db.Text
+  locale  String  @default("en")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([key, locale])
+}
+
+model Broadcast {
+  id      String        @id @default(cuid())
+  subject String
+  message String        @db.Text
+  type    BroadcastType @default(EMAIL)
+  sentAt  DateTime?
+
+  stats Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum BroadcastType {
+  EMAIL
+  NOTIFICATION
+  BOTH
+}
+
+model SystemSetting {
+  key         String  @id
+  value       String  @db.Text
+  description String?
+
+  updatedAt DateTime @updatedAt
 }

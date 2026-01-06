@@ -4,16 +4,22 @@ import dynamic from "next/dynamic";
 import { useMemo } from "react";
 import { useTranslations } from "next-intl";
 
+// Loading component wrapper to use translations
+function ThreeDLoader() {
+    const t = useTranslations('Common');
+    return (
+        <div className="w-full h-[500px] flex items-center justify-center">
+            <div className="text-snow-accent text-lg animate-pulse">{t('loading3DModel')}</div>
+        </div>
+    );
+}
+
 // Dynamically import ThreeDViewer to avoid SSR issues with Three.js
 const ThreeDViewer = dynamic(
     () => import("./ThreeDViewer").then((mod) => ({ default: mod.ThreeDViewer })),
     {
         ssr: false,
-        loading: () => (
-            <div className="w-full h-[500px] flex items-center justify-center">
-                <div className="text-snow-accent text-lg animate-pulse">Loading 3D Model...</div>
-            </div>
-        )
+        loading: () => <ThreeDLoader />
     }
 );
 
