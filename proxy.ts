@@ -14,18 +14,18 @@ export default withAuth(
         loginPage: "/api/auth/login",
         publicPaths: [
             "/",
-            "/fr",
+            "/ar",
             "/en",
             "/api/auth/(.*)",
             "/api/webhooks/(.*)",
             "/products(.*)",
-            "/fr/products(.*)",
+            "/ar/products(.*)",
             "/en/products(.*)",
             "/categories(.*)",
-            "/fr/categories(.*)",
+            "/ar/categories(.*)",
             "/en/categories(.*)",
             "/cart",
-            "/fr/cart",
+            "/ar/cart",
             "/en/cart"
         ],
     }

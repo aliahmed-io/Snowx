@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCart } from "@/components/providers/CartProvider";
+import { useCurrency } from "@/components/providers/CurrencyProvider";
 
 interface ProductCardProps {
     id: string;
@@ -27,6 +28,7 @@ export function ProductCard({
     reviewCount,
 }: ProductCardProps) {
     const { addItem } = useCart();
+    const { formatPrice } = useCurrency();
 
     const discount = comparePrice
         ? Math.round(((comparePrice - price) / comparePrice) * 100)
@@ -104,9 +106,9 @@ export function ProductCard({
 
                     {/* Price */}
                     <div className="flex items-center gap-2">
-                        <span className="text-2xl font-bold text-white">${price.toFixed(2)}</span>
+                        <span className="text-2xl font-bold text-white">{formatPrice(price)}</span>
                         {comparePrice && (
-                            <span className="text-gray-500 line-through text-sm">${comparePrice.toFixed(2)}</span>
+                            <span className="text-gray-500 line-through text-sm">{formatPrice(comparePrice)}</span>
                         )}
                     </div>
                 </div>

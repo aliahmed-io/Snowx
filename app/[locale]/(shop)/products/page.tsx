@@ -3,11 +3,15 @@ import { getProducts } from "@/actions/products";
 import { getCategories } from "@/actions/categories";
 import { ProductGrid } from "@/components/shop/ProductGrid";
 import { ProductFilters } from "@/components/shop/ProductFilters";
+import { getTranslations } from "next-intl/server";
 
-export const metadata = {
-    title: "Products | SnowX",
-    description: "Browse our premium digital subscriptions at frozen prices",
-};
+export async function generateMetadata({ params: { locale } }: { params: { locale: string } }) {
+    const t = await getTranslations({ locale, namespace: 'Shop' });
+    return {
+        title: `${t('title')} | SnowX`,
+        description: t('subtitle'),
+    };
+}
 
 interface ProductsPageProps {
     searchParams: Promise<{ category?: string; sort?: string; search?: string }>;
@@ -15,6 +19,7 @@ interface ProductsPageProps {
 
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
     const params = await searchParams;
+    const t = await getTranslations('Shop');
 
     const [products, categories] = await Promise.all([
         getProducts({
@@ -30,10 +35,10 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
             {/* Header */}
             <div className="mb-8">
                 <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-                    Our <span className="text-snow-accent">Products</span>
+                    {t('title')}
                 </h1>
                 <p className="text-gray-400 text-lg max-w-2xl">
-                    Premium digital subscriptions at frozen prices. Get access to GPT, Netflix, Spotify, and more.
+                    {t('subtitle')}
                 </p>
             </div>
 
@@ -43,7 +48,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                     <input
                         type="text"
                         name="search"
-                        placeholder="Search products..."
+                        placeholder={t('searchPlaceholder')}
                         defaultValue={params.search}
                         className="w-full bg-white/10 border border-white/20 text-white rounded-xl px-4 py-3 pl-12 focus:outline-none focus:border-snow-accent transition-colors"
                     />
@@ -65,7 +70,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
             {/* Products Grid */}
             <ProductGrid
                 products={products}
-                emptyMessage="No products match your filters"
+                emptyMessage={t('noResults')}
             />
         </div>
     );

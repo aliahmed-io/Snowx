@@ -1,10 +1,14 @@
 "use client";
 
 import { useCart, CartItem } from "@/components/providers/CartProvider";
-import Link from "next/link";
+import { Link } from "@/navigation";
+import { useTranslations } from "next-intl";
+import { useCurrency } from "@/components/providers/CurrencyProvider";
 
 export function CartSidebar() {
     const { items, removeItem, updateQuantity, subtotal, itemCount, isOpen, closeCart, clearCart } = useCart();
+    const t = useTranslations('Cart');
+    const { formatPrice } = useCurrency();
 
     if (!isOpen) return null;
 
@@ -24,7 +28,7 @@ export function CartSidebar() {
                         <svg className="w-6 h-6 text-snow-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                         </svg>
-                        Cart ({itemCount})
+                        {t('title')} ({itemCount})
                     </h2>
                     <button
                         onClick={closeCart}
@@ -43,12 +47,12 @@ export function CartSidebar() {
                             <svg className="w-16 h-16 mx-auto text-gray-600 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                             </svg>
-                            <p className="text-gray-400 mb-4">Your cart is empty</p>
+                            <p className="text-gray-400 mb-4">{t('empty')}</p>
                             <button
                                 onClick={closeCart}
                                 className="text-snow-accent hover:underline"
                             >
-                                Continue shopping
+                                {t('continueShopping')}
                             </button>
                         </div>
                     ) : (
@@ -59,6 +63,7 @@ export function CartSidebar() {
                                     item={item}
                                     onRemove={() => removeItem(item.id)}
                                     onUpdateQuantity={(qty) => updateQuantity(item.id, qty)}
+                                    formatPrice={formatPrice}
                                 />
                             ))}
                         </div>
@@ -69,24 +74,24 @@ export function CartSidebar() {
                 {items.length > 0 && (
                     <div className="border-t border-white/10 p-6 space-y-4">
                         <div className="flex justify-between items-center">
-                            <span className="text-gray-400">Subtotal</span>
-                            <span className="text-2xl font-bold text-white">${subtotal.toFixed(2)}</span>
+                            <span className="text-gray-400">{t('subtotal')}</span>
+                            <span className="text-2xl font-bold text-white">{formatPrice(subtotal)}</span>
                         </div>
-                        <p className="text-gray-500 text-sm">Shipping and taxes calculated at checkout</p>
+                        <p className="text-gray-500 text-sm">{t('shippingNote')}</p>
 
                         <Link
                             href="/checkout"
                             onClick={closeCart}
                             className="block w-full bg-gradient-to-r from-snow-accent to-cyan-400 text-gray-900 font-bold py-3 rounded-xl text-center hover:shadow-[0_0_30px_rgba(56,189,248,0.4)] transition-all duration-300"
                         >
-                            Checkout
+                            {t('checkout')}
                         </Link>
 
                         <button
                             onClick={clearCart}
                             className="block w-full text-gray-400 hover:text-white transition-colors text-sm"
                         >
-                            Clear cart
+                            {t('clearCart')}
                         </button>
                     </div>
                 )}
@@ -99,10 +104,12 @@ function CartItemRow({
     item,
     onRemove,
     onUpdateQuantity,
+    formatPrice,
 }: {
     item: CartItem;
     onRemove: () => void;
     onUpdateQuantity: (qty: number) => void;
+    formatPrice: (amount: number) => string;
 }) {
     return (
         <div className="flex gap-4 bg-white/5 rounded-xl p-4">
@@ -124,7 +131,7 @@ function CartItemRow({
                 <Link href={`/products/${item.slug}`} className="text-white font-medium hover:text-snow-accent transition-colors line-clamp-1">
                     {item.name}
                 </Link>
-                <p className="text-snow-accent font-bold mt-1">${item.price.toFixed(2)}</p>
+                <p className="text-snow-accent font-bold mt-1">{formatPrice(item.price)}</p>
 
                 {/* Quantity controls */}
                 <div className="flex items-center gap-2 mt-2">

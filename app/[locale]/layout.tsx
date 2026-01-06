@@ -40,14 +40,14 @@ export default async function RootLayout({
   const { locale } = await params;
 
   // Ensure valid locale
-  if (!['en', 'fr'].includes(locale)) {
+  if (!['en', 'ar'].includes(locale)) {
     notFound();
   }
 
   const messages = await getMessages();
 
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html lang={locale} dir={locale === 'ar' ? 'rtl' : 'ltr'} suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

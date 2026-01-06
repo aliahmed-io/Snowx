@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
-export type CurrencyCode = "USD" | "EUR" | "GBP";
+export type CurrencyCode = "USD" | "SAR" | "AED";
 
 interface CurrencyContextType {
     currency: CurrencyCode;
@@ -16,14 +16,20 @@ const CurrencyContext = createContext<CurrencyContextType | undefined>(undefined
 
 const RATES = {
     USD: 1,
-    EUR: 0.92,
-    GBP: 0.79,
+    SAR: 3.75,
+    AED: 3.67,
 };
 
 const SYMBOLS = {
     USD: "$",
-    EUR: "€",
-    GBP: "£",
+    SAR: "ر.س",
+    AED: "د.إ",
+};
+
+const LOCALE_MAP = {
+    USD: 'en-US',
+    SAR: 'ar-SA',
+    AED: 'ar-AE',
 };
 
 export function CurrencyProvider({ children }: { children: ReactNode }) {
@@ -32,7 +38,7 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
 
     useEffect(() => {
         const stored = localStorage.getItem("snowx-currency");
-        if (stored && (stored === "USD" || stored === "EUR" || stored === "GBP")) {
+        if (stored && (stored === "USD" || stored === "SAR" || stored === "AED")) {
             setCurrency(stored as CurrencyCode);
         }
         setIsHydrated(true);
@@ -50,7 +56,7 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
 
     const formatPrice = (amount: number) => {
         const converted = convertPrice(amount);
-        return new Intl.NumberFormat(undefined, {
+        return new Intl.NumberFormat(LOCALE_MAP[currency], {
             style: "currency",
             currency: currency,
         }).format(converted);

@@ -5,8 +5,8 @@ import { useState } from "react";
 import { useCurrency, CurrencyCode } from "@/components/providers/CurrencyProvider";
 import { useLocale, useTranslations } from "next-intl";
 
-const currencies: CurrencyCode[] = ["USD", "EUR", "GBP"];
-const languages = ["en", "fr"] as const;
+const currencies: CurrencyCode[] = ["USD", "SAR", "AED"];
+const languages = ["en", "ar"] as const;
 
 export function Navbar() {
     const { currency, setCurrency } = useCurrency();

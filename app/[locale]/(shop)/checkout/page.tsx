@@ -2,13 +2,17 @@
 
 import { useCart } from "@/components/providers/CartProvider";
 import { useState } from "react";
-import Link from "next/link";
+import { Link } from "@/navigation";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
+import { useCurrency } from "@/components/providers/CurrencyProvider";
 
 export default function CheckoutPage() {
     const { items, subtotal } = useCart();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const t = useTranslations('Checkout');
+    const { formatPrice } = useCurrency();
 
     const tax = subtotal * 0.1;
     const shipping = subtotal > 50 ? 0 : 5.99;
@@ -60,13 +64,13 @@ export default function CheckoutPage() {
                     <svg className="w-24 h-24 mx-auto text-gray-600 mb-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                     </svg>
-                    <h1 className="text-3xl font-bold text-white mb-4">Nothing to checkout</h1>
-                    <p className="text-gray-400 mb-8">Add some items to your cart first.</p>
+                    <h1 className="text-3xl font-bold text-white mb-4">{t('nothingToCheckout')}</h1>
+                    <p className="text-gray-400 mb-8">{t('addItems')}</p>
                     <Link
                         href="/products"
                         className="inline-flex items-center gap-2 bg-gradient-to-r from-snow-accent to-cyan-400 text-gray-900 font-bold px-8 py-3 rounded-xl hover:shadow-[0_0_30px_rgba(56,189,248,0.4)] transition-all"
                     >
-                        Browse Products
+                        {t('browseProducts')}
                     </Link>
                 </div>
             </div>
@@ -75,12 +79,12 @@ export default function CheckoutPage() {
 
     return (
         <div className="pt-24 pb-16 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
-            <h1 className="text-4xl font-bold text-white mb-8">Checkout</h1>
+            <h1 className="text-4xl font-bold text-white mb-8">{t('title')}</h1>
 
             <div className="grid lg:grid-cols-2 gap-8">
                 {/* Order summary */}
                 <div>
-                    <h2 className="text-xl font-semibold text-white mb-4">Order Summary</h2>
+                    <h2 className="text-xl font-semibold text-white mb-4">{t('orderSummary')}</h2>
                     <div className="bg-white/5 rounded-xl border border-white/10 p-6 space-y-4">
                         {items.map((item) => (
                             <div key={item.id} className="flex gap-4">
@@ -99,26 +103,26 @@ export default function CheckoutPage() {
                                     <p className="text-white font-medium">{item.name}</p>
                                     <p className="text-gray-400 text-sm">Qty: {item.quantity}</p>
                                 </div>
-                                <p className="text-white font-medium">${(item.price * item.quantity).toFixed(2)}</p>
+                                <p className="text-white font-medium">{formatPrice(item.price * item.quantity)}</p>
                             </div>
                         ))}
 
                         <div className="border-t border-white/10 pt-4 space-y-2">
                             <div className="flex justify-between text-gray-400">
-                                <span>Subtotal</span>
-                                <span>${subtotal.toFixed(2)}</span>
+                                <span>{t('subtotal')}</span>
+                                <span>{formatPrice(subtotal)}</span>
                             </div>
                             <div className="flex justify-between text-gray-400">
-                                <span>Tax (10%)</span>
-                                <span>${tax.toFixed(2)}</span>
+                                <span>{t('tax')} (10%)</span>
+                                <span>{formatPrice(tax)}</span>
                             </div>
                             <div className="flex justify-between text-gray-400">
-                                <span>Shipping</span>
-                                <span>{shipping === 0 ? "Free" : `$${shipping.toFixed(2)}`}</span>
+                                <span>{t('shipping')}</span>
+                                <span>{shipping === 0 ? "Free" : formatPrice(shipping)}</span>
                             </div>
                             <div className="flex justify-between text-white text-xl font-bold pt-2">
-                                <span>Total</span>
-                                <span>${total.toFixed(2)}</span>
+                                <span>{t('total')}</span>
+                                <span>{formatPrice(total)}</span>
                             </div>
                         </div>
                     </div>
@@ -126,19 +130,18 @@ export default function CheckoutPage() {
 
                 {/* Payment */}
                 <div>
-                    <h2 className="text-xl font-semibold text-white mb-4">Payment</h2>
+                    <h2 className="text-xl font-semibold text-white mb-4">{t('payment')}</h2>
                     <div className="bg-white/5 rounded-xl border border-white/10 p-6">
                         <div className="mb-6">
                             <div className="flex items-center gap-3 text-gray-400 mb-4">
                                 <svg className="w-6 h-6 text-snow-accent" viewBox="0 0 24 24" fill="currentColor">
                                     <path d="M3 10h18v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-9Zm0-3V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2H3Zm5 6a1 1 0 0 0 0 2h4a1 1 0 1 0 0-2H8Z" />
                                 </svg>
-                                <span>Secure payment powered by Stripe</span>
+                                <span>{t('securePayment')}</span>
                             </div>
 
                             <p className="text-gray-500 text-sm">
-                                You will be redirected to Stripe&apos;s secure checkout to complete your payment.
-                                We accept all major credit cards.
+                                {t('redirectNotice')}
                             </p>
                         </div>
 
@@ -163,7 +166,7 @@ export default function CheckoutPage() {
                                 </>
                             ) : (
                                 <>
-                                    Pay ${total.toFixed(2)}
+                                    {t('pay')} {formatPrice(total)}
                                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                                     </svg>
@@ -175,15 +178,15 @@ export default function CheckoutPage() {
                         <div className="mt-6 grid grid-cols-3 gap-4 text-center text-gray-500 text-xs">
                             <div className="flex flex-col items-center gap-1">
                                 <span className="text-xl">🔒</span>
-                                <span>256-bit SSL</span>
+                                <span>{t('trust.ssl')}</span>
                             </div>
                             <div className="flex flex-col items-center gap-1">
                                 <span className="text-xl">💳</span>
-                                <span>PCI Compliant</span>
+                                <span>{t('trust.pci')}</span>
                             </div>
                             <div className="flex flex-col items-center gap-1">
                                 <span className="text-xl">✓</span>
-                                <span>Money-back</span>
+                                <span>{t('trust.moneyBack')}</span>
                             </div>
                         </div>
                     </div>

@@ -2,7 +2,7 @@
 
 import React, { useRef, useState, useMemo, Suspense, useEffect, useCallback } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { useGLTF, Environment, Float, Sparkles, Html, useProgress } from "@react-three/drei";
+import { useGLTF, Environment, Float, Sparkles, Html, useProgress, Center } from "@react-three/drei";
 import * as THREE from "three";
 import gsap from "gsap";
 
@@ -94,7 +94,8 @@ function Model({ onClick, isAnimating }: { onClick: () => void, isAnimating: boo
     const { scene } = useGLTF("/3d-model.glb");
     const groupRef = useRef<THREE.Group>(null);
 
-    // Apply ice material
+    // Apply ice material - DISABLED for debugging
+    /*
     useEffect(() => {
         scene.traverse((child) => {
             if ((child as THREE.Mesh).isMesh) {
@@ -115,6 +116,7 @@ function Model({ onClick, isAnimating }: { onClick: () => void, isAnimating: boo
             }
         });
     }, [scene]);
+    */
 
     // GSAP click animation
     useEffect(() => {
@@ -147,12 +149,13 @@ function Model({ onClick, isAnimating }: { onClick: () => void, isAnimating: boo
 
     return (
         <group ref={groupRef} onClick={onClick}>
-            <primitive
-                object={scene}
-                scale={2.5}
-                position={[0, 0, 0]}
-                rotation={[0.2, -0.3, 0]}
-            />
+            <Center>
+                <primitive
+                    object={scene}
+                    scale={2.5}
+                    rotation={[0.2, -0.3, 0]}
+                />
+            </Center>
         </group>
     );
 }
