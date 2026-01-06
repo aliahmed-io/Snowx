@@ -17,7 +17,8 @@ export function Navbar() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     const handleLanguageChange = (newLocale: string) => {
-        router.replace(pathname, { locale: newLocale });
+        // Prevent stacking by using push with a clean pathname
+        router.push(pathname, { locale: newLocale });
     };
 
     return (

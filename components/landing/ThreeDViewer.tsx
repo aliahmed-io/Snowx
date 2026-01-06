@@ -153,7 +153,7 @@ function Model({ onClick, isAnimating }: { onClick: () => void, isAnimating: boo
                 <primitive
                     object={scene}
                     scale={2.5}
-                    rotation={[0.2, -0.3, 0]}
+                    rotation={[0, 0.8, 0]}
                 />
             </Center>
         </group>

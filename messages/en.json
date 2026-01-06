@@ -3,7 +3,9 @@
         "loading": "Loading...",
         "processing": "Processing...",
         "pay": "Pay",
-        "free": "Free"
+        "free": "Free",
+        "loading3DModel": "Loading 3D Model...",
+        "clickToInteract": "Click to interact"
     },
     "Hero": {
         "title": "Your Premium Digital Subscriptions,",

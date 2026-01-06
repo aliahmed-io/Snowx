@@ -6,7 +6,7 @@ import { routing } from "./navigation";
 const intlMiddleware = createMiddleware(routing);
 
 export default withAuth(
-    async function middleware(req: NextRequest) {
+    async function proxy(req: NextRequest) {
         return intlMiddleware(req);
     },
     {
@@ -33,7 +33,7 @@ export default withAuth(
 
 export const config = {
     matcher: [
-        "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
+        "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest|glb|gltf)).*)",
         "/(api|trpc)(.*)",
     ],
 };
