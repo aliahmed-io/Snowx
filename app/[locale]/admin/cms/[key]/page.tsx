@@ -5,9 +5,9 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
 interface CMSEditPageProps {
-    params: {
+    params: Promise<{
         key: string;
-    };
+    }>;
 }
 
 async function saveContent(formData: FormData) {
@@ -42,10 +42,11 @@ async function saveContent(formData: FormData) {
 }
 
 export default async function CMSEditPage({ params }: CMSEditPageProps) {
+    const { key } = await params;
     const block = await db.contentBlock.findUnique({
         where: {
             key_locale: {
-                key: params.key,
+                key,
                 locale: 'en' // Defaulting to EN for now
             }
         }
@@ -63,13 +64,13 @@ export default async function CMSEditPage({ params }: CMSEditPageProps) {
                     </Link>
                     <div>
                         <h2 className="text-2xl font-bold text-white tracking-tight">Edit Content</h2>
-                        <p className="text-gray-400 text-sm mt-1 font-mono">{params.key}</p>
+                        <p className="text-gray-400 text-sm mt-1 font-mono">{key}</p>
                     </div>
                 </div>
             </div>
 
             <form action={saveContent} className="space-y-6">
-                <input type="hidden" name="key" value={params.key} />
+                <input type="hidden" name="key" value={key} />
 
                 <div className="grid grid-cols-3 gap-6">
                     <div className="col-span-2 space-y-6">

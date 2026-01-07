@@ -1,3 +1,13 @@
+import { z } from "zod";
+import {
+    CarouselSchema,
+    DeliveryDateSchema,
+    PaymentMethodSchema,
+    SettingInputSchema,
+    SiteCurrencySchema,
+    SiteLanguageSchema,
+} from "@/lib/validator";
+
 // User types
 export interface UserProfile {
     id: string;
@@ -135,3 +145,14 @@ export interface ProductFilters {
     isFeatured?: boolean;
     isActive?: boolean;
 }
+
+// setting
+export type ICarousel = z.infer<typeof CarouselSchema>;
+export type ISettingInput = z.infer<typeof SettingInputSchema>;
+export type ClientSetting = ISettingInput & {
+    currency: string;
+};
+export type SiteLanguage = z.infer<typeof SiteLanguageSchema>;
+export type SiteCurrency = z.infer<typeof SiteCurrencySchema>;
+export type PaymentMethod = z.infer<typeof PaymentMethodSchema>;
+export type DeliveryDate = z.infer<typeof DeliveryDateSchema>;

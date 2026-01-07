@@ -1,0 +1,15 @@
+{
+    "Common": {
+        "loading3DModel": "Loading 3D Model...",
+        "clickToInteract": "Click to Interact",
+        "recovering3DView": "Recovering 3D View..."
+    },
+    "Navbar": {
+        "products": "Products",
+        "categories": "Categories",
+        "admin": "Admin"
+    },
+    "Footer": {
+        "copyright": "All rights reserved."
+    }
+}

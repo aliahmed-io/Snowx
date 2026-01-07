@@ -1,4 +1,5 @@
-import { Bell, Search, User } from "lucide-react";
+import { Bell, Search, User as UserIcon } from "lucide-react";
+import Image from "next/image";
 import { db } from "@/lib/db";
 import { Link } from "@/navigation";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
@@ -66,10 +67,17 @@ export async function AdminHeader() {
                         <p className="text-xs text-gray-500">Administrator</p>
                     </div>
                     {user?.picture ? (
-                        <img src={user.picture} alt="" className="w-9 h-9 rounded-full border border-snow-primary/20" />
+                        <div className="relative w-9 h-9 rounded-full border border-snow-primary/20 overflow-hidden">
+                            <Image
+                                src={user.picture}
+                                alt=""
+                                fill
+                                className="object-cover"
+                            />
+                        </div>
                     ) : (
                         <div className="w-9 h-9 rounded-full bg-snow-accent/10 flex items-center justify-center text-snow-accent">
-                            <User className="w-5 h-5" />
+                            <UserIcon className="w-5 h-5" />
                         </div>
                     )}
                 </div>

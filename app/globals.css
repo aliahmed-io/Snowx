@@ -1,22 +1,23 @@
 @import "tailwindcss";
+@import "@uploadthing/react/styles.css";
 
 :root {
-  /* Brand Colors */
-  --snow-primary: #0f172a;
-  --snow-primary-light: #1e293b;
+  /* Brand Colors - Frost/Ice Palette */
+  --snow-primary: #020617;
+  --snow-primary-light: #0f172a;
   --snow-accent: #3b82f6;
   --snow-accent-light: #60a5fa;
-  --snow-white: #ffffff;
+  --snow-accent-glow: rgba(59, 130, 246, 0.4);
+  --snow-white: #f8fafc;
   --snow-gray: #94a3b8;
   --snow-gray-light: #f1f5f9;
-  --snow-success: #22c55e;
-  --snow-gradient-start: #0B1120;
-  /* Darker blue */
-  --snow-gradient-end: #1e3a5f;
+  --snow-success: #10b981;
+  --snow-gradient-start: #020617;
+  --snow-gradient-end: #1e3a8a;
 
   /* Base */
-  --background: #ffffff;
-  --foreground: #0f172a;
+  --background: #020617;
+  --foreground: #f8fafc;
 }
 
 @theme inline {
@@ -30,30 +31,170 @@
   --color-snow-gray: var(--snow-gray);
   --color-snow-gray-light: var(--snow-gray-light);
   --color-snow-success: var(--snow-success);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-jakarta), system-ui;
+  --font-outfit: var(--font-outfit), sans-serif;
+  --font-jakarta: var(--font-jakarta), sans-serif;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--font-jakarta);
+  overflow-x: hidden;
+  /* Prevent horizontal scroll from animations */
 }
 
-/* Ice Background */
-.ice-background-overlay {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-outfit);
+}
+
+/* Ice Texture Overlay */
+.ice-texture {
+  position: relative;
+}
+
+.ice-texture::before {
+  content: "";
+  position: absolute;
+  inset: 0;
   background-image: url('/ice-background.png');
   background-size: cover;
   background-position: center;
   mix-blend-mode: overlay;
-  opacity: 0.15;
+  opacity: 0.12;
   pointer-events: none;
-  position: absolute;
-  inset: 0;
   z-index: 1;
 }
 
-/* Snow Particles Animation */
+/* Glass Card Premium */
+.glass-card {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.5);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transform: translateY(-5px);
+  box-shadow: 0 20px 50px -10px rgba(59, 130, 246, 0.3);
+}
+
+/* Responsive Scaling for Sections */
+.responsive-section {
+  padding-block: clamp(3rem, 10vh, 8rem);
+}
+
+/* Section Transitions */
+.section-transition-wavy {
+  position: relative;
+  overflow: hidden;
+}
+
+.section-transition-wavy::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 60px;
+  background: linear-gradient(to bottom, transparent, var(--snow-primary));
+  z-index: 10;
+}
+
+.section-transition-slant {
+  clip-path: polygon(0 0, 100% 5%, 100% 100%, 0 95%);
+}
+
+/* Button Premium Styles */
+.btn-primary {
+  background: linear-gradient(135deg, var(--snow-accent) 0%, var(--snow-accent-light) 100%);
+  color: white;
+  padding: 0.75rem 2rem;
+  border-radius: 9999px;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 20px var(--snow-accent-glow);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transform: rotate(45deg);
+  transition: all 0.5s;
+}
+
+.btn-primary:hover::after {
+  left: 100%;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 0 30px var(--snow-accent-glow);
+}
+
+/* Animations */
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.reveal-on-scroll {
+  opacity: 0;
+}
+
+.reveal-on-scroll.active {
+  animation: reveal 0.8s forwards ease-out;
+}
+
+/* Discount Badge */
+.discount-badge {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Snow Particles */
+.snow-particle {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: white;
+  border-radius: 50%;
+  animation: snow-fall linear infinite;
+  opacity: 0;
+  pointer-events: none;
+}
+
 @keyframes snow-fall {
   0% {
     transform: translateY(-10px) translateX(0);
@@ -61,125 +202,15 @@ body {
   }
 
   10% {
-    opacity: 1;
+    opacity: 0.8;
   }
 
   90% {
-    opacity: 1;
+    opacity: 0.8;
   }
 
   100% {
-    transform: translateY(100vh) translateX(20px);
+    transform: translateY(110vh) translateX(30px);
     opacity: 0;
   }
-}
-
-@keyframes float {
-
-  0%,
-  100% {
-    transform: translateY(0) rotate(0deg);
-  }
-
-  50% {
-    transform: translateY(-20px) rotate(5deg);
-  }
-}
-
-@keyframes pulse-glow {
-
-  0%,
-  100% {
-    filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.5));
-  }
-
-  50% {
-    filter: drop-shadow(0 0 40px rgba(59, 130, 246, 0.8));
-  }
-}
-
-.snow-particle {
-  position: absolute;
-  width: 4px;
-  height: 4px;
-  background: white;
-  border-radius: 50%;
-  animation: snow-fall linear infinite;
-  opacity: 0;
-}
-
-.float-animation {
-  animation: float 6s ease-in-out infinite;
-}
-
-.pulse-glow {
-  animation: pulse-glow 2s ease-in-out infinite;
-}
-
-/* Hero Gradient */
-.hero-gradient {
-  background: radial-gradient(circle at center, #1e293b 0%, var(--snow-gradient-start) 100%);
-}
-
-/* Glass Card */
-.glass-card {
-  background: rgba(255, 255, 255, 0.03);
-  /* More transparent */
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-}
-
-/* Button Styles */
-.btn-primary {
-  background: linear-gradient(135deg, var(--snow-accent) 0%, var(--snow-accent-light) 100%);
-  color: white;
-  padding: 0.75rem 2rem;
-  border-radius: 9999px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
-  /* Glowing shadow */
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.btn-primary:hover {
-  transform: translateY(-2px) scale(1.05);
-  box-shadow: 0 0 30px rgba(59, 130, 246, 0.7);
-}
-
-/* Discount Badge */
-.discount-badge {
-  background: rgba(34, 197, 94, 0.2);
-  color: #4ade80;
-  border: 1px solid rgba(34, 197, 94, 0.3);
-  font-size: 0.75rem;
-  font-weight: 600;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-}
-
-/* Switcher Button */
-.switcher-btn {
-  padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  transition: all 0.2s ease;
-}
-
-.switcher-btn.active {
-  background: var(--snow-accent);
-  color: white;
-  box-shadow: 0 0 10px rgba(59, 130, 246, 0.4);
-}
-
-.switcher-btn:not(.active) {
-  background: transparent;
-  color: rgba(255, 255, 255, 0.6);
-}
-
-.switcher-btn:not(.active):hover {
-  color: white;
 }

@@ -2,12 +2,10 @@ import { db } from "@/lib/db";
 import { Link } from "@/navigation";
 import {
     ArrowLeft,
-    User,
-    Clock,
-    Send,
     MessageSquare,
-    CheckCircle,
-    XCircle
+    Clock,
+    User,
+    Send
 } from "lucide-react";
 import { notFound } from "next/navigation";
 import { TicketStatus } from "@prisma/client";
@@ -33,9 +31,10 @@ async function sendReply(formData: FormData) {
     console.log("Reply sent:", formData.get("message"));
 }
 
-export default async function TicketDetailsPage({ params }: { params: { ticketId: string } }) {
+export default async function TicketDetailsPage({ params }: { params: Promise<{ ticketId: string }> }) {
+    const { ticketId } = await params;
     const ticket = await db.ticket.findUnique({
-        where: { id: params.ticketId },
+        where: { id: ticketId },
         include: { user: true }
     });
 
@@ -98,7 +97,7 @@ export default async function TicketDetailsPage({ params }: { params: { ticketId
                 <div className="p-8 space-y-8">
                     {/* User Message */}
                     <div className="flex gap-4">
-                        <div className="w-10 h-10 rounded-full bg-snow-accent/20 flex-shrink-0 flex items-center justify-center text-snow-accent">
+                        <div className="w-10 h-10 rounded-full bg-snow-accent/20 shrink-0 flex items-center justify-center text-snow-accent">
                             <User className="w-5 h-5" />
                         </div>
                         <div className="flex-1 space-y-2">
@@ -124,7 +123,7 @@ export default async function TicketDetailsPage({ params }: { params: { ticketId
 
                     {/* Reply Box */}
                     <div className="flex gap-4">
-                        <div className="w-10 h-10 rounded-full bg-snow-accent flex-shrink-0 flex items-center justify-center text-[#020817]">
+                        <div className="w-10 h-10 rounded-full bg-snow-accent shrink-0 flex items-center justify-center text-[#020817]">
                             <MessageSquare className="w-5 h-5" />
                         </div>
                         <div className="flex-1">

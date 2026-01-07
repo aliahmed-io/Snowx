@@ -7,13 +7,13 @@ export default function NotFound() {
     return (
         <div className="min-h-screen bg-[#020817] flex items-center justify-center p-4 overflow-hidden relative">
             {/* Background Effects */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_rgba(14,165,233,0.1)_0%,_transparent_50%)]" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(14,165,233,0.1)_0%,transparent_50%)]" />
             <div className="absolute top-0 right-0 w-96 h-96 bg-snow-accent/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
             <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
 
             <div className="relative z-10 text-center space-y-8 max-w-lg mx-auto">
                 <div className="relative">
-                    <h1 className="text-[150px] font-black text-transparent bg-clip-text bg-gradient-to-b from-white/10 to-transparent leading-none select-none">
+                    <h1 className="text-[150px] font-black text-transparent bg-clip-text bg-linear-to-b from-white/10 to-transparent leading-none select-none">
                         404
                     </h1>
                     <div className="absolute inset-0 flex items-center justify-center">

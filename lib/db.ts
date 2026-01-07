@@ -14,20 +14,27 @@ function createPrismaClient() {
     throw new Error("DATABASE_URL environment variable is not set");
   }
 
-  const pool = globalForPrisma.pool ?? new Pool({ connectionString });
-  const adapter = new PrismaPg(pool);
+  try {
+    const pool = globalForPrisma.pool ?? new Pool({ connectionString });
+    const adapter = new PrismaPg(pool);
 
-  if (process.env.NODE_ENV !== "production") {
-    globalForPrisma.pool = pool;
+    if (process.env.NODE_ENV !== "production") {
+      globalForPrisma.pool = pool;
+    }
+
+    const client = new PrismaClient({
+      adapter,
+      log:
+        process.env.NODE_ENV === "development"
+          ? ["query", "error", "warn"]
+          : ["error"],
+    });
+
+    return client;
+  } catch (error) {
+    console.error("❌ Prisma Initialization Error:", error);
+    throw error;
   }
-
-  return new PrismaClient({
-    adapter,
-    log:
-      process.env.NODE_ENV === "development"
-        ? ["query", "error", "warn"]
-        : ["error"],
-  });
 }
 
 export const db = globalForPrisma.prisma ?? createPrismaClient();

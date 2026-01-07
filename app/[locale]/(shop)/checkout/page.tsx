@@ -68,7 +68,7 @@ export default function CheckoutPage() {
                     <p className="text-gray-400 mb-8">{t('addItems')}</p>
                     <Link
                         href="/products"
-                        className="inline-flex items-center gap-2 bg-gradient-to-r from-snow-accent to-cyan-400 text-gray-900 font-bold px-8 py-3 rounded-xl hover:shadow-[0_0_30px_rgba(56,189,248,0.4)] transition-all"
+                        className="inline-flex items-center gap-2 bg-linear-to-r from-snow-accent to-cyan-400 text-gray-900 font-bold px-8 py-3 rounded-xl hover:shadow-[0_0_30px_rgba(56,189,248,0.4)] transition-all"
                     >
                         {t('browseProducts')}
                     </Link>
@@ -154,7 +154,7 @@ export default function CheckoutPage() {
                         <button
                             onClick={handleCheckout}
                             disabled={loading}
-                            className="w-full bg-gradient-to-r from-snow-accent to-cyan-400 text-gray-900 font-bold py-4 rounded-xl hover:shadow-[0_0_30px_rgba(56,189,248,0.4)] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                            className="w-full bg-linear-to-r from-snow-accent to-cyan-400 text-gray-900 font-bold py-4 rounded-xl hover:shadow-[0_0_30px_rgba(56,189,248,0.4)] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                         >
                             {loading ? (
                                 <>

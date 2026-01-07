@@ -10,7 +10,7 @@ export default function CheckoutSuccessPage() {
         <div className="pt-24 pb-16 px-4 sm:px-6 lg:px-8 max-w-2xl mx-auto text-center">
             <div className="py-12">
                 {/* Success animation */}
-                <div className="w-24 h-24 mx-auto bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center mb-8 animate-bounce">
+                <div className="w-24 h-24 mx-auto bg-linear-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center mb-8 animate-bounce">
                     <svg className="w-12 h-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                     </svg>
@@ -31,7 +31,7 @@ export default function CheckoutSuccessPage() {
                             { step: "3", title: "Start enjoying", desc: "Your subscription is active immediately - no waiting required!" },
                         ].map((item) => (
                             <li key={item.step} className="flex gap-4">
-                                <span className="w-8 h-8 rounded-full bg-snow-accent/20 text-snow-accent flex items-center justify-center font-bold flex-shrink-0">
+                                <span className="w-8 h-8 rounded-full bg-snow-accent/20 text-snow-accent flex items-center justify-center font-bold shrink-0">
                                     {item.step}
                                 </span>
                                 <div>
@@ -56,7 +56,7 @@ export default function CheckoutSuccessPage() {
                     </Link>
                     <Link
                         href="/products"
-                        className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-snow-accent to-cyan-400 text-gray-900 font-bold px-6 py-3 rounded-xl hover:shadow-[0_0_30px_rgba(56,189,248,0.4)] transition-all"
+                        className="inline-flex items-center justify-center gap-2 bg-linear-to-r from-snow-accent to-cyan-400 text-gray-900 font-bold px-6 py-3 rounded-xl hover:shadow-[0_0_30px_rgba(56,189,248,0.4)] transition-all"
                     >
                         Continue Shopping
                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

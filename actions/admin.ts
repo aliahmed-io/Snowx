@@ -81,3 +81,15 @@ export async function getCustomers(options?: { limit?: number }) {
         totalSpent: c.orders.reduce((acc, o) => acc + Number(o.total), 0),
     }));
 }
+import { OrderStatus } from "@prisma/client";
+import { revalidatePath } from "next/cache";
+
+export async function updateOrderStatus(orderId: string, status: OrderStatus) {
+    await db.order.update({
+        where: { id: orderId },
+        data: { status }
+    });
+
+    revalidatePath(`/admin/orders/${orderId}`);
+    revalidatePath(`/admin/orders`);
+}

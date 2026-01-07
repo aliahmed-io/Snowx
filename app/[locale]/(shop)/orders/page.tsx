@@ -1,7 +1,8 @@
 import { getUserOrders } from "@/actions/orders";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { redirect } from "next/navigation";
-import Link from "next/link";
+import Image from "next/image";
+import { Link } from "@/navigation";
 
 export const metadata = {
     title: "My Orders | SnowX",
@@ -30,7 +31,7 @@ export default async function OrdersPage() {
                     <p className="text-gray-400 mb-8">Start shopping to see your orders here.</p>
                     <Link
                         href="/products"
-                        className="inline-flex items-center gap-2 bg-gradient-to-r from-snow-accent to-cyan-400 text-gray-900 font-bold px-8 py-3 rounded-xl hover:shadow-[0_0_30px_rgba(56,189,248,0.4)] transition-all"
+                        className="inline-flex items-center gap-2 bg-linear-to-r from-snow-accent to-cyan-400 text-gray-900 font-bold px-8 py-3 rounded-xl hover:shadow-[0_0_30px_rgba(56,189,248,0.4)] transition-all"
                     >
                         Browse Products
                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -65,9 +66,14 @@ export default async function OrdersPage() {
                             <div className="p-4 space-y-4">
                                 {order.items.map((item) => (
                                     <div key={item.id} className="flex gap-4">
-                                        <div className="w-16 h-16 bg-gray-800 rounded-lg overflow-hidden flex-shrink-0">
+                                        <div className="relative w-16 h-16 bg-gray-800 rounded-lg overflow-hidden shrink-0">
                                             {item.product.images[0] ? (
-                                                <img src={item.product.images[0]} alt="" className="w-full h-full object-cover" />
+                                                <Image
+                                                    src={item.product.images[0]}
+                                                    alt=""
+                                                    fill
+                                                    className="object-cover"
+                                                />
                                             ) : (
                                                 <div className="w-full h-full flex items-center justify-center text-gray-600">
                                                     <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">

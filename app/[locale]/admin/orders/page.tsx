@@ -1,28 +1,27 @@
 import { db } from "@/lib/db";
 import { formatPrice, cn } from "@/lib/utils";
 import { Link } from "@/navigation";
+import Image from "next/image";
+import { Prisma, OrderStatus } from "@prisma/client";
 import {
     Search,
-    Eye,
-    Filter,
-    ArrowUpDown
+    Eye
 } from "lucide-react";
-import { OrderStatus } from "@prisma/client";
 
 interface OrdersPageProps {
-    searchParams: {
+    searchParams: Promise<{
         status?: string;
         page?: string;
         search?: string;
-    };
+    }>;
 }
 
 export default async function OrdersPage({ searchParams }: OrdersPageProps) {
-    const status = searchParams.status as OrderStatus | undefined;
-    const search = searchParams.search;
+    const { status: statusParam, search } = await searchParams;
+    const status = statusParam as OrderStatus | undefined;
 
     // Build where clause
-    const where: any = {};
+    const where: Prisma.OrderWhereInput = {};
     if (status) {
         where.status = status;
     }
@@ -119,9 +118,18 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-2">
                                                 {order.user.profileImage ? (
-                                                    <img src={order.user.profileImage} alt="" className="w-6 h-6 rounded-full" />
+                                                    <div className="relative w-6 h-6 rounded-full overflow-hidden">
+                                                        <Image
+                                                            src={order.user.profileImage}
+                                                            alt=""
+                                                            fill
+                                                            className="object-cover"
+                                                        />
+                                                    </div>
                                                 ) : (
-                                                    <div className="w-6 h-6 rounded-full bg-snow-accent/20" />
+                                                    <div className="w-6 h-6 rounded-full bg-snow-accent/20 flex items-center justify-center text-snow-accent text-[8px]">
+                                                        {order.user.firstName?.[0] || order.user.email[0].toUpperCase()}
+                                                    </div>
                                                 )}
                                                 <div className="flex flex-col">
                                                     <span className="text-white text-xs">{order.user.firstName} {order.user.lastName}</span>

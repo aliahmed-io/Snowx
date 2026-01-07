@@ -13,9 +13,19 @@ import {
 } from 'recharts';
 import { formatPrice } from '@/lib/utils';
 
+interface RevenueData {
+    date: string;
+    amount: number;
+}
+
+interface UserData {
+    date: string;
+    users: number;
+}
+
 interface AnalyticsChartsProps {
-    revenueData: any[];
-    usersData: any[];
+    revenueData: RevenueData[];
+    usersData: UserData[];
 }
 
 export function AnalyticsCharts({ revenueData, usersData }: AnalyticsChartsProps) {
@@ -51,7 +61,7 @@ export function AnalyticsCharts({ revenueData, usersData }: AnalyticsChartsProps
                             <Tooltip
                                 contentStyle={{ backgroundColor: '#020817', borderColor: 'rgba(255,255,255,0.1)', color: '#fff' }}
                                 itemStyle={{ color: '#0ea5e9' }}
-                                formatter={(value: any) => [formatPrice(Number(value)), "Revenue"]}
+                                formatter={(value: number | string | (string | number)[] | undefined) => [formatPrice(Number(value || 0)), "Revenue"]}
                             />
                             <Area
                                 type="monotone"

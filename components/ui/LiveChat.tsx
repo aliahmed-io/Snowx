@@ -38,7 +38,7 @@ export function LiveChat() {
                     <div className="h-64 p-4 overflow-y-auto bg-snow-gray-light">
                         {/* Welcome Message */}
                         <div className="flex gap-3 mb-4">
-                            <div className="w-8 h-8 rounded-full bg-snow-accent flex-shrink-0 flex items-center justify-center">
+                            <div className="w-8 h-8 rounded-full bg-snow-accent shrink-0 flex items-center justify-center">
                                 <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                 </svg>
@@ -75,8 +75,8 @@ export function LiveChat() {
             <button
                 onClick={() => setIsOpen(!isOpen)}
                 className={`fixed bottom-6 right-6 w-14 h-14 rounded-full shadow-lg z-50 flex items-center justify-center transition-all duration-300 ${isOpen
-                        ? "bg-snow-gray-light text-snow-primary"
-                        : "bg-snow-accent text-white hover:bg-snow-accent-light"
+                    ? "bg-snow-gray-light text-snow-primary"
+                    : "bg-snow-accent text-white hover:bg-snow-accent-light"
                     }`}
             >
                 {isOpen ? (

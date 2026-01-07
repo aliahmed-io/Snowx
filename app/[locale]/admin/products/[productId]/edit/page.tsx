@@ -1,12 +1,11 @@
 import { db } from "@/lib/db";
 import { ProductForm } from "@/components/admin/ProductForm";
-import { slugify } from "@/lib/utils";
 import { notFound, redirect } from "next/navigation";
 
 interface EditPageProps {
-    params: {
+    params: Promise<{
         productId: string;
-    };
+    }>;
 }
 
 async function updateProduct(id: string, formData: FormData) {
@@ -18,7 +17,7 @@ async function updateProduct(id: string, formData: FormData) {
     const categoryId = formData.get("categoryId") as string;
     const isActive = formData.get("isActive") === "on";
     const isFeatured = formData.get("isFeatured") === "on";
-    const imagesStr = formData.get("images") as string;
+    const images = formData.getAll("images") as string[];
 
     await db.product.update({
         where: { id },
@@ -29,7 +28,7 @@ async function updateProduct(id: string, formData: FormData) {
             categoryId,
             isActive,
             isFeatured,
-            images: JSON.parse(imagesStr || "[]"),
+            images,
             // Only update slug if name changes? Simplification: Don't update slug to preserve SEO URLs
         }
     });
@@ -38,8 +37,9 @@ async function updateProduct(id: string, formData: FormData) {
 }
 
 export default async function EditProductPage({ params }: EditPageProps) {
+    const { productId } = await params;
     const [product, categories] = await Promise.all([
-        db.product.findUnique({ where: { id: params.productId } }),
+        db.product.findUnique({ where: { id: productId } }),
         db.category.findMany({ orderBy: { name: 'asc' } })
     ]);
 

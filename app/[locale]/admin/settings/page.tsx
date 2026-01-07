@@ -1,6 +1,9 @@
 import { db } from "@/lib/db";
-import { Link } from "@/navigation";
-import { Save, Settings, Shield, Server } from "lucide-react";
+import {
+    Settings,
+    Save,
+    Server
+} from "lucide-react";
 import { revalidatePath } from "next/cache";
 
 async function saveSettings(formData: FormData) {

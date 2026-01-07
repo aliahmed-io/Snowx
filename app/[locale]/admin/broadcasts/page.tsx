@@ -1,10 +1,9 @@
 import { db } from "@/lib/db";
-import { Link } from "@/navigation";
+import { sendEmail } from "@/lib/mail";
 import {
     Send,
     Megaphone,
     History,
-    Users,
     Mail
 } from "lucide-react";
 import { BroadcastType } from "@prisma/client";
@@ -16,23 +15,35 @@ async function sendBroadcast(formData: FormData) {
     const message = formData.get("message") as string;
     const type = formData.get("type") as BroadcastType;
 
-    if (!subject || !message) return;
+    // Mock targeting: Send to all "CUSTOMER" users
+    const users = await db.user.findMany({
+        where: { role: "CUSTOMER" },
+        select: { email: true }
+    });
+
+    const recipients = users.map(u => u.email);
+
+    if (recipients.length > 0) {
+        // Send email (for demo purposes we slice to avoid limiting issues on free tier)
+        await sendEmail({
+            to: recipients.slice(0, 50),
+            subject,
+            html: `<p>${message.replace(/\n/g, "<br>")}</p>`
+        });
+    }
 
     await db.broadcast.create({
         data: {
             subject,
             message,
             type,
-            sentAt: new Date(), // Immediate send
+            sentAt: new Date(),
             stats: {
-                sent: 0, // Placeholder
+                sent: recipients.length,
                 opened: 0
             }
         }
     });
-
-    // Mock Email Sending Logic Here
-    console.log(`Broadcasting [${type}]: ${subject}`);
 
     revalidatePath("/admin/broadcasts");
 }

@@ -27,7 +27,7 @@ export async function POST(req: Request) {
 
         if (event.type === "user.created") {
             const { user } = event.data;
-            const isAdmin = user.email === "alihassan182006@gmail.com";
+            const isAdmin = user.email === process.env.ADMIN_EMAIL;
 
             // 1. Create Stripe Customer
             const stripe = getStripe();

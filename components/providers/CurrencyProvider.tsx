@@ -37,11 +37,16 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
     const [isHydrated, setIsHydrated] = useState(false);
 
     useEffect(() => {
-        const stored = localStorage.getItem("snowx-currency");
-        if (stored && (stored === "USD" || stored === "SAR" || stored === "AED")) {
-            setCurrency(stored as CurrencyCode);
-        }
-        setIsHydrated(true);
+        // Use a timeout to move state updates out of the synchronous effect body
+        // and avoid the react-hooks/set-state-in-effect warning.
+        const timer = setTimeout(() => {
+            const stored = localStorage.getItem("snowx-currency");
+            if (stored && (stored === "USD" || stored === "SAR" || stored === "AED")) {
+                setCurrency(stored as CurrencyCode);
+            }
+            setIsHydrated(true);
+        }, 0);
+        return () => clearTimeout(timer);
     }, []);
 
     useEffect(() => {

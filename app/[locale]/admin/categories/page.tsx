@@ -1,5 +1,6 @@
 import { getCategories } from "@/actions/categories";
 import { CategoryForm } from "./CategoryForm";
+import Image from "next/image";
 
 export const metadata = {
     title: "Categories | Admin | SnowX",
@@ -34,11 +35,14 @@ export default async function AdminCategoriesPage() {
                                 >
                                     <div className="flex items-center gap-3">
                                         {category.image ? (
-                                            <img
-                                                src={category.image}
-                                                alt=""
-                                                className="w-10 h-10 rounded-lg object-cover"
-                                            />
+                                            <div className="relative w-10 h-10 rounded-lg overflow-hidden">
+                                                <Image
+                                                    src={category.image}
+                                                    alt=""
+                                                    fill
+                                                    className="object-cover"
+                                                />
+                                            </div>
                                         ) : (
                                             <div className="w-10 h-10 rounded-lg bg-gray-800 flex items-center justify-center text-gray-600">
                                                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

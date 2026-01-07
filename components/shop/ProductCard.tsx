@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useCart } from "@/components/providers/CartProvider";
 import { useCurrency } from "@/components/providers/CurrencyProvider";
 
@@ -44,18 +45,19 @@ export function ProductCard({
             <div className="relative bg-gray-900/50 rounded-2xl overflow-hidden border border-white/10 hover:border-snow-accent/50 transition-all duration-300 hover:shadow-[0_0_30px_rgba(56,189,248,0.15)]">
                 {/* Discount badge */}
                 {discount > 0 && (
-                    <div className="absolute top-3 left-3 z-10 bg-gradient-to-r from-rose-500 to-pink-500 text-white text-xs font-bold px-2.5 py-1 rounded-full">
+                    <div className="absolute top-3 left-3 z-10 bg-linear-to-r from-rose-500 to-pink-500 text-white text-xs font-bold px-2.5 py-1 rounded-full">
                         -{discount}%
                     </div>
                 )}
 
                 {/* Image */}
-                <div className="aspect-square relative overflow-hidden bg-gradient-to-br from-gray-800 to-gray-900">
+                <div className="aspect-square relative overflow-hidden bg-linear-to-br from-gray-800 to-gray-900">
                     {image ? (
-                        <img
+                        <Image
                             src={image}
                             alt={name}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                            fill
+                            className="object-cover group-hover:scale-110 transition-transform duration-500"
                         />
                     ) : (
                         <div className="w-full h-full flex items-center justify-center text-gray-600">
@@ -65,10 +67,10 @@ export function ProductCard({
                         </div>
                     )}
 
-                    {/* Quick add button */}
+                    {/* Quick add button - Always visible on mobile/hover on desktop */}
                     <button
                         onClick={handleAddToCart}
-                        className="absolute bottom-3 right-3 bg-snow-accent text-gray-900 p-3 rounded-full opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300 hover:bg-white shadow-lg"
+                        className="absolute bottom-3 right-3 bg-snow-accent text-gray-900 p-3 rounded-full md:opacity-0 md:group-hover:opacity-100 md:translate-y-2 md:group-hover:translate-y-0 transition-all duration-300 hover:bg-white shadow-lg active:scale-95 z-20"
                     >
                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />

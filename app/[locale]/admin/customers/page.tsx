@@ -1,4 +1,5 @@
 import { getCustomers } from "@/actions/admin";
+import Image from "next/image";
 
 export const metadata = {
     title: "Customers | Admin | SnowX",
@@ -36,11 +37,14 @@ export default async function AdminCustomersPage() {
                                     <td className="p-4">
                                         <div className="flex items-center gap-3">
                                             {customer.profileImage ? (
-                                                <img
-                                                    src={customer.profileImage}
-                                                    alt=""
-                                                    className="w-10 h-10 rounded-full object-cover"
-                                                />
+                                                <div className="relative w-10 h-10 rounded-full overflow-hidden">
+                                                    <Image
+                                                        src={customer.profileImage}
+                                                        alt=""
+                                                        fill
+                                                        className="object-cover"
+                                                    />
+                                                </div>
                                             ) : (
                                                 <div className="w-10 h-10 rounded-full bg-snow-accent/20 flex items-center justify-center text-snow-accent font-bold">
                                                     {customer.firstName?.[0] || customer.email[0].toUpperCase()}

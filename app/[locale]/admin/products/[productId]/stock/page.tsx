@@ -1,13 +1,17 @@
 import { db } from "@/lib/db";
 import { Link } from "@/navigation";
-import { ArrowLeft, Plus, Save, Trash, Upload } from "lucide-react";
-import { notFound, redirect } from "next/navigation";
+import {
+    ArrowLeft,
+    Trash2,
+    Plus
+} from "lucide-react";
+import { notFound } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
 interface StockPageProps {
-    params: {
+    params: Promise<{
         productId: string;
-    };
+    }>;
 }
 
 async function addStock(formData: FormData) {
@@ -47,8 +51,9 @@ async function deleteAccount(formData: FormData) {
 }
 
 export default async function ProductStockPage({ params }: StockPageProps) {
+    const { productId } = await params;
     const product = await db.product.findUnique({
-        where: { id: params.productId },
+        where: { id: productId },
         include: {
             accounts: {
                 orderBy: { createdAt: 'desc' }
@@ -107,7 +112,7 @@ export default async function ProductStockPage({ params }: StockPageProps) {
                                 type="submit"
                                 className="w-full bg-snow-accent text-[#020817] py-2.5 rounded-lg font-bold hover:bg-snow-accent/90 transition-colors flex items-center justify-center gap-2"
                             >
-                                <Upload className="w-4 h-4" />
+                                <Plus className="w-4 h-4" />
                                 Upload Stock
                             </button>
                         </form>
@@ -184,7 +189,7 @@ export default async function ProductStockPage({ params }: StockPageProps) {
                                                             className="text-gray-600 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
                                                             title="Delete"
                                                         >
-                                                            <Trash className="w-4 h-4" />
+                                                            <Trash2 className="w-4 h-4" />
                                                         </button>
                                                     </form>
                                                 )}

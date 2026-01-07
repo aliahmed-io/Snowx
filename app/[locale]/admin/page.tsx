@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { formatPrice, cn } from "@/lib/utils";
 import { StatsCard } from "@/components/admin/StatsCard";
+import Image from "next/image";
 import {
     CreditCard,
     Users,
@@ -57,7 +58,7 @@ export default async function AdminDashboard() {
         <div className="space-y-8">
             <div>
                 <h2 className="text-3xl font-bold text-white tracking-tight">Dashboard</h2>
-                <p className="text-gray-400 mt-2">Overview of your store's performance</p>
+                <p className="text-gray-400 mt-2">Here&apos;s what&apos;s happening with your store today</p>
             </div>
 
             {/* Stats Grid */}
@@ -132,9 +133,18 @@ export default async function AdminDashboard() {
                                         <td className="px-6 py-4 font-mono text-white">#{order.orderNumber.slice(-6)}</td>
                                         <td className="px-6 py-4 flex items-center gap-2">
                                             {order.user.profileImage ? (
-                                                <img src={order.user.profileImage} alt="" className="w-6 h-6 rounded-full" />
+                                                <div className="relative w-6 h-6 rounded-full overflow-hidden">
+                                                    <Image
+                                                        src={order.user.profileImage}
+                                                        alt=""
+                                                        fill
+                                                        className="object-cover"
+                                                    />
+                                                </div>
                                             ) : (
-                                                <div className="w-6 h-6 rounded-full bg-snow-accent/20" />
+                                                <div className="w-6 h-6 rounded-full bg-snow-accent/20 flex items-center justify-center text-snow-accent text-[8px]">
+                                                    {order.user.firstName?.[0] || order.user.email[0].toUpperCase()}
+                                                </div>
                                             )}
                                             {order.user.firstName || order.user.email}
                                         </td>

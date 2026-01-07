@@ -1,12 +1,11 @@
 import { db } from "@/lib/db";
-import { Link } from "@/navigation";
+import { Prisma } from "@prisma/client";
+import Image from "next/image";
 import {
-    Search,
-    MoreHorizontal,
     Ban,
-    CheckCircle,
+    Search,
     ShoppingBag,
-    Mail
+    CheckCircle
 } from "lucide-react";
 import { revalidatePath } from "next/cache";
 
@@ -23,10 +22,10 @@ async function toggleSuspension(formData: FormData) {
     revalidatePath("/admin/users");
 }
 
-export default async function UsersPage({ searchParams }: { searchParams: { search?: string } }) {
-    const search = searchParams.search;
+export default async function UsersPage({ searchParams }: { searchParams: Promise<{ search?: string }> }) {
+    const search = (await searchParams).search;
 
-    const where: any = {};
+    const where: Prisma.UserWhereInput = {};
     if (search) {
         where.OR = [
             { email: { contains: search, mode: 'insensitive' } },
@@ -92,7 +91,14 @@ export default async function UsersPage({ searchParams }: { searchParams: { sear
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">
                                                 {user.profileImage ? (
-                                                    <img src={user.profileImage} alt="" className="w-10 h-10 rounded-full" />
+                                                    <div className="relative w-10 h-10 rounded-full overflow-hidden">
+                                                        <Image
+                                                            src={user.profileImage}
+                                                            alt=""
+                                                            fill
+                                                            className="object-cover"
+                                                        />
+                                                    </div>
                                                 ) : (
                                                     <div className="w-10 h-10 rounded-full bg-snow-accent/20 flex items-center justify-center text-snow-accent">
                                                         {user.firstName?.[0] || user.email[0].toUpperCase()}
@@ -144,9 +150,6 @@ export default async function UsersPage({ searchParams }: { searchParams: { sear
                                                         {user.isSuspended ? <CheckCircle className="w-4 h-4 text-green-400" /> : <Ban className="w-4 h-4 text-red-400" />}
                                                     </button>
                                                 </form>
-                                                {/* <button className="p-2 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors">
-                                                    <MoreHorizontal className="w-4 h-4" />
-                                                </button> */}
                                             </div>
                                         </td>
                                     </tr>

@@ -1,10 +1,10 @@
 import { db } from "@/lib/db";
 import { formatPrice } from "@/lib/utils";
 import { Link } from "@/navigation";
+import Image from "next/image";
 import {
     Plus,
     Search,
-    MoreHorizontal,
     Edit,
     Trash,
     Package,
@@ -86,9 +86,14 @@ export default async function ProductsPage() {
                                     <tr key={product.id} className="hover:bg-white/5 transition-colors group">
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">
-                                                {product.images[0] ? ( // Simple check, ideally use next/image
-                                                    <div className="w-10 h-10 rounded-lg bg-white/5 overflow-hidden">
-                                                        <img src={product.images[0]} alt="" className="w-full h-full object-cover" />
+                                                {product.images[0] ? (
+                                                    <div className="relative w-10 h-10 rounded-lg bg-white/5 overflow-hidden">
+                                                        <Image
+                                                            src={product.images[0]}
+                                                            alt=""
+                                                            fill
+                                                            className="object-cover"
+                                                        />
                                                     </div>
                                                 ) : (
                                                     <div className="w-10 h-10 rounded-lg bg-snow-accent/10 flex items-center justify-center text-snow-accent">

@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { AnalyticsCharts } from "@/components/admin/AnalyticsCharts";
 import { formatPrice } from "@/lib/utils";
+import { redis } from "@/lib/redis"; // Import Redis
 import {
     TrendingUp,
     Users,
@@ -8,12 +9,36 @@ import {
     CreditCard
 } from "lucide-react";
 
-export default async function AnalyticsPage() {
-    // 1. Fetch Key Metrics
-    const totalRevenue = await db.order.aggregate({
+interface AnalyticsData {
+    totalRevenue: number;
+    totalOrders: number;
+    totalUsers: number;
+    averageOrderValue: number;
+    revenueData: { date: string; amount: number }[];
+    usersData: { date: string; users: number }[];
+}
+
+// Helper to fetch data with caching
+async function getAnalyticsData(): Promise<AnalyticsData> {
+    const CACHE_KEY = "analytics:dashboard-stats";
+
+    // 1. Try Cache
+    try {
+        const cached = await redis.get(CACHE_KEY);
+        if (cached) {
+            console.log("Serving Analytics from Redis Cache");
+            return cached as AnalyticsData;
+        }
+    } catch (e) {
+        console.warn("Redis fetch failed:", e);
+    }
+
+    // 2. Fetch from DB if no cache
+    const totalRevenueResult = await db.order.aggregate({
         _sum: { total: true },
         where: { status: { not: 'CANCELLED' } }
     });
+    const totalRevenue = Number(totalRevenueResult._sum.total || 0);
 
     const totalOrders = await db.order.count({
         where: { status: { not: 'CANCELLED' } }
@@ -24,10 +49,10 @@ export default async function AnalyticsPage() {
     });
 
     const averageOrderValue = totalOrders > 0
-        ? Number(totalRevenue._sum.total) / totalOrders
+        ? totalRevenue / totalOrders
         : 0;
 
-    // 2. Fetch Revenue Trends (Last 7 days)
+    // Revenue Trends (Last 7 days)
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
@@ -53,8 +78,6 @@ export default async function AnalyticsPage() {
 
     recentOrders.forEach(order => {
         const date = new Date(order.createdAt).toLocaleDateString();
-        // Simple aggregation - typically depends on locale format matches map keys
-        // Ideally use a library like 'date-fns' to normalize
         if (revenueMap.has(date)) {
             revenueMap.set(date, (revenueMap.get(date) || 0) + Number(order.total));
         }
@@ -65,7 +88,7 @@ export default async function AnalyticsPage() {
         amount
     }));
 
-    // 3. Fetch User Growth (Last 7 days)
+    // User Growth (Last 7 days)
     const recentUsers = await db.user.findMany({
         where: {
             createdAt: { gte: sevenDaysAgo }
@@ -92,6 +115,35 @@ export default async function AnalyticsPage() {
         users
     }));
 
+    const data = {
+        totalRevenue,
+        totalOrders,
+        totalUsers,
+        averageOrderValue,
+        revenueData,
+        usersData
+    };
+
+    // 3. Set Cache (Expire in 60 seconds)
+    try {
+        await redis.set(CACHE_KEY, data, { ex: 60 });
+    } catch (e) {
+        console.warn("Redis set failed:", e);
+    }
+
+    return data;
+}
+
+export default async function AnalyticsPage() {
+    const {
+        totalRevenue,
+        totalOrders,
+        totalUsers,
+        averageOrderValue,
+        revenueData,
+        usersData
+    } = await getAnalyticsData();
+
     return (
         <div className="space-y-8">
             <div>
@@ -109,7 +161,7 @@ export default async function AnalyticsPage() {
                         </div>
                     </div>
                     <p className="text-2xl font-bold text-white mb-1">
-                        {formatPrice(Number(totalRevenue._sum.total || 0))}
+                        {formatPrice(totalRevenue)}
                     </p>
                 </div>
 

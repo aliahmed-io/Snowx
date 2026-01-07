@@ -1,39 +1,17 @@
-import { withAuth } from "@kinde-oss/kinde-auth-nextjs/middleware";
-import createMiddleware from "next-intl/middleware";
-import { NextRequest } from "next/server";
-import { routing } from "./navigation";
+import createMiddleware from 'next-intl/middleware';
+import { routing } from './i18n/routing';
 
-const intlMiddleware = createMiddleware(routing);
-
-export default withAuth(
-    async function proxy(req: NextRequest) {
-        return intlMiddleware(req);
-    },
-    {
-        isReturnToCurrentPage: true,
-        loginPage: "/api/auth/login",
-        publicPaths: [
-            "/",
-            "/ar",
-            "/en",
-            "/api/auth/(.*)",
-            "/api/webhooks/(.*)",
-            "/products(.*)",
-            "/ar/products(.*)",
-            "/en/products(.*)",
-            "/categories(.*)",
-            "/ar/categories(.*)",
-            "/en/categories(.*)",
-            "/cart",
-            "/ar/cart",
-            "/en/cart"
-        ],
-    }
-);
+export default createMiddleware(routing);
 
 export const config = {
+    // Matcher for internationalized routes
     matcher: [
-        "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest|glb|gltf)).*)",
-        "/(api|trpc)(.*)",
-    ],
+        // Match all pathnames except for
+        // - API routes
+        // - static files (_next, images, etc.)
+        // - metadata files (favicon, robots, etc.)
+        '/((?!api|_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|.*\\..*).*)',
+        // Match / even if it's empty
+        '/'
+    ]
 };

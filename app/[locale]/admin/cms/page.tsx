@@ -3,8 +3,7 @@ import { Link } from "@/navigation";
 import {
     FileText,
     Edit,
-    Globe,
-    Plus
+    Globe
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 

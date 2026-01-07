@@ -1,20 +1,17 @@
 import { db } from "@/lib/db";
 import { Link } from "@/navigation";
+import { Prisma, TicketStatus } from "@prisma/client";
 import {
-    Search,
-    MessageSquare,
     Clock,
-    CheckCircle,
     User,
     CornerUpLeft
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { TicketStatus } from "@prisma/client";
 
-export default async function SupportPage({ searchParams }: { searchParams: { status?: string } }) {
-    const status = searchParams.status as TicketStatus | undefined;
+export default async function SupportPage({ searchParams }: { searchParams: Promise<{ status?: string }> }) {
+    const status = (await searchParams).status as TicketStatus | undefined;
 
-    const where: any = {};
+    const where: Prisma.TicketWhereInput = {};
     if (status) {
         where.status = status;
     }

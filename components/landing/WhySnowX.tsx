@@ -1,62 +1,66 @@
+import { useTranslations } from "next-intl";
+
 const features = [
-    {
-        icon: (
-            <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-            </svg>
-        ),
-        title: "Seamless SEO",
-        description: "Seamless SEO allows the seamless integration of functional bots.",
-    },
     {
         icon: (
             <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
         ),
-        title: "High Performance (300 VU)",
-        description: "Experiences 300 VU has high high performance within tests.",
+        title: "blazingFast",
+        description: "blazingFastDesc",
     },
     {
         icon: (
             <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
             </svg>
         ),
-        title: "24/7 Live Chat",
-        description: "24/7 live chat answers instantly to provide sales context.",
+        title: "secureReliable",
+        description: "secureReliableDesc",
+    },
+    {
+        icon: (
+            <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 12.728l-3.536-3.536M12 3v4m0 10v4m9-9h-4M7 12H3m15.364 6.364l-1.414-1.414M7.05 7.05L5.636 5.636m12.728 0l-1.414 1.414M7.05 16.95l-1.414 1.414" />
+            </svg>
+        ),
+        title: "expertSupport",
+        description: "expertSupportDesc",
     },
 ];
 
 export function WhySnowX() {
+    const t = useTranslations('WhySnowX');
+
     return (
-        <section className="py-24 bg-white">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section className="py-24 relative bg-snow-primary ice-texture overflow-hidden">
+            <div className="max-w-7xl mx-auto px-6 relative z-10">
                 {/* Section Header */}
-                <div className="text-center mb-16">
-                    <h2 className="text-3xl md:text-4xl font-bold text-snow-primary mb-2">
-                        Why SnowX
+                <div className="text-center mb-20">
+                    <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
+                        The <span className="text-snow-accent">SnowX</span> Advantage
                     </h2>
-                    <p className="text-snow-gray/80 text-sm max-w-2xl mx-auto uppercase tracking-wide">
-                        Innovate your promotion landing palette
+                    <p className="text-snow-gray max-w-2xl mx-auto text-lg">
+                        We redefine premium access by combining reliability, speed, and unbeatable value.
                     </p>
                 </div>
 
                 {/* Features Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {features.map((feature, index) => (
                         <div
                             key={index}
-                            className="flex flex-col items-center text-center p-6 group"
+                            className="p-10 rounded-[2.5rem] bg-white/5 border border-white/5 hover:border-snow-accent/30 transition-all duration-500 group"
                         >
-                            <div className="w-16 h-16 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                            <div className="w-16 h-16 rounded-2xl bg-snow-accent/10 text-snow-accent flex items-center justify-center mb-8 group-hover:bg-snow-accent group-hover:text-white transition-all duration-500">
                                 {feature.icon}
                             </div>
-                            <h3 className="text-lg font-bold text-snow-primary mb-3">
-                                {feature.title}
+                            <h3 className="text-2xl font-bold text-white mb-4">
+                                {t(feature.title)}
                             </h3>
-                            <p className="text-snow-gray text-sm leading-relaxed max-w-xs">
-                                {feature.description}
+                            <p className="text-snow-gray leading-relaxed">
+                                {t(feature.description)}
                             </p>
                         </div>
                     ))}

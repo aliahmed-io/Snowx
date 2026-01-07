@@ -52,8 +52,8 @@ export function AddToCartButton({ product }: AddToCartButtonProps) {
             <button
                 onClick={handleAddToCart}
                 className={`w-full py-4 rounded-xl font-bold text-lg transition-all duration-300 flex items-center justify-center gap-3 ${added
-                        ? "bg-green-500 text-white"
-                        : "bg-gradient-to-r from-snow-accent to-cyan-400 text-gray-900 hover:shadow-[0_0_30px_rgba(56,189,248,0.4)]"
+                    ? "bg-green-500 text-white"
+                    : "flex-1 bg-linear-to-r from-snow-accent to-cyan-400 text-gray-900 font-bold py-4 rounded-2xl flex items-center justify-center gap-2 hover:shadow-[0_0_30px_rgba(56,189,248,0.4)] transition-all disabled:opacity-50 disabled:cursor-not-allowed group"
                     }`}
             >
                 {added ? (

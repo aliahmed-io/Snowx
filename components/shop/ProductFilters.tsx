@@ -31,30 +31,32 @@ export function ProductFilters({ categories, currentCategory, currentSort }: Pro
     }, [router, searchParams]);
 
     return (
-        <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between mb-8">
-            {/* Category filters */}
-            <div className="flex flex-wrap gap-2">
-                <button
-                    onClick={() => updateParams("category", null)}
-                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${!currentCategory
-                            ? "bg-snow-accent text-gray-900"
-                            : "bg-white/10 text-white hover:bg-white/20"
-                        }`}
-                >
-                    All
-                </button>
-                {categories.map((cat) => (
+        <div className="flex flex-col lg:flex-row gap-6 items-start lg:items-center justify-between mb-8">
+            {/* Category filters - Horizontal scroll on mobile */}
+            <div className="w-full lg:w-auto overflow-x-auto no-scrollbar -mx-4 px-4 lg:mx-0 lg:px-0">
+                <div className="flex flex-nowrap lg:flex-wrap gap-2 pb-2 lg:pb-0">
                     <button
-                        key={cat.id}
-                        onClick={() => updateParams("category", cat.slug)}
-                        className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${currentCategory === cat.slug
-                                ? "bg-snow-accent text-gray-900"
-                                : "bg-white/10 text-white hover:bg-white/20"
+                        onClick={() => updateParams("category", null)}
+                        className={`whitespace-nowrap px-5 py-2.5 rounded-full text-sm font-medium transition-all ${!currentCategory
+                            ? "bg-snow-accent text-gray-900 shadow-[0_0_15px_rgba(56,189,248,0.3)]"
+                            : "bg-white/5 text-gray-400 hover:text-white hover:bg-white/10"
                             }`}
                     >
-                        {cat.name} ({cat.productCount})
+                        All
                     </button>
-                ))}
+                    {categories.map((cat) => (
+                        <button
+                            key={cat.id}
+                            onClick={() => updateParams("category", cat.slug)}
+                            className={`whitespace-nowrap px-5 py-2.5 rounded-full text-sm font-medium transition-all ${currentCategory === cat.slug
+                                ? "bg-snow-accent text-gray-900 shadow-[0_0_15px_rgba(56,189,248,0.3)]"
+                                : "bg-white/5 text-gray-400 hover:text-white hover:bg-white/10"
+                                }`}
+                        >
+                            {cat.name} <span className="opacity-60 text-xs ml-1">({cat.productCount})</span>
+                        </button>
+                    ))}
+                </div>
             </div>
 
             {/* Sort dropdown */}

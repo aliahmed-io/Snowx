@@ -2,9 +2,12 @@
 
 import { useState } from "react";
 import { useRouter } from "@/navigation";
-import { Loader2, Plus, Save, Upload, X } from "lucide-react";
+import {
+    Loader2,
+    Trash
+} from "lucide-react";
 import Image from "next/image";
-import { cn, formatPrice } from "@/lib/utils";
+import { UploadDropzone } from "@/utils/uploadthing";
 
 interface Category {
     id: string;
@@ -22,6 +25,7 @@ interface ProductFormProps {
         images: string[];
         isActive: boolean;
         isFeatured: boolean;
+        inventory: number;
     };
     action: (formData: FormData) => Promise<void>;
 }
@@ -34,8 +38,8 @@ export function ProductForm({ categories, initialData, action }: ProductFormProp
     const handleSubmit = async (formData: FormData) => {
         setLoading(true);
         try {
-            // Append images manually since they are state-managed (mocking upload for now)
-            formData.set("images", JSON.stringify(images));
+            // Append images one by one
+            images.forEach(url => formData.append("images", url));
             await action(formData);
             router.push("/admin/products");
             router.refresh();
@@ -45,12 +49,8 @@ export function ProductForm({ categories, initialData, action }: ProductFormProp
         }
     };
 
-    const handleImageAdd = () => {
-        // Mock image upload functionality
-        const url = prompt("Enter image URL:");
-        if (url) {
-            setImages([...images, url]);
-        }
+    const handleRemoveImage = (index: number) => {
+        setImages(prev => prev.filter((_, i) => i !== index));
     };
 
     return (
@@ -84,28 +84,33 @@ export function ProductForm({ categories, initialData, action }: ProductFormProp
 
                     <div className="bg-[#0a1628] border border-snow-primary/20 p-6 rounded-xl space-y-4">
                         <h3 className="text-lg font-semibold text-white">Media</h3>
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-3 gap-4 mb-4">
                             {images.map((url, i) => (
-                                <div key={i} className="relative aspect-square rounded-lg overflow-hidden group bg-black/40">
+                                <div key={i} className="relative aspect-square rounded-lg overflow-hidden group bg-black/40 border border-snow-primary/20">
                                     <Image src={url} alt="" fill className="object-cover" />
                                     <button
                                         type="button"
-                                        onClick={() => setImages(images.filter((_, idx) => idx !== i))}
-                                        className="absolute top-2 right-2 bg-red-500/80 p-1 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                                        onClick={() => handleRemoveImage(i)}
+                                        className="absolute top-2 right-2 bg-red-500/80 p-1.5 rounded-md text-white opacity-0 group-hover:opacity-100 transition-opacity"
                                     >
-                                        <X className="w-4 h-4" />
+                                        <Trash className="w-3 h-3" />
                                     </button>
                                 </div>
                             ))}
-                            <button
-                                type="button"
-                                onClick={handleImageAdd}
-                                className="aspect-square rounded-lg border-2 border-dashed border-snow-primary/20 hover:border-snow-accent/50 hover:bg-snow-accent/5 flex flex-col items-center justify-center text-gray-500 hover:text-snow-accent transition-all"
-                            >
-                                <Upload className="w-8 h-8 mb-2" />
-                                <span className="text-xs">Add Image</span>
-                            </button>
                         </div>
+
+                        <UploadDropzone
+                            endpoint="imageUploader"
+                            onClientUploadComplete={(res) => {
+                                if (res) {
+                                    setImages(prev => [...prev, ...res.map(f => f.url)]);
+                                }
+                            }}
+                            onUploadError={(error: Error) => {
+                                alert(`ERROR! ${error.message}`);
+                            }}
+                            className="bg-snow-primary/5 border-snow-primary/20 ut-label:text-snow-accent ut-button:bg-snow-accent ut-button:text-black ut-button:font-bold ut-button:hover:bg-snow-accent/90"
+                        />
                     </div>
                 </div>
 
@@ -118,6 +123,7 @@ export function ProductForm({ categories, initialData, action }: ProductFormProp
                             <input
                                 type="checkbox"
                                 name="isActive"
+                                value="true"
                                 defaultChecked={initialData?.isActive ?? true}
                                 className="w-4 h-4 rounded border-gray-600 bg-gray-700 text-snow-accent"
                             />
@@ -127,6 +133,7 @@ export function ProductForm({ categories, initialData, action }: ProductFormProp
                             <input
                                 type="checkbox"
                                 name="isFeatured"
+                                value="true"
                                 defaultChecked={initialData?.isFeatured ?? false}
                                 className="w-4 h-4 rounded border-gray-600 bg-gray-700 text-snow-accent"
                             />
@@ -143,6 +150,17 @@ export function ProductForm({ categories, initialData, action }: ProductFormProp
                                 name="price"
                                 step="0.01"
                                 defaultValue={initialData?.price}
+                                required
+                                className="bg-snow-primary/10 border border-snow-primary/20 rounded-lg p-2.5 text-white focus:border-snow-accent/50 focus:outline-none"
+                            />
+                        </div>
+
+                        <div className="grid gap-2">
+                            <label className="text-sm font-medium text-gray-400">Inventory</label>
+                            <input
+                                type="number"
+                                name="inventory"
+                                defaultValue={initialData?.inventory ?? 0}
                                 required
                                 className="bg-snow-primary/10 border border-snow-primary/20 rounded-lg p-2.5 text-white focus:border-snow-accent/50 focus:outline-none"
                             />

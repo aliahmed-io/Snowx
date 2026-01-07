@@ -12,7 +12,7 @@ async function createProduct(formData: FormData) {
     const categoryId = formData.get("categoryId") as string;
     const isActive = formData.get("isActive") === "on";
     const isFeatured = formData.get("isFeatured") === "on";
-    const imagesStr = formData.get("images") as string;
+    const images = formData.getAll("images") as string[];
 
     if (!name || !price || !categoryId) return;
 
@@ -25,7 +25,7 @@ async function createProduct(formData: FormData) {
             categoryId,
             isActive,
             isFeatured,
-            images: JSON.parse(imagesStr || "[]")
+            images
         }
     });
 

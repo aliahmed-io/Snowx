@@ -1,54 +1,55 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { updateOrderStatus } from "@/actions/orders";
+import { OrderStatus } from "@prisma/client";
+import { updateOrderStatus } from "@/actions/admin";
+import { cn } from "@/lib/utils";
 
 interface OrderStatusFormProps {
     orderId: string;
-    currentStatus: string;
+    initialStatus: OrderStatus;
 }
 
-export function OrderStatusForm({ orderId, currentStatus }: OrderStatusFormProps) {
-    const router = useRouter();
-    const [status, setStatus] = useState(currentStatus);
-    const [loading, setLoading] = useState(false);
+export function OrderStatusForm({ orderId, initialStatus }: OrderStatusFormProps) {
+    const [status, setStatus] = useState<OrderStatus>(initialStatus);
+    const [isLoading, setIsLoading] = useState(false);
 
-    const handleUpdate = async () => {
-        if (status === currentStatus) return;
+    const statuses = Object.values(OrderStatus);
 
-        setLoading(true);
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsLoading(true);
         try {
-            await updateOrderStatus(orderId, status as "PENDING" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED" | "REFUNDED");
-            router.refresh();
+            await updateOrderStatus(orderId, status);
         } catch (error) {
-            console.error("Failed to update status:", error);
+            console.error(error);
         } finally {
-            setLoading(false);
+            setIsLoading(false);
         }
     };
 
     return (
-        <div className="flex items-center gap-3">
-            <select
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-                className="bg-white/10 border border-white/20 text-white rounded-lg px-4 py-2 focus:outline-none focus:border-snow-accent"
-            >
-                <option value="PENDING">Pending</option>
-                <option value="PROCESSING">Processing</option>
-                <option value="SHIPPED">Shipped</option>
-                <option value="DELIVERED">Delivered</option>
-                <option value="CANCELLED">Cancelled</option>
-                <option value="REFUNDED">Refunded</option>
-            </select>
-            <button
-                onClick={handleUpdate}
-                disabled={loading || status === currentStatus}
-                className="bg-snow-accent text-gray-900 font-bold px-4 py-2 rounded-lg hover:bg-cyan-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-                {loading ? "Updating..." : "Update"}
-            </button>
+        <div className="bg-[#0a1628] border border-snow-primary/20 rounded-xl p-6">
+            <h3 className="font-semibold text-white mb-4">Order Status</h3>
+            <form onSubmit={handleSubmit} className="space-y-3">
+                <select
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value as OrderStatus)}
+                    disabled={isLoading}
+                    className="w-full bg-snow-primary/10 border border-snow-primary/20 rounded-lg p-2.5 text-white focus:border-snow-accent/50 focus:outline-none disabled:opacity-50"
+                >
+                    {statuses.map((s) => (
+                        <option key={s} value={s}>{s}</option>
+                    ))}
+                </select>
+                <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="w-full bg-snow-accent text-[#020817] py-2 rounded-lg font-bold hover:bg-snow-accent/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                    {isLoading ? "Updating..." : "Update Status"}
+                </button>
+            </form>
         </div>
     );
 }

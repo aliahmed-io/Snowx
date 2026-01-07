@@ -207,3 +207,20 @@ model SystemSetting {
 
   updatedAt DateTime @updatedAt
 }
+
+model Setting {
+  id                      String   @id @default(cuid())
+  common                  Json
+  site                    Json
+  carousels               Json
+  availableLanguages      Json
+  defaultLanguage         String
+  availableCurrencies     Json
+  defaultCurrency         String
+  availablePaymentMethods Json
+  defaultPaymentMethod    String
+  availableDeliveryDates  Json
+  defaultDeliveryDate     String
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+}

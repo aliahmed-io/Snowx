@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 import { getProductBySlug, getProducts } from "@/actions/products";
 import { AddToCartButton } from "./AddToCartButton";
-import Link from "next/link";
+import Image from "next/image";
+import { Link } from "@/navigation";
 
 interface ProductPageProps {
     params: Promise<{ slug: string }>;
@@ -54,12 +55,14 @@ export default async function ProductPage({ params }: ProductPageProps) {
             <div className="grid lg:grid-cols-2 gap-12">
                 {/* Image Gallery */}
                 <div className="space-y-4">
-                    <div className="aspect-square bg-gray-900/50 rounded-2xl overflow-hidden border border-white/10">
+                    <div className="aspect-square relative rounded-3xl overflow-hidden bg-linear-to-br from-gray-800 to-gray-900 border border-white/10">
                         {product.images[0] ? (
-                            <img
+                            <Image
                                 src={product.images[0]}
                                 alt={product.name}
-                                className="w-full h-full object-cover"
+                                fill
+                                className="object-cover"
+                                priority
                             />
                         ) : (
                             <div className="w-full h-full flex items-center justify-center text-gray-600">
@@ -74,8 +77,13 @@ export default async function ProductPage({ params }: ProductPageProps) {
                     {product.images.length > 1 && (
                         <div className="grid grid-cols-4 gap-4">
                             {product.images.slice(0, 4).map((img, i) => (
-                                <div key={i} className="aspect-square bg-gray-900/50 rounded-lg overflow-hidden border border-white/10">
-                                    <img src={img} alt="" className="w-full h-full object-cover" />
+                                <div key={i} className="aspect-square relative bg-gray-900/50 rounded-lg overflow-hidden border border-white/10">
+                                    <Image
+                                        src={img}
+                                        alt=""
+                                        fill
+                                        className="object-cover"
+                                    />
                                 </div>
                             ))}
                         </div>
@@ -115,7 +123,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                         {product.comparePrice && (
                             <>
                                 <span className="text-xl text-gray-500 line-through">${product.comparePrice.toFixed(2)}</span>
-                                <span className="bg-gradient-to-r from-rose-500 to-pink-500 text-white text-sm font-bold px-3 py-1 rounded-full">
+                                <span className="bg-linear-to-r from-rose-500 to-pink-500 text-white text-sm font-bold px-3 py-1 rounded-full">
                                     Save {discount}%
                                 </span>
                             </>
@@ -147,7 +155,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                                 "Money-back guarantee",
                             ].map((feature, i) => (
                                 <li key={i} className="flex items-center gap-3 text-gray-400">
-                                    <svg className="w-5 h-5 text-snow-accent flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <svg className="w-5 h-5 text-snow-accent shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                     </svg>
                                     {feature}
@@ -205,9 +213,14 @@ export default async function ProductPage({ params }: ProductPageProps) {
                             .slice(0, 4)
                             .map((p) => (
                                 <Link key={p.id} href={`/products/${p.slug}`} className="group">
-                                    <div className="aspect-square bg-gray-900/50 rounded-xl overflow-hidden border border-white/10 group-hover:border-snow-accent/50 transition-all mb-3">
+                                    <div className="aspect-square relative bg-gray-900/50 rounded-xl overflow-hidden border border-white/10 group-hover:border-snow-accent/50 transition-all mb-3">
                                         {p.images[0] ? (
-                                            <img src={p.images[0]} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                                            <Image
+                                                src={p.images[0]}
+                                                alt={p.name}
+                                                fill
+                                                className="object-cover group-hover:scale-105 transition-transform"
+                                            />
                                         ) : (
                                             <div className="w-full h-full flex items-center justify-center text-gray-600">
                                                 <svg className="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">

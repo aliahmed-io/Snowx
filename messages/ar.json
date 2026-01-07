@@ -1,72 +1,15 @@
 {
     "Common": {
-        "loading": "جار التحميل...",
-        "processing": "جار المعالجة...",
-        "pay": "دفع",
-        "free": "مجاني",
-        "loading3DModel": "جار تحميل النموذج ثلاثي الأبعاد...",
-        "clickToInteract": "انقر للتفاعل"
-    },
-    "Hero": {
-        "title": "اشتراكاتك الرقمية المميزة،",
-        "subtitle": "تصلك مبردة.",
-        "description": "احصل على وصول مخفض إلى GPT و Netflix و Spotify والمزيد. اشتراكات مميزة بأسعار مجمدة.",
-        "cta": "ابدأ الآن"
+        "loading3DModel": "جاري تحميل النموذج ثلاثي الأبعاد...",
+        "clickToInteract": "انقر للتفاعل",
+        "recovering3DView": "جاري استعادة العرض ثلاثي الأبعاد..."
     },
     "Navbar": {
-        "home": "الرئيسية",
         "products": "المنتجات",
-        "about": "عن المتجر",
-        "faq": "الأسئلة الشائعة",
-        "support": "الدعم",
-        "admin": "الإدارة",
-        "signIn": "تسجيل الدخول"
+        "categories": "الفئات",
+        "admin": "لوحة التحكم"
     },
     "Footer": {
-        "navigation": "التنقل",
-        "company": "الشركة",
-        "preferences": "التفضيلات",
-        "currency": "العملة",
-        "language": "اللغة",
-        "copyright": "© 2024 - اشتراكات رقمية مميزة، تم التوصيل.",
-        "contact": "تواصل معنا",
-        "poweredBy": "مدعوم بنظام إدارة المحتوى المدمج"
-    },
-    "Shop": {
-        "title": "منتجاتنا",
-        "subtitle": "اشتراكات رقمية مميزة بأسعار مجمدة. احصل على وصول إلى GPT و Netflix و Spotify والمزيد.",
-        "filters": "تصفية",
-        "sort": "ترتيب حسب",
-        "addToCart": "أضف إلى السلة",
-        "outOfStock": "نفذت الكمية",
-        "searchPlaceholder": "البحث عن المنتجات...",
-        "noResults": "لا توجد منتجات تطابق بحثك"
-    },
-    "Cart": {
-        "title": "سلتك",
-        "empty": "سلتك فارغة",
-        "subtotal": "المجموع الفرعي",
-        "checkout": "إتمام الشراء",
-        "continueShopping": "متابعة التسوق",
-        "shippingNote": "سيتم حساب الشحن والضرائب عند الدفع",
-        "clearCart": "إفراغ السلة"
-    },
-    "Checkout": {
-        "title": "الدفع",
-        "orderSummary": "ملخص الطلب",
-        "tax": "الضريبة",
-        "shipping": "الشحن",
-        "total": "المجموع",
-        "payment": "الدفع",
-        "securePayment": "دفع آمن عبر Stripe",
-        "redirectNotice": "سيتم إعادة توجيهك إلى صفحة الدفع الآمنة في Stripe لإكمال عملية الدفع. نقبل جميع البطاقات الائتمانية الرئيسية.",
-        "nothingToCheckout": "لا يوجد شيء للدفع",
-        "addItems": "أضف بعض المنتجات إلى سلتك أولاً.",
-        "browseProducts": "تصفح المنتجات",
-        "trust": {
-            "ssl": "تشفير SSL 256-bit",
-            "pci": "متوافق مع PCI",
-            "moneyBack": "ضمان استعادة الأموال"
-        }
+        "copyright": "جميع الحقوق محفوظة."
     }
 }
