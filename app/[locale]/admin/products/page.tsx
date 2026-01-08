@@ -12,15 +12,16 @@ import {
 } from "lucide-react";
 
 async function getProducts() {
-    return await db.product.findMany({
+    const products = await db.product.findMany({
         include: {
             category: true,
             _count: {
-                select: { accounts: { where: { isSold: false } } }
+                select: { licenses: { where: { status: 'AVAILABLE' } } }
             }
         },
         orderBy: { createdAt: 'desc' }
     });
+    return products;
 }
 
 export default async function ProductsPage() {
@@ -117,8 +118,8 @@ export default async function ProductsPage() {
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-2">
                                                 <Key className="w-4 h-4 text-gray-500" />
-                                                <span className={product._count.accounts > 0 ? "text-green-400" : "text-red-400"}>
-                                                    {product._count.accounts}
+                                                <span className={product._count.licenses > 0 ? "text-green-400" : "text-red-400"}>
+                                                    {product._count.licenses}
                                                 </span>
                                                 <span className="text-gray-600">/ {product.stockQuantity} Total</span>
                                             </div>

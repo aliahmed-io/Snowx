@@ -18,7 +18,8 @@ import {
     MessageSquare,
     Settings,
     LogOut,
-    BarChart3
+    BarChart3,
+    Key
 } from "lucide-react";
 
 const sidebarGroups = [
@@ -54,6 +55,11 @@ const sidebarGroups = [
                 title: "Categories",
                 href: "/admin/categories",
                 icon: Component
+            },
+            {
+                title: "Licenses",
+                href: "/admin/licenses",
+                icon: Key
             },
             {
                 title: "Banner Picture",

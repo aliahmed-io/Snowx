@@ -26,6 +26,7 @@ model User {
   addresses              Address[]
   wishlist               WishlistItem[]
   tickets                Ticket[] // Kept for potential compatibility or future use
+  licenses               LicenseKey[]
 }
 
 enum Role {
@@ -74,7 +75,7 @@ model Product {
   reviews       Review[]
   orderItems    OrderItem[]
   wishlistItems WishlistItem[]
-  accounts      Account[]      @relation("ProductAccounts") // For digital delivery
+  licenses      LicenseKey[]
 
   @@index([status])
   @@index([createdAt])
@@ -113,31 +114,70 @@ enum BannerType {
   CATEGORY
 }
 
-// Account model required for Digital Products (SnowX core feature)
-model Account {
-  id          String  @id @default(cuid())
-  credentials String  @db.Text
-  isSold      Boolean @default(false)
+// License Key System (Replacing Account)
+model LicenseKey {
+  id     String        @id @default(cuid())
+  key    String        @db.Text
+  status LicenseStatus @default(AVAILABLE)
 
-  product   Product @relation("ProductAccounts", fields: [productId], references: [id], onDelete: Cascade)
+  // Relations
   productId String
+  product   Product @relation(fields: [productId], references: [id])
 
-  order   Order?  @relation(fields: [orderId], references: [id])
   orderId String?
+  order   Order?  @relation(fields: [orderId], references: [id])
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  events LicenseEventLog[]
+
   @@index([productId])
   @@index([orderId])
+  @@index([userId])
+  @@index([status])
+  @@index([key]) // For quick lookup
 }
 
+model LicenseEventLog {
+  id           String           @id @default(cuid())
+  licenseKeyId String
+  type         LicenseEventType
+  metadata     Json? // Stores IP, UserAgent, etc.
+  createdAt    DateTime         @default(now())
+
+  licenseKey LicenseKey @relation(fields: [licenseKeyId], references: [id], onDelete: Cascade)
+
+  @@index([licenseKeyId])
+}
+
+enum LicenseStatus {
+  AVAILABLE // In pool, ready to be sold
+  ACTIVE // Sold and valid
+  SUSPENDED // Chargeback/Dispute initiated
+  REVOKED // Chargeback lost / Fraud confirmed
+  EXPIRED // Subscription ended
+}
+
+enum LicenseEventType {
+  CREATED
+  ASSIGNED
+  VIEWED
+  SUSPENDED
+  REVOKED
+  RESTORED
+}
+
+// Updated Order model with better indices
 model Order {
   id          String      @id @default(cuid())
-  orderNumber String      @unique @default(cuid()) // Kept from current
+  orderNumber String      @unique @default(cuid())
   status      OrderStatus @default(PENDING)
 
-  // Pricing - specific to current system compatibility
+  // Pricing
   total    Decimal @db.Decimal(10, 2)
   subtotal Decimal @db.Decimal(10, 2)
   tax      Decimal @db.Decimal(10, 2)
@@ -160,9 +200,10 @@ model Order {
   billingAddress  Json?
 
   orderItems OrderItem[]
-  accounts   Account[]
+  licenses   LicenseKey[] // Changed from accounts
 
-  @@index([userId])
+  // Performance Indices
+  @@index([userId, status]) // Critical for "My Orders" queries
   @@index([createdAt])
   @@index([status])
 }

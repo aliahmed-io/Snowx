@@ -31,10 +31,12 @@ export async function POST(request: NextRequest) {
         const purchaseUnit = orderDetails.purchase_units?.[0];
         const customId = purchaseUnit?.custom_id;
         let cartItems: { productId: string; quantity: number; price: number }[] = [];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        let metadata: Record<string, any> = {};
 
         if (customId) {
             try {
-                const metadata = JSON.parse(customId);
+                metadata = JSON.parse(customId);
                 cartItems = JSON.parse(metadata.items || "[]");
             } catch {
                 console.warn("Failed to parse order metadata");
@@ -62,6 +64,8 @@ export async function POST(request: NextRequest) {
                 subtotal,
                 tax,
                 shipping,
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                userId: (metadata as Record<string, any>)?.userId || null, // Try to link user
                 shippingAddress: {
                     email: payerEmail,
                     name: payerName ? `${payerName.given_name} ${payerName.surname}` : null,
@@ -75,6 +79,30 @@ export async function POST(request: NextRequest) {
                 } : undefined,
             },
         });
+
+        // Assign Licenses
+        try {
+            // Need a userId. If null, maybe use email to find or create?
+            // For now, if userId exists, we assign.
+            // Or we assign to the Order regardless of user (LicenseKey has orderId).
+
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const userIdToAssign = (metadata as Record<string, any>)?.userId;
+
+            // If we have items and it's a digital product, assign keys.
+            if (cartItems.length > 0) {
+                await import("@/lib/services/license-service").then(({ LicenseAssignmentService }) =>
+                    LicenseAssignmentService.assignLicenseToOrder(
+                        order.id,
+                        userIdToAssign, // Can be null/undefined? Service expects string.
+                        cartItems
+                    )
+                );
+            }
+        } catch (err) {
+            console.error("Failed to assign licenses:", err);
+            // Don't fail the request, just log. Admin can fix.
+        }
 
         return NextResponse.json({
             success: true,
