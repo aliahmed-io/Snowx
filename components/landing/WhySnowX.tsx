@@ -34,7 +34,7 @@ export function WhySnowX() {
     const t = useTranslations('WhySnowX');
 
     return (
-        <section className="py-24 relative bg-snow-primary ice-texture overflow-hidden">
+        <section className="py-24 relative bg-snow-primary ice-texture-smooth overflow-hidden">
             <div className="max-w-7xl mx-auto px-6 relative z-10">
                 {/* Section Header */}
                 <div className="text-center mb-20">

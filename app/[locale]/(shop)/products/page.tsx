@@ -4,6 +4,7 @@ import { getCategories } from "@/actions/categories";
 import { ProductGrid } from "@/components/shop/ProductGrid";
 import { ProductFilters } from "@/components/shop/ProductFilters";
 import { getTranslations } from "next-intl/server";
+import { Search } from "lucide-react";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
     const { locale } = await params;
@@ -43,30 +44,31 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                 </p>
             </div>
 
-            {/* Search bar */}
-            <form className="mb-8">
-                <div className="relative max-w-md">
-                    <input
-                        type="text"
-                        name="search"
-                        placeholder={t('searchPlaceholder')}
-                        defaultValue={params.search}
-                        className="w-full bg-white/10 border border-white/20 text-white rounded-xl px-4 py-3 pl-12 focus:outline-none focus:border-snow-accent transition-colors"
-                    />
-                    <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                </div>
-            </form>
+            {/* Search and Filters Layout */}
+            <div className="flex flex-col md:flex-row gap-6 items-center justify-between mb-8">
+                {/* Search bar */}
+                <form className="w-full md:max-w-md">
+                    <div className="flex items-center w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-2.5 focus-within:bg-white/10 focus-within:border-white/20 transition-all duration-300">
+                        <Search className="w-5 h-5 text-white/40 mr-3" />
+                        <input
+                            type="text"
+                            name="search"
+                            placeholder={t('searchPlaceholder')}
+                            defaultValue={params.search}
+                            className="flex-1 bg-transparent border-none outline-none text-white placeholder:text-white/40 text-sm h-full w-full"
+                        />
+                    </div>
+                </form>
 
-            {/* Filters */}
-            <Suspense fallback={<div className="h-12" />}>
-                <ProductFilters
-                    categories={categories}
-                    currentCategory={params.category}
-                    currentSort={params.sort}
-                />
-            </Suspense>
+                {/* Filters */}
+                <Suspense fallback={<div className="h-12" />}>
+                    <ProductFilters
+                        categories={categories}
+                        currentCategory={params.category}
+                        currentSort={params.sort}
+                    />
+                </Suspense>
+            </div>
 
             {/* Products Grid */}
             <ProductGrid

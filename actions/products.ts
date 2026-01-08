@@ -12,7 +12,7 @@ export async function getProducts(options?: {
 }) {
     const where: Record<string, unknown> = { isActive: true };
 
-    if (options?.categorySlug) {
+    if (options?.categorySlug && options.categorySlug !== 'all') {
         where.category = { slug: options.categorySlug };
     }
 

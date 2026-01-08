@@ -5,11 +5,76 @@
         "recovering3DView": "Recovering 3D View..."
     },
     "Navbar": {
+        "home": "Home",
         "products": "Products",
         "categories": "Categories",
-        "admin": "Admin"
+        "about": "About",
+        "support": "Support",
+        "faq": "FAQ",
+        "admin": "Admin",
+        "streaming": "Streaming",
+        "ai": "AI",
+        "music": "Music",
+        "signIn": "Sign In",
+        "signUp": "Sign Up",
+        "signOut": "Sign Out"
     },
     "Footer": {
-        "copyright": "All rights reserved."
+        "copyright": "All rights reserved.",
+        "shop": "Shop",
+        "company": "Company",
+        "legal": "Legal",
+        "preferences": "Preferences",
+        "currency": "Currency",
+        "language": "Language",
+        "contact": "Contact",
+        "privacy": "Privacy",
+        "terms": "Terms",
+        "refund": "Refund",
+        "poweredBy": "Powered by"
+    },
+    "Shop": {
+        "title": "Products",
+        "subtitle": "Explore our premium digital subscriptions",
+        "searchPlaceholder": "Search for products...",
+        "noResults": "No products found matching your search."
+    },
+    "Home": {
+        "bannerTitle": "Limited Drops",
+        "shopByCategory": "Shop by Category",
+        "featuredItems": "Featured Items",
+        "browseAll": "Browse all Products"
+    },
+    "Hero": {
+        "title": "Premium Digital",
+        "subtitle": "Subscriptions",
+        "description": "Unlock premium access to your favorite services at unbeatable prices. Instant delivery, secure payments, and 24/7 support.",
+        "cta": "Start Shopping"
+    },
+    "HowItWorks": {
+        "selectPlan": "Select Plan",
+        "selectPlanDesc": "Choose from our wide range of premium subscriptions.",
+        "securePayment": "Secure Payment",
+        "securePaymentDesc": "Pay securely using your preferred payment method.",
+        "instantDelivery": "Instant Delivery",
+        "instantDeliveryDesc": "Receive your credentials instantly via email."
+    },
+    "WhySnowX": {
+        "blazingFast": "Blazing Fast",
+        "blazingFastDesc": "Experience lightning-fast service delivery.",
+        "secureReliable": "Secure & Reliable",
+        "secureReliableDesc": "Your security is our top priority.",
+        "expertSupport": "Expert Support",
+        "expertSupportDesc": "Our team is here to help you 24/7."
+    },
+    "cart": {
+        "title": "Your Cart",
+        "emptyTitle": "Your cart is empty",
+        "emptySubtitle": "Looks like you haven't added anything to your cart yet",
+        "shopNow": "Shop Now",
+        "subtotal": "Subtotal",
+        "total": "Total",
+        "checkout": "Checkout",
+        "clearCart": "Clear Cart"
     }
 }

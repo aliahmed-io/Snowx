@@ -5,11 +5,58 @@
         "recovering3DView": "جاري استعادة العرض ثلاثي الأبعاد..."
     },
     "Navbar": {
+        "home": "الرئيسية",
         "products": "المنتجات",
-        "categories": "الفئات",
-        "admin": "لوحة التحكم"
+        "categories": "التصنيفات",
+        "about": "قصتنا",
+        "support": "الدعم",
+        "faq": "الأسئلة الشائعة",
+        "admin": "الإدارة",
+        "streaming": "بث مباشر",
+        "ai": "ذكاء اصطناعي",
+        "music": "موسيقى",
+        "signIn": "تسجيل دخول",
+        "signUp": "تسجيل جديد",
+        "signOut": "خروج"
     },
     "Footer": {
-        "copyright": "جميع الحقوق محفوظة."
+        "copyright": "جميع الحقوق محفوظة",
+        "shop": "المتجر",
+        "company": "الشركة",
+        "legal": "قانوني",
+        "preferences": "التفضيلات",
+        "currency": "العملة",
+        "language": "اللغة",
+        "contact": "اتصل بنا",
+        "privacy": "الخصوصية",
+        "terms": "الشروط",
+        "refund": "الاسترجاع",
+        "poweredBy": "مشغل بواسطة"
+    },
+    "Shop": {
+        "title": "المنتجات",
+        "subtitle": "استكشف اشتراكاتنا الرقمية المميزة"
+    },
+    "Hero": {
+        "title": "اشتراكات رقمية",
+        "subtitle": "مميزة",
+        "description": "احصل على وصول مميز لخدماتك المفضلة بأسعار لا تقبل المنافسة. تسليم فوري، مدفوعات آمنة، ودعم 24/7.",
+        "cta": "ابدأ التسوق"
+    },
+    "HowItWorks": {
+        "selectPlan": "اختر الخطة",
+        "selectPlanDesc": "اختر من بين مجموعة واسعة من الاشتراكات المميزة.",
+        "securePayment": "دفع آمن",
+        "securePaymentDesc": "ادفع بأمان باستخدام طريقة الدفع المفضلة لديك.",
+        "instantDelivery": "تسليم فوري",
+        "instantDeliveryDesc": "استلم بيانات اعتمادك فوراً عبر البريد الإلكتروني."
+    },
+    "WhySnowX": {
+        "blazingFast": "سريع جداً",
+        "blazingFastDesc": "تجربة خدمة تسليم فائقة السرعة.",
+        "secureReliable": "آمن وموثوق",
+        "secureReliableDesc": "أمانك هو أولويتنا القصوى.",
+        "expertSupport": "دعم الخبراء",
+        "expertSupportDesc": "فريقنا هنا لمساعدتك على مدار الساعة."
     }
 }

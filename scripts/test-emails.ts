@@ -1,5 +1,5 @@
-const { sendEmail } = require("./lib/mail");
-require("dotenv").config({ path: ".env.local" });
+import { sendEmail } from "@/lib/mail";
+import "dotenv/config";
 
 async function testEmails() {
     console.log("--- Starting Email Integration Test ---");

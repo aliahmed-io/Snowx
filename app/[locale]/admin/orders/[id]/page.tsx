@@ -14,7 +14,6 @@ import {
 } from "lucide-react";
 import { notFound } from "next/navigation";
 import { OrderStatus } from "@prisma/client";
-import { revalidatePath } from "next/cache";
 
 import { OrderStatusForm } from "./OrderStatusForm";
 
@@ -63,7 +62,6 @@ export default async function OrderDetailsPage({ params }: OrderDetailsPageProps
 
     if (!order) notFound();
 
-    const statuses = Object.values(OrderStatus);
 
     interface Address {
         line1?: string;

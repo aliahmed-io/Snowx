@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { Link, usePathname, useRouter } from "@/navigation";
 import { useLocale, useTranslations } from "next-intl";
 
@@ -15,9 +16,7 @@ export function Footer() {
     };
 
     return (
-        <footer className="bg-snow-primary text-white relative overflow-hidden border-t border-white/5">
-            {/* Ice Texture Overlay */}
-            <div className="absolute inset-0 ice-texture pointer-events-none opacity-20" />
+        <footer className="bg-snow-primary text-white relative overflow-hidden border-t border-white/5 ice-texture-footer">
 
             <div className="max-w-7xl mx-auto px-6 py-20 relative z-10">
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-12 md:gap-8">
@@ -25,9 +24,11 @@ export function Footer() {
                     {/* Brand Section */}
                     <div className="md:col-span-4 space-y-6">
                         <Link href="/" className="inline-block transform hover:scale-105 transition-transform">
-                            <img
+                            <Image
                                 src="/snowx2-icon.png"
                                 alt="SnowX"
+                                width={96}
+                                height={96}
                                 className="w-24 h-24 object-contain"
                             />
                         </Link>

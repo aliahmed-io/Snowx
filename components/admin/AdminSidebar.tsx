@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 import { Link, usePathname } from "@/navigation";
 import { cn } from "@/lib/utils";
 import {
@@ -63,10 +65,12 @@ export function AdminSidebar() {
     return (
         <div className="flex flex-col h-full bg-[#0a1628] border-r border-snow-primary/20 w-64 text-white">
             <div className="p-6 border-b border-snow-primary/20 flex items-center gap-3">
-                <img
+                <Image
                     src="/snowx2-icon.png"
                     alt="SnowX"
-                    className="w-10 h-10 object-contain"
+                    width={40}
+                    height={40}
+                    className="object-contain"
                 />
                 <h1 className="text-xl font-bold bg-linear-to-r from-snow-accent to-blue-400 bg-clip-text text-transparent">
                     Admin

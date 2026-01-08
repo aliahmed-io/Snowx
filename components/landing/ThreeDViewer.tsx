@@ -109,6 +109,30 @@ function Model({ onClick, isAnimating }: { onClick: () => void, isAnimating: boo
     const clonedScene = useMemo(() => scene.clone(), [scene]);
     const groupRef = useRef<THREE.Group>(null);
 
+    // Apply Frost Material Look
+    useEffect(() => {
+        clonedScene.traverse((child) => {
+            if ((child as THREE.Mesh).isMesh) {
+                const mesh = child as THREE.Mesh;
+                if (mesh.material) {
+                    // Clone material to ensure unique instance if shared
+                    const material = Array.isArray(mesh.material)
+                        ? mesh.material[0].clone()
+                        : mesh.material.clone();
+
+                    // Frost/Ice Properties with whiter finish
+                    (material as THREE.MeshStandardMaterial).color.set("#ffffff"); // Pure white base
+                    (material as THREE.MeshStandardMaterial).emissive.set("#bae6fd"); // Very pale blue glow (whiter)
+                    (material as THREE.MeshStandardMaterial).emissiveIntensity = 0.3;
+                    (material as THREE.MeshStandardMaterial).roughness = 0.2; // Smoother for more reflections
+                    (material as THREE.MeshStandardMaterial).metalness = 0.9; // High metalness for shiny ice look
+
+                    mesh.material = material;
+                }
+            }
+        });
+    }, [clonedScene]);
+
     useEffect(() => {
         if (!groupRef.current || !isAnimating) return;
 
@@ -134,10 +158,13 @@ function Model({ onClick, isAnimating }: { onClick: () => void, isAnimating: boo
         };
     }, [isAnimating]);
 
-    useFrame((state) => {
+    useFrame((state, delta) => {
         // Fix: Avoid conflict between GSAP and useFrame for position/rotation
         if (groupRef.current && !isAnimating) {
+            // Floating animation
             groupRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.5) * 0.1;
+            // Slow continuous rotation to show whole model
+            groupRef.current.rotation.y += delta * 0.2;
         }
     });
 
@@ -150,7 +177,8 @@ function Model({ onClick, isAnimating }: { onClick: () => void, isAnimating: boo
                 <primitive
                     object={clonedScene}
                     scale={2.5}
-                    rotation={[0, 0.8, 0]}
+                    // Removed static rotation to allow continuous rotation
+                    rotation={[0, 0, 0]}
                 />
             </Center>
         </group>
@@ -230,7 +258,7 @@ export function ThreeDViewer() {
     }
 
     return (
-        <div className="w-full h-[500px] relative z-10 cursor-pointer">
+        <div className="w-full h-full min-h-[400px] relative z-10 cursor-pointer">
             <Canvas
                 key={key}
                 camera={{ position: [0, 0, 7], fov: 50 }}

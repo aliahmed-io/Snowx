@@ -2,17 +2,17 @@ import { Link } from "@/navigation";
 
 const products = [
     {
-        id: "gpt-plus",
-        name: "GPT Plus",
-        description: "Experience the power of advanced AI with GPT-4 and exclusive features.",
-        image: "/products/gpt.svg",
-        originalPrice: 20.00,
-        discountedPrice: 7.99,
-        discountPercent: 60,
-        gradient: "from-emerald-500/20 via-blue-500/10 to-purple-500/20",
+        id: "gemini-advanced",
+        name: "Gemini Advanced",
+        description: "Google's most capable AI model, Ultra 1.0, designed for highly complex tasks.",
+        image: "/products/gemini.svg",
+        originalPrice: 19.99,
+        discountedPrice: 6.99,
+        discountPercent: 65,
+        gradient: "from-blue-500/20 via-purple-500/10 to-pink-500/20",
         icon: (
             <svg className="w-16 h-16 text-white" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M22.28 9.82a6.05 6.05 0 0 0-.51-4.91 6.04 6.04 0 0 0-6.51-2.9 6.07 6.07 0 0 0-10.79 2.09 6.05 6.05 0 0 0-4 2.9 6.05 6.05 0 0 0 .74 7.1 6.05 6.05 0 0 0 .51 4.91 6.05 6.05 0 0 0 6.51 2.9 6.07 6.07 0 0 0 10.79-2.09 6.05 6.05 0 0 0 4-2.9 6.05 6.05 0 0 0-.74-7.1zM12 11.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm-4.5 2.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm9 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z" />
+                <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 11.944 12 12 12 0 0 0 12-12A12 12 0 0 0 11.944 0zm0 4.68c1.644 1.706 3.193 3.327 5.122 4.606-1.922 1.34-3.518 2.92-5.122 4.68-1.574-1.748-3.153-3.328-5.11-4.68 1.956-1.28 3.535-2.9 5.11-4.606z" />
             </svg>
         ),
     },
@@ -50,10 +50,7 @@ const products = [
 
 export function FeaturedSubscriptions() {
     return (
-        <section className="py-24 relative bg-snow-primary overflow-hidden">
-            {/* Ice Texture Overlay */}
-            <div className="absolute inset-0 ice-texture pointer-events-none opacity-40" />
-
+        <section className="py-24 relative bg-snow-primary ice-texture-frost overflow-hidden">
             <div className="max-w-7xl mx-auto px-6 relative z-10">
                 {/* Section Header */}
                 <div className="text-center mb-16 space-y-4">
@@ -73,25 +70,25 @@ export function FeaturedSubscriptions() {
                     {products.map((product) => (
                         <div
                             key={product.id}
-                            className="glass-card group rounded-4xl overflow-hidden flex flex-col h-full"
+                            className="glass-card group rounded-4xl overflow-hidden flex flex-col h-full bg-[#080d1e] hover:bg-[#0f1729] transition-all duration-500 border border-white/5"
                         >
                             {/* Product Image Area */}
-                            <div className={`relative aspect-square w-full bg-linear-to-br ${product.gradient} flex items-center justify-center p-12 transition-transform duration-500 group-hover:scale-105`}>
+                            <div className={`relative aspect-16/10 w-full bg-linear-to-br ${product.gradient} flex items-center justify-center p-8 transition-transform duration-500 group-hover:scale-105`}>
                                 <div className="absolute inset-0 bg-linear-to-t from-snow-primary-light/80 to-transparent opacity-60" />
                                 <div className="relative z-10 drop-shadow-[0_0_30px_rgba(255,255,255,0.3)] transform group-hover:rotate-6 transition-transform duration-500">
                                     {product.icon}
                                 </div>
 
                                 {/* Floating Discount Badge */}
-                                <div className="absolute top-6 right-6">
-                                    <span className="bg-white/10 backdrop-blur-md border border-white/20 text-white text-xs font-bold px-4 py-2 rounded-full uppercase tracking-wider">
+                                <div className="absolute top-4 right-4">
+                                    <span className="bg-white/10 backdrop-blur-md border border-white/20 text-white text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">
                                         -{product.discountPercent}% OFF
                                     </span>
                                 </div>
                             </div>
 
                             {/* Product Info */}
-                            <div className="p-8 flex flex-col flex-1 space-y-4">
+                            <div className="p-6 flex flex-col flex-1 space-y-4">
                                 <div>
                                     <h3 className="text-2xl font-bold text-white mb-2 group-hover:text-snow-accent transition-colors">
                                         {product.name}
@@ -101,7 +98,7 @@ export function FeaturedSubscriptions() {
                                     </p>
                                 </div>
 
-                                <div className="mt-auto pt-6 border-t border-white/5 flex items-center justify-between">
+                                <div className="mt-auto pt-4 border-t border-white/5 flex items-center justify-between">
                                     <div className="flex flex-col">
                                         <span className="text-snow-gray line-through text-xs font-medium">
                                             ${product.originalPrice.toFixed(2)}
@@ -116,9 +113,9 @@ export function FeaturedSubscriptions() {
 
                                     <Link
                                         href={`/products/${product.id}`}
-                                        className="bg-white/5 hover:bg-snow-accent text-white p-4 rounded-2xl transition-all duration-300 border border-white/10 hover:border-snow-accent group/btn"
+                                        className="bg-white/5 hover:bg-snow-accent text-white p-3 rounded-xl transition-all duration-300 border border-white/10 hover:border-snow-accent group/btn"
                                     >
-                                        <svg className="w-6 h-6 transform group-hover/btn:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <svg className="w-5 h-5 transform group-hover/btn:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                                         </svg>
                                     </Link>

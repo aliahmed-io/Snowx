@@ -16,6 +16,13 @@ function createPrismaClient() {
 
   try {
     const pool = globalForPrisma.pool ?? new Pool({ connectionString });
+
+    // Handle unexpected pool errors to prevent crash
+    pool.on('error', (err) => {
+      console.error('Unexpected error on idle client', err);
+      process.exit(-1);
+    });
+
     const adapter = new PrismaPg(pool);
 
     if (process.env.NODE_ENV !== "production") {

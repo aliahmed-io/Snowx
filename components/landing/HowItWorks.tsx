@@ -34,7 +34,10 @@ export function HowItWorks() {
     const t = useTranslations('HowItWorks');
 
     return (
-        <section className="py-24 relative bg-snow-primary-light section-transition-slant ice-texture">
+        <section className="relative py-20 z-10 mt-2">
+            {/* Skewed Background & Texture */}
+            <div className="absolute inset-0 bg-snow-primary-light ice-texture-frost transform -skew-y-3 origin-top-left h-full w-full -z-10 scale-110" />
+
             <div className="max-w-7xl mx-auto px-6 relative z-10">
                 {/* Section Header */}
                 <div className="text-center mb-20 space-y-4">

@@ -71,6 +71,57 @@ h6 {
   z-index: 1;
 }
 
+.ice-texture-hero {
+  position: relative;
+}
+
+.ice-texture-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url('/ice_texture_premium_dark_1767772924654.png');
+  background-size: cover;
+  background-position: center;
+  mix-blend-mode: overlay;
+  opacity: 0.7;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.ice-texture-footer {
+  position: relative;
+}
+
+.ice-texture-footer::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url('/ice_texture_premium_dark_1767772924654.png');
+  background-size: cover;
+  background-position: center;
+  mix-blend-mode: normal;
+  opacity: 0.25;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.ice-texture-frost {
+  position: relative;
+}
+
+.ice-texture-frost::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url('/ice-texture-2.png');
+  background-size: cover;
+  background-position: center;
+  mix-blend-mode: soft-light;
+  opacity: 0.7;
+  pointer-events: none;
+  z-index: 1;
+}
+
 /* Glass Card Premium */
 .glass-card {
   background: rgba(255, 255, 255, 0.03);
@@ -213,4 +264,21 @@ h6 {
     transform: translateY(110vh) translateX(30px);
     opacity: 0;
   }
+}
+
+.ice-texture-smooth {
+  position: relative;
+}
+
+.ice-texture-smooth::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url('/ice-texture-3.png');
+  background-size: cover;
+  background-position: center;
+  mix-blend-mode: overlay;
+  opacity: 0.8;
+  pointer-events: none;
+  z-index: 1;
 }

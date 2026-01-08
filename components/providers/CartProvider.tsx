@@ -39,9 +39,13 @@ function getInitialCart(): CartItem[] {
 }
 
 export function CartProvider({ children }: { children: ReactNode }) {
-    const [items, setItems] = useState<CartItem[]>(getInitialCart);
+    const [items, setItems] = useState<CartItem[]>([]);
     const [isOpen, setIsOpen] = useState(false);
     const isHydratedRef = useRef(false);
+
+    useEffect(() => {
+        setItems(getInitialCart());
+    }, []);
 
     // Mark as hydrated on mount - using ref to avoid setState in effect
     useEffect(() => {

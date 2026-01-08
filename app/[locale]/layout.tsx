@@ -1,17 +1,20 @@
 import type { Metadata } from "next";
 import { Outfit, Plus_Jakarta_Sans } from "next/font/google";
 import "../globals.css";
-import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { LiveChat } from "@/components/ui/LiveChat";
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { CurrencyProvider } from "@/components/providers/CurrencyProvider";
+import { CartProvider } from "@/components/providers/CartProvider";
+import { CartSidebar } from "@/components/shop/CartSidebar";
 import { notFound } from "next/navigation";
 import AppInitializer from "@/components/shared/app-initializer";
 import ClientProviders from "@/components/shared/client-providers";
 import { db } from "@/lib/db";
 import { ClientSetting } from "@/types";
+import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
+import { Navbar } from "@/components/layout/Navbar";
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -49,7 +52,14 @@ export default async function RootLayout({
   }
 
   // Fetch settings from DB (or use default if none exist yet)
-  let setting = await db.setting.findFirst() as unknown as ClientSetting;
+  let setting: ClientSetting | null = null;
+
+  try {
+    setting = await db.setting.findFirst() as unknown as ClientSetting;
+  } catch (error) {
+    console.error("Failed to fetch settings:", error);
+    // setting remains null, triggering fallback below
+  }
   if (!setting) {
     // Fallback to minimal setting if DB is empty or during first run
     setting = {
@@ -72,6 +82,9 @@ export default async function RootLayout({
 
   const messages = await getMessages();
 
+  const { getUser } = getKindeServerSession();
+  const user = await getUser();
+
   return (
     <html lang={locale} dir={locale === 'ar' ? 'rtl' : 'ltr'} suppressHydrationWarning>
       <body
@@ -82,10 +95,13 @@ export default async function RootLayout({
           <ClientProviders>
             <NextIntlClientProvider messages={messages}>
               <CurrencyProvider>
-                <Navbar />
-                <main className="min-h-screen">{children}</main>
-                <Footer />
-                <LiveChat />
+                <CartProvider>
+                  <Navbar user={user} />
+                  <CartSidebar />
+                  <main className="min-h-screen">{children}</main>
+                  <Footer />
+                  <LiveChat />
+                </CartProvider>
               </CurrencyProvider>
             </NextIntlClientProvider>
           </ClientProviders>
