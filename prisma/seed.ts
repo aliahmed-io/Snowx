@@ -94,60 +94,36 @@ async function main() {
             }
         });
 
-        // Seed License Keys (Product Pool)
-        // 50 Active (Sold), 50 Available (Unsold) for each product
+        // Seed Account Inventory (Product Pool)
+        // 50 Sold, 50 Available for each product
 
         // Check keys count
-        const count = await prisma.licenseKey.count({ where: { productId: product.id } });
+        const count = await prisma.account.count({ where: { productId: product.id } });
 
         if (count === 0) {
-            const keysData = [];
+            const accountsData = [];
 
-            // 50 Sold keys
+            // 50 Available Accounts
             for (let i = 0; i < 50; i++) {
-                keysData.push({
-                    key: `LICENSE-${product.slug.toUpperCase()}-${Math.random().toString(36).substring(7).toUpperCase()}`,
-                    productId: product.id,
-                    status: 'ACTIVE', // Sold
-                    // usage of enum string if TS complains, cast as any or import enum
-                });
-            }
-
-            // 50 Available keys
-            for (let i = 0; i < 50; i++) {
-                keysData.push({
-                    key: `POOL-${product.slug.toUpperCase()}-${Math.random().toString(36).substring(7).toUpperCase()}`,
+                accountsData.push({
+                    serviceType: "Netflix", // Placeholder, ideally mapped from product category/slug
+                    username: `user_${product.slug}_${i}@example.com`,
+                    password: `encrypted_pass_${i}`, // Placeholder encryption
                     productId: product.id,
                     status: 'AVAILABLE'
+                    // usage of enum string if TS complains
                 });
             }
 
-            // Create many does not allow setting relations to other records easily in many cases if they differ
-            // But here we are just setting pool. Sold ones usually need User/Order.
-            // For simplicity in seed, we will create them "loose" first, then maybe link some.
-            // Or just map and create.
-
-            // Let's rely on type-safe loop for better relation handling if needed, 
-            // or just createMany and assume 'ACTIVE' ones are just "sold" conceptually but not linked yet in this block.
-            // We will link them in the Order loop later? Or just leave them as "Active" orphan for now (legacy data sim).
-
-            // Actually best to create Available ones only here.
-            // Sold ones will be created via Order simulation.
-
-            // 100 Available Keys
-            const poolData = Array(100).fill(null).map((_, i) => ({
-                key: `POOL-${product.slug.toUpperCase()}-${Math.random().toString(36).substring(7).toUpperCase()}`,
-                productId: product.id,
-                status: 'AVAILABLE'
-            }));
-
-            await prisma.licenseKey.createMany({ data: poolData as any }); // cast any to avoid enum strictness in pure script
+            // Create Available
+            // Using implicit 'any' cast for simpler seed logic with enums
+            await prisma.account.createMany({ data: accountsData as any });
         }
     }
 
-    console.log('✅ Products & License Pool seeded');
+    console.log('✅ Products & Account Pool seeded');
 
-    // 4. Users (Admin already exists likely, but let's ensure a test user)
+    // 4. Users
     const testUser = await prisma.user.upsert({
         where: { email: 'demo@snowx.com' },
         update: {},
@@ -162,8 +138,7 @@ async function main() {
 
     console.log('✅ Users seeded');
 
-    // 5. Orders & Daily Stats (Historical Data for Charts)
-    // Generate data for last 30 days
+    // 5. Orders & Daily Stats
     const now = new Date();
 
     for (let i = 29; i >= 0; i--) {
@@ -171,7 +146,6 @@ async function main() {
         date.setDate(date.getDate() - i);
         date.setHours(12, 0, 0, 0);
 
-        // Random daily revenue between 500 and 2000
         const dailyOrderCount = Math.floor(Math.random() * 5) + 1;
         let dailyRevenue = 0;
 
@@ -179,9 +153,6 @@ async function main() {
             const orderTotal = Math.floor(Math.random() * 100) + 20;
             dailyRevenue += orderTotal;
 
-            // Create Order (only if not already plenty)
-            // Check loosely or just create. For seed, creating extra is usually fine unless unique constraints.
-            // Order number unique.
             const orderNum = `ORD-${date.getFullYear()}${date.getMonth()}-${date.getDate()}-${k}`;
 
             await prisma.order.upsert({
@@ -191,7 +162,7 @@ async function main() {
                     orderNumber: orderNum,
                     status: OrderStatus.DELIVERED,
                     total: orderTotal,
-                    subtotal: orderTotal, // Simplified
+                    subtotal: orderTotal,
                     tax: 0,
                     shipping: 0,
                     userId: testUser.id,
@@ -204,15 +175,16 @@ async function main() {
                             currency: 'USD'
                         }
                     },
-                    // Create a sold license for this order (conceptually linking to one of the products)
-                    // For simplicity, we just create a NEW license here key rather than taking from pool
-                    // to avoid complex logic in seed.
-                    licenses: {
+                    // Create a sold account for this order
+                    accounts: {
                         create: {
-                            key: `SOLD-${orderNum}-Key`,
-                            status: 'ACTIVE',
-                            productId: entertainment?.id || products[0].categoryId || 'unknown', // Fallback
-                            userId: testUser.id
+                            serviceType: 'Netflix',
+                            username: `sold_user_${k}@example.com`,
+                            password: `encrypted_pass_${k}`,
+                            productId: entertainment?.id || products[0].categoryId || 'unknown',
+                            userId: testUser.id,
+                            status: 'SOLD',
+                            purchaseDate: date
                         }
                     }
                 }

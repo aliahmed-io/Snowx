@@ -13,9 +13,10 @@ import {
     Printer
 } from "lucide-react";
 import { notFound } from "next/navigation";
-import { OrderStatus } from "@prisma/client";
+import { OrderStatus, AccountStatus } from "@prisma/client";
 
 import { OrderStatusForm } from "./OrderStatusForm";
+import { ReplacementButton } from "@/components/admin/ReplacementButton";
 
 interface OrderDetailsPageProps {
     params: Promise<{
@@ -53,6 +54,11 @@ export default async function OrderDetailsPage({ params }: OrderDetailsPageProps
         include: {
             User: true,
             orderItems: {
+                include: {
+                    product: true
+                }
+            },
+            accounts: {
                 include: {
                     product: true
                 }
@@ -190,6 +196,66 @@ export default async function OrderDetailsPage({ params }: OrderDetailsPageProps
                                     <span>{formatPrice(Number(order.total))}</span>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+
+                    {/* Assigned Accounts */}
+                    <div className="bg-[#0a1628] border border-snow-primary/20 rounded-xl overflow-hidden mt-6">
+                        <div className="p-4 border-b border-snow-primary/20 bg-white/5">
+                            <h3 className="font-semibold text-white flex items-center gap-2">
+                                <Package className="w-4 h-4 text-snow-accent" />
+                                Assigned Accounts
+                            </h3>
+                        </div>
+                        <div className="p-0">
+                            <table className="w-full text-left text-sm text-gray-400">
+                                <thead className="bg-[#020817] text-xs uppercase font-medium">
+                                    <tr>
+                                        <th className="px-6 py-3">Service</th>
+                                        <th className="px-6 py-3">Username</th>
+                                        <th className="px-6 py-3">Status</th>
+                                        <th className="px-6 py-3 text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-snow-primary/10">
+                                    {order.accounts.map((account) => (
+                                        <tr key={account.id} className="hover:bg-white/5">
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center gap-3">
+                                                    <div>
+                                                        <p className="text-white font-medium">{account.serviceType}</p>
+                                                        <p className="text-xs text-gray-500">{account.product.name}</p>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 font-mono text-xs">{account.username}</td>
+                                            <td className="px-6 py-4">
+                                                <span className={cn(
+                                                    "px-2 py-0.5 rounded-full text-xs font-medium border",
+                                                    account.status === AccountStatus.SOLD ? "bg-green-500/10 text-green-400 border-green-500/20" :
+                                                        account.status === AccountStatus.REPLACED ? "bg-orange-500/10 text-orange-400 border-orange-500/20" :
+                                                            account.status === AccountStatus.BANNED ? "bg-red-500/10 text-red-400 border-red-500/20" :
+                                                                "bg-gray-500/10 text-gray-400 border-gray-500/20"
+                                                )}>
+                                                    {account.status}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 text-right">
+                                                {account.status === AccountStatus.SOLD && (
+                                                    <ReplacementButton accountId={account.id} username={account.username} />
+                                                )}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    {order.accounts.length === 0 && (
+                                        <tr>
+                                            <td colSpan={4} className="px-6 py-4 text-center text-gray-500 italic">
+                                                No accounts assigned to this order yet.
+                                            </td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
 

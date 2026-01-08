@@ -26,7 +26,7 @@ model User {
   addresses              Address[]
   wishlist               WishlistItem[]
   tickets                Ticket[] // Kept for potential compatibility or future use
-  licenses               LicenseKey[]
+  accounts               Account[]
 }
 
 enum Role {
@@ -75,7 +75,7 @@ model Product {
   reviews       Review[]
   orderItems    OrderItem[]
   wishlistItems WishlistItem[]
-  licenses      LicenseKey[]
+  accounts      Account[]
 
   @@index([status])
   @@index([createdAt])
@@ -114,11 +114,15 @@ enum BannerType {
   CATEGORY
 }
 
-// License Key System (Replacing Account)
-model LicenseKey {
-  id     String        @id @default(cuid())
-  key    String        @db.Text
-  status LicenseStatus @default(AVAILABLE)
+// Account Inventory System
+// Account Inventory System
+model Account {
+  id          String @id @default(cuid())
+  serviceType String // e.g. "Netflix", "Spotify" - linked to Product via naming or ID if needed
+  username    String
+  password    String // ENCRYPTED
+
+  status AccountStatus @default(AVAILABLE)
 
   // Relations
   productId String
@@ -130,45 +134,34 @@ model LicenseKey {
   userId String?
   user   User?   @relation(fields: [userId], references: [id])
 
+  purchaseDate DateTime? // When it was assigned to an order
+  expiryDate   DateTime? // Subscription expiry
+
+  notes String? // Internal admin notes (e.g. "Original owner: John")
+
+  // Replacement History
+  replacedById String?  @unique
+  replacedBy   Account? @relation("ReplacementHistory", fields: [replacedById], references: [id])
+  replaces     Account? @relation("ReplacementHistory")
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  events LicenseEventLog[]
-
-  @@index([productId])
+  @@unique([username, serviceType]) // Prevent duplicate inventory
+  @@index([status])
   @@index([orderId])
   @@index([userId])
-  @@index([status])
-  @@index([key]) // For quick lookup
+  @@index([productId])
+  @@index([serviceType])
 }
 
-model LicenseEventLog {
-  id           String           @id @default(cuid())
-  licenseKeyId String
-  type         LicenseEventType
-  metadata     Json? // Stores IP, UserAgent, etc.
-  createdAt    DateTime         @default(now())
-
-  licenseKey LicenseKey @relation(fields: [licenseKeyId], references: [id], onDelete: Cascade)
-
-  @@index([licenseKeyId])
-}
-
-enum LicenseStatus {
-  AVAILABLE // In pool, ready to be sold
-  ACTIVE // Sold and valid
-  SUSPENDED // Chargeback/Dispute initiated
-  REVOKED // Chargeback lost / Fraud confirmed
-  EXPIRED // Subscription ended
-}
-
-enum LicenseEventType {
-  CREATED
-  ASSIGNED
-  VIEWED
-  SUSPENDED
-  REVOKED
-  RESTORED
+enum AccountStatus {
+  AVAILABLE // In stock, ready to sell
+  SOLD // Assigned to a user
+  EXPIRED // Subscription ended (Time passed)
+  SUSPENDED // Temporarily locked (e.g. Dispute)
+  BANNED // Account died/killed by provider
+  REPLACED // Was sold, but failed, and given a replacement
 }
 
 // Updated Order model with better indices
@@ -199,8 +192,9 @@ model Order {
   shippingAddress Json?
   billingAddress  Json?
 
-  orderItems OrderItem[]
-  licenses   LicenseKey[] // Changed from accounts
+  orderItems       OrderItem[]
+  accounts         Account[]
+  replacementCount Int         @default(0)
 
   // Performance Indices
   @@index([userId, status]) // Critical for "My Orders" queries

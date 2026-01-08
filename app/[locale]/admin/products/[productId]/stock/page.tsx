@@ -7,7 +7,8 @@ import {
 } from "lucide-react";
 import { notFound } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { LicenseStatus } from "@prisma/client";
+import { AccountStatus } from "@prisma/client";
+import { AccountService } from "@/lib/services/account-service";
 
 interface StockPageProps {
     params: Promise<{
@@ -19,33 +20,47 @@ async function addStock(formData: FormData) {
     "use server";
 
     const productId = formData.get("productId") as string;
-    const keysRaw = formData.get("keys") as string;
+    const accountsRaw = formData.get("accounts") as string; // username:password
 
-    if (!productId || !keysRaw) return;
+    if (!productId || !accountsRaw) return;
+
+    // Get product to determine service type (fallback to product name)
+    const product = await db.product.findUnique({ where: { id: productId } });
+    if (!product) return;
 
     // Split by newlines for bulk add
-    const lines = keysRaw.split('\n').filter(line => line.trim() !== '');
+    const lines = accountsRaw.split('\n').filter(line => line.trim() !== '');
 
-    if (lines.length > 0) {
-        await db.licenseKey.createMany({
-            data: lines.map(k => ({
-                key: k.trim(),
+    for (const line of lines) {
+        // Expected format: username:password or just username (password generated?) - No, usually pairs.
+        // Let's assume username:password
+        const [username, password] = line.split(':').map(s => s.trim());
+
+        if (username) {
+            await AccountService.addAccount({
                 productId,
-                status: LicenseStatus.AVAILABLE
-            }))
-        });
-
-        revalidatePath(`/admin/products/${productId}/stock`);
+                serviceType: product.name, // Use product name as service type for now
+                username,
+                password: password || "ChangeMe123!", // Fallback if missing
+                notes: "Bulk added via Product Stock page"
+            });
+        }
     }
+
+    revalidatePath(`/admin/products/${productId}/stock`);
 }
 
-async function deleteLicense(formData: FormData) {
+async function deleteAccount(formData: FormData) {
     "use server";
-    const licenseId = formData.get("licenseId") as string;
+    const accountId = formData.get("accountId") as string;
     const productId = formData.get("productId") as string;
 
-    await db.licenseKey.delete({
-        where: { id: licenseId }
+    // Only allow deleting AVAILABLE accounts directly here
+    await db.account.deleteMany({
+        where: {
+            id: accountId,
+            status: AccountStatus.AVAILABLE
+        }
     });
 
     revalidatePath(`/admin/products/${productId}/stock`);
@@ -56,7 +71,7 @@ export default async function ProductStockPage({ params }: StockPageProps) {
     const product = await db.product.findUnique({
         where: { id: productId },
         include: {
-            licenses: {
+            accounts: {
                 orderBy: { createdAt: 'desc' }
             }
         }
@@ -66,8 +81,8 @@ export default async function ProductStockPage({ params }: StockPageProps) {
         notFound();
     }
 
-    const activeStock = product.licenses.filter(l => l.status === LicenseStatus.AVAILABLE);
-    const soldStock = product.licenses.filter(l => l.status === LicenseStatus.ACTIVE);
+    const activeStock = product.accounts.filter(l => l.status === AccountStatus.AVAILABLE);
+    const soldStock = product.accounts.filter(l => l.status === AccountStatus.SOLD);
 
     return (
         <div className="space-y-8 max-w-5xl mx-auto">
@@ -80,7 +95,7 @@ export default async function ProductStockPage({ params }: StockPageProps) {
                 </Link>
                 <div>
                     <h2 className="text-2xl font-bold text-white tracking-tight">Manage Stock: {product.name}</h2>
-                    <p className="text-gray-400 text-sm">Add or remove digital license keys for this product</p>
+                    <p className="text-gray-400 text-sm">Add or remove account credentials for this product</p>
                 </div>
             </div>
 
@@ -90,23 +105,23 @@ export default async function ProductStockPage({ params }: StockPageProps) {
                     <div className="bg-[#0a1628] border border-snow-primary/20 rounded-xl p-6">
                         <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                             <Plus className="w-5 h-5 text-snow-accent" />
-                            Add Stock
+                            Add Accounts
                         </h3>
                         <form action={addStock} className="space-y-4">
                             <input type="hidden" name="productId" value={product.id} />
                             <div>
                                 <label className="block text-sm font-medium text-gray-400 mb-2">
-                                    License Keys
+                                    Credentials (User:Pass)
                                 </label>
                                 <textarea
-                                    name="keys"
+                                    name="accounts"
                                     rows={10}
                                     className="w-full bg-snow-primary/10 border border-snow-primary/20 rounded-lg p-3 text-sm text-gray-300 focus:outline-none focus:border-snow-accent/50 transition-colors font-mono"
-                                    placeholder={`XXXX-XXXX-XXXX\nYYYY-YYYY-YYYY\n...`}
+                                    placeholder={`user1:pass1\nuser2:pass2\n...`}
                                     required
                                 />
                                 <p className="text-xs text-gray-500 mt-2">
-                                    Paste multiple keys, one per line.
+                                    Paste multiple accounts, one per line. Format: <code>username:password</code>
                                 </p>
                             </div>
                             <button
@@ -127,12 +142,12 @@ export default async function ProductStockPage({ params }: StockPageProps) {
                                 <span className="text-green-400 font-mono">{activeStock.length}</span>
                             </div>
                             <div className="flex justify-between text-sm">
-                                <span className="text-gray-500">Sold (Active)</span>
+                                <span className="text-gray-500">Sold</span>
                                 <span className="text-blue-400 font-mono">{soldStock.length}</span>
                             </div>
                             <div className="pt-3 border-t border-snow-primary/20 flex justify-between font-medium">
                                 <span className="text-white">Total</span>
-                                <span className="text-white font-mono">{product.licenses.length}</span>
+                                <span className="text-white font-mono">{product.accounts.length}</span>
                             </div>
                         </div>
                     </div>
@@ -141,53 +156,47 @@ export default async function ProductStockPage({ params }: StockPageProps) {
                 {/* Stock List */}
                 <div className="lg:col-span-2 bg-[#0a1628] border border-snow-primary/20 rounded-xl overflow-hidden flex flex-col h-[600px]">
                     <div className="p-4 border-b border-snow-primary/20 bg-white/5">
-                        <h3 className="font-semibold text-white">License Inventory</h3>
+                        <h3 className="font-semibold text-white">Account Inventory</h3>
                     </div>
                     <div className="flex-1 overflow-y-auto p-0">
-                        {product.licenses.length === 0 ? (
+                        {product.accounts.length === 0 ? (
                             <div className="h-full flex flex-col items-center justify-center text-gray-500 p-8">
-                                <p>No licenses found.</p>
+                                <p>No accounts found.</p>
                             </div>
                         ) : (
                             <table className="w-full text-left text-sm text-gray-400">
                                 <thead className="bg-[#020817] sticky top-0 z-10 text-xs uppercase font-medium">
                                     <tr>
-                                        <th className="px-4 py-3">License Key</th>
+                                        <th className="px-4 py-3">Username</th>
                                         <th className="px-4 py-3 w-24">Status</th>
                                         <th className="px-4 py-3 w-24">Order</th>
                                         <th className="px-4 py-3 w-16"></th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-snow-primary/10">
-                                    {product.licenses.map((license) => (
-                                        <tr key={license.id} className="hover:bg-white/5 group">
+                                    {product.accounts.map((account) => (
+                                        <tr key={account.id} className="hover:bg-white/5 group">
                                             <td className="px-4 py-3 font-mono text-xs text-white break-all">
-                                                {license.status !== LicenseStatus.AVAILABLE ? (
-                                                    <span className="opacity-70">
-                                                        {license.key}
-                                                    </span>
-                                                ) : (
-                                                    license.key
-                                                )}
+                                                {account.username}
                                             </td>
                                             <td className="px-4 py-3">
-                                                <span className={`text-xs px-2 py-0.5 rounded ${license.status === LicenseStatus.AVAILABLE ? 'bg-green-500/10 text-green-400' :
-                                                        license.status === LicenseStatus.ACTIVE ? 'bg-blue-500/10 text-blue-400' :
-                                                            'bg-red-500/10 text-red-400'
+                                                <span className={`text-xs px-2 py-0.5 rounded ${account.status === AccountStatus.AVAILABLE ? 'bg-green-500/10 text-green-400' :
+                                                    account.status === AccountStatus.SOLD ? 'bg-blue-500/10 text-blue-400' :
+                                                        'bg-red-500/10 text-red-400'
                                                     }`}>
-                                                    {license.status}
+                                                    {account.status}
                                                 </span>
                                             </td>
                                             <td className="px-4 py-3 text-xs whitespace-nowrap">
-                                                {license.orderId ? (
+                                                {account.orderId ? (
                                                     <span className="text-blue-300">Ordered</span>
                                                 ) : '-'}
                                             </td>
                                             <td className="px-4 py-3 text-right">
-                                                {license.status === LicenseStatus.AVAILABLE && (
-                                                    <form action={deleteLicense}>
+                                                {account.status === AccountStatus.AVAILABLE && (
+                                                    <form action={deleteAccount}>
                                                         <input type="hidden" name="productId" value={product.id} />
-                                                        <input type="hidden" name="licenseId" value={license.id} />
+                                                        <input type="hidden" name="accountId" value={account.id} />
                                                         <button
                                                             type="submit"
                                                             className="text-gray-600 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"

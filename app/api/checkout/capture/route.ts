@@ -89,10 +89,10 @@ export async function POST(request: NextRequest) {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const userIdToAssign = (metadata as Record<string, any>)?.userId;
 
-            // If we have items and it's a digital product, assign keys.
+            // If we have items and it's a digital product, assign accounts.
             if (cartItems.length > 0) {
-                await import("@/lib/services/license-service").then(({ LicenseAssignmentService }) =>
-                    LicenseAssignmentService.assignLicenseToOrder(
+                await import("@/lib/services/account-service").then(({ AccountService }) =>
+                    AccountService.assignAccountsToOrder(
                         order.id,
                         userIdToAssign, // Can be null/undefined? Service expects string.
                         cartItems

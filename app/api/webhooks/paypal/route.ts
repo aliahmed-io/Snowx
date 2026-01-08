@@ -103,12 +103,12 @@ async function handleDisputeCreated(transactionId: string | undefined, reason: s
     });
 
     if (payment) {
-        const { LicenseAssignmentService } = await import("@/lib/services/license-service");
-        await LicenseAssignmentService.suspendLicensesForOrder(
+        const { AccountService } = await import("@/lib/services/account-service");
+        await AccountService.suspendAccountsForOrder(
             payment.orderId,
             `PayPal Dispute Opened: ${reason}`
         );
-        console.log(`Suspended licenses for Order ${payment.orderId}`);
+        console.log(`Suspended accounts for Order ${payment.orderId}`);
     }
 }
 
@@ -120,22 +120,22 @@ async function handleDisputeResolved(transactionId: string | undefined, outcome:
 
     if (!payment) return;
 
-    const { LicenseAssignmentService } = await import("@/lib/services/license-service");
+    const { AccountService } = await import("@/lib/services/account-service");
 
     if (outcome === "RESOLVED_BUYER_FAVOUR") {
-        // Seller Lost -> Permanent Revoke
-        await LicenseAssignmentService.revokeLicensesForOrder(
+        // Seller Lost -> Permanent Ban
+        await AccountService.banAccountsForOrder(
             payment.orderId,
             `PayPal Dispute Lost: ${outcome} (${reason})`
         );
-        console.log(`Revoked licenses for Order ${payment.orderId} (Dispute Lost)`);
+        console.log(`Banned accounts for Order ${payment.orderId} (Dispute Lost)`);
     } else if (outcome === "RESOLVED_SELLER_FAVOUR") {
         // Seller Won -> Restore
-        await LicenseAssignmentService.restoreLicensesForOrder(
+        await AccountService.restoreAccountsForOrder(
             payment.orderId,
             `PayPal Dispute Won: ${outcome} (${reason})`
         );
-        console.log(`Restored licenses for Order ${payment.orderId} (Dispute Won)`);
+        console.log(`Restored accounts for Order ${payment.orderId} (Dispute Won)`);
     }
 }
 
@@ -146,11 +146,11 @@ async function handleCaptureDenied(transactionId: string | undefined, reason: st
     });
 
     if (payment) {
-        const { LicenseAssignmentService } = await import("@/lib/services/license-service");
-        await LicenseAssignmentService.revokeLicensesForOrder(
+        const { AccountService } = await import("@/lib/services/account-service");
+        await AccountService.banAccountsForOrder(
             payment.orderId,
             `PayPal Capture Denied: ${reason}`
         );
-        console.log(`Revoked licenses for Order ${payment.orderId} (Capture Denied)`);
+        console.log(`Banned accounts for Order ${payment.orderId} (Capture Denied)`);
     }
 }

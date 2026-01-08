@@ -16,7 +16,7 @@ async function getProducts() {
         include: {
             category: true,
             _count: {
-                select: { licenses: { where: { status: 'AVAILABLE' } } }
+                select: { accounts: { where: { status: 'AVAILABLE' } } }
             }
         },
         orderBy: { createdAt: 'desc' }
@@ -118,8 +118,8 @@ export default async function ProductsPage() {
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-2">
                                                 <Key className="w-4 h-4 text-gray-500" />
-                                                <span className={product._count.licenses > 0 ? "text-green-400" : "text-red-400"}>
-                                                    {product._count.licenses}
+                                                <span className={product._count.accounts > 0 ? "text-green-400" : "text-red-400"}>
+                                                    {product._count.accounts}
                                                 </span>
                                                 <span className="text-gray-600">/ {product.stockQuantity} Total</span>
                                             </div>

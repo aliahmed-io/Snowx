@@ -27,6 +27,7 @@ const plusJakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
   title: "SnowX | Premium Digital Subscriptions, Delivered Cold",
   description: "Get discounted access to GPT, Netflix, Spotify, and more. Premium digital subscriptions at frozen prices.",
   keywords: ["digital subscriptions", "GPT", "Netflix", "Spotify", "discount", "premium"],

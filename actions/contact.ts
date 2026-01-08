@@ -3,6 +3,7 @@
 import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { sendEmail } from "@/lib/mail";
 
 const contactSchema = z.object({
     name: z.string().min(1, "Name is required"),
@@ -27,6 +28,7 @@ export async function submitContactForm(prevState: { error?: string; success?: s
     }
 
     try {
+        // 1. Save to Database
         await db.contact.create({
             data: {
                 name: validatedFields.data.name,
@@ -36,8 +38,22 @@ export async function submitContactForm(prevState: { error?: string; success?: s
             },
         });
 
+        // 2. Send Email Notification (to Admin)
+        const adminEmail = process.env.ADMIN_EMAIL || "ali.ahmed.2001@outlook.com"; // Default to owner email
+        await sendEmail({
+            to: adminEmail,
+            subject: `[SnowX Contact] ${validatedFields.data.subject}`,
+            html: `
+                <h1>New Contact Message</h1>
+                <p><strong>From:</strong> ${validatedFields.data.name} (${validatedFields.data.email})</p>
+                <p><strong>Subject:</strong> ${validatedFields.data.subject}</p>
+                <br />
+                <p>${validatedFields.data.message.replace(/\n/g, '<br/>')}</p>
+            `
+        });
+
         revalidatePath("/admin/contact");
-        return { success: "Message sent successfully! We'll get back to you soon." };
+        return { success: "Message sent! We'll get back to you shortly." };
     } catch (error) {
         console.error("Contact form error:", error);
         return { error: "Failed to send message. Please try again later." };

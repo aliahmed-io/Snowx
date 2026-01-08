@@ -57,8 +57,8 @@ const sidebarGroups = [
                 icon: Component
             },
             {
-                title: "Licenses",
-                href: "/admin/licenses",
+                title: "Inventory",
+                href: "/admin/inventory",
                 icon: Key
             },
             {
