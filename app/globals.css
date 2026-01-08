@@ -82,7 +82,7 @@ h6 {
   background-image: url('/ice_texture_premium_dark_1767772924654.png');
   background-size: cover;
   background-position: center;
-  mix-blend-mode: overlay;
+  mix-blend-mode: soft-light;
   opacity: 0.7;
   pointer-events: none;
   z-index: 1;

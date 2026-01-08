@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, FormEvent } from "react";
 import {
     Send,
     MoreHorizontal,
@@ -75,7 +75,7 @@ export default function EmailPage() {
         { id: "cam_2", subject: "New Features Update", sentAt: null, status: "draft", recipients: 0 },
     ]);
 
-    const handleSendCampaign = (e: React.FormEvent) => {
+    const handleSendCampaign = (e: FormEvent) => {
         e.preventDefault();
         toast.promise(
             new Promise((resolve) => setTimeout(resolve, 2000)),

@@ -47,8 +47,8 @@ export async function POST(req: Request) {
                     firstName: user.first_name,
                     lastName: user.last_name,
                     profileImage: user.picture,
-                    role: isAdmin ? "ADMIN" : "CUSTOMER",
-                    stripeCustomerId: stripeCustomer.id
+                    role: isAdmin ? "ADMIN" : "CUSTOMER"
+                    // Note: stripeCustomerId would need to be added to schema to store
                 }
             });
 

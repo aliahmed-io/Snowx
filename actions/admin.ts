@@ -27,7 +27,7 @@ export async function getAdminStats() {
             take: 5,
             orderBy: { createdAt: "desc" },
             include: {
-                user: { select: { email: true, firstName: true, lastName: true } },
+                User: { select: { email: true, firstName: true, lastName: true } },
             },
         }),
         // Orders by status

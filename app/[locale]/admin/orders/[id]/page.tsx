@@ -29,13 +29,13 @@ async function sendReceipt(formData: FormData) {
 
     const order = await db.order.findUnique({
         where: { id: orderId },
-        include: { user: true }
+        include: { User: true }
     });
 
-    if (!order) return;
+    if (!order || !order.User) return;
 
     await sendEmail({
-        to: order.user.email,
+        to: order.User.email,
         subject: `Receipt for Order #${order.orderNumber}`,
         html: `
             <h1>Thank you for your order!</h1>
@@ -51,8 +51,8 @@ export default async function OrderDetailsPage({ params }: OrderDetailsPageProps
     const order = await db.order.findUnique({
         where: { id: orderId },
         include: {
-            user: true,
-            items: {
+            User: true,
+            orderItems: {
                 include: {
                     product: true
                 }
@@ -60,7 +60,7 @@ export default async function OrderDetailsPage({ params }: OrderDetailsPageProps
         }
     });
 
-    if (!order) notFound();
+    if (!order || !order.User) notFound();
 
 
     interface Address {
@@ -150,7 +150,7 @@ export default async function OrderDetailsPage({ params }: OrderDetailsPageProps
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-snow-primary/10">
-                                    {order.items.map((item) => (
+                                    {order.orderItems.map((item) => (
                                         <tr key={item.id} className="hover:bg-white/5">
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-3">
@@ -203,13 +203,6 @@ export default async function OrderDetailsPage({ params }: OrderDetailsPageProps
                                 <p className="text-xs text-gray-500">{new Date(order.createdAt).toLocaleString()}</p>
                             </div>
                             {/* Payment Log */}
-                            {order.stripePaymentId && (
-                                <div className="relative">
-                                    <div className="absolute -left-[31px] bg-[#0a1628] w-2.5 h-2.5 rounded-full border-2 border-blue-500" />
-                                    <p className="text-sm text-gray-300">Payment Processed</p>
-                                    <p className="text-xs text-gray-500">Stripe ID: {order.stripePaymentId}</p>
-                                </div>
-                            )}
                         </div>
                     </div>
                 </div>
@@ -226,10 +219,10 @@ export default async function OrderDetailsPage({ params }: OrderDetailsPageProps
                             Customer
                         </h3>
                         <div className="flex items-center gap-3 mb-6">
-                            {order.user.profileImage ? (
+                            {order.User.profileImage ? (
                                 <div className="relative w-10 h-10 rounded-full overflow-hidden">
                                     <Image
-                                        src={order.user.profileImage}
+                                        src={order.User.profileImage}
                                         alt=""
                                         fill
                                         className="object-cover"
@@ -237,12 +230,12 @@ export default async function OrderDetailsPage({ params }: OrderDetailsPageProps
                                 </div>
                             ) : (
                                 <div className="w-10 h-10 rounded-full bg-snow-accent/20 flex items-center justify-center text-snow-accent">
-                                    {order.user.firstName?.[0] || order.user.email[0].toUpperCase()}
+                                    {order.User.firstName?.[0] || order.User.email[0].toUpperCase()}
                                 </div>
                             )}
                             <div>
-                                <p className="text-white font-medium">{order.user.firstName} {order.user.lastName}</p>
-                                <p className="text-xs text-gray-500">{order.user.email}</p>
+                                <p className="text-white font-medium">{order.User.firstName} {order.User.lastName}</p>
+                                <p className="text-xs text-gray-500">{order.User.email}</p>
                             </div>
                         </div>
                         <div className="space-y-4 pt-4 border-t border-snow-primary/20">
@@ -250,7 +243,7 @@ export default async function OrderDetailsPage({ params }: OrderDetailsPageProps
                                 <Mail className="w-4 h-4 text-gray-500 shrink-0 mt-0.5" />
                                 <div className="text-sm">
                                     <p className="text-gray-400">Email</p>
-                                    <p className="text-gray-300">{order.user.email}</p>
+                                    <p className="text-gray-300">{order.User.email}</p>
                                 </div>
                             </div>
                             <div className="flex gap-3">

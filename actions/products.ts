@@ -9,40 +9,69 @@ export async function getProducts(options?: {
     sortBy?: "price-asc" | "price-desc" | "newest" | "name";
     featured?: boolean;
     limit?: number;
+    page?: number;
+    minPrice?: number;
+    maxPrice?: number;
+    platforms?: string[]; // For filtering by platform/tag if implemented
 }) {
+    const {
+        categorySlug,
+        search,
+        sortBy,
+        featured,
+        limit = 12,
+        page = 1,
+        minPrice,
+        maxPrice
+    } = options || {};
+
     const where: Record<string, unknown> = { isActive: true };
 
-    if (options?.categorySlug && options.categorySlug !== 'all') {
-        where.category = { slug: options.categorySlug };
+    if (categorySlug && categorySlug !== 'all') {
+        where.category = { slug: categorySlug };
     }
 
-    if (options?.search) {
+    if (search) {
         where.OR = [
-            { name: { contains: options.search, mode: "insensitive" } },
-            { description: { contains: options.search, mode: "insensitive" } },
+            { name: { contains: search, mode: "insensitive" } },
+            { description: { contains: search, mode: "insensitive" } },
         ];
     }
 
-    if (options?.featured) {
+    if (featured) {
         where.isFeatured = true;
     }
 
+    // Price Filtering
+    if (minPrice !== undefined || maxPrice !== undefined) {
+        where.price = {};
+        if (minPrice !== undefined) (where.price as any).gte = minPrice;
+        if (maxPrice !== undefined) (where.price as any).lte = maxPrice;
+    }
+
     let orderBy: Record<string, string> = { createdAt: "desc" };
-    if (options?.sortBy === "price-asc") orderBy = { price: "asc" };
-    if (options?.sortBy === "price-desc") orderBy = { price: "desc" };
-    if (options?.sortBy === "name") orderBy = { name: "asc" };
+    if (sortBy === "price-asc") orderBy = { price: "asc" };
+    if (sortBy === "price-desc") orderBy = { price: "desc" };
+    if (sortBy === "name") orderBy = { name: "asc" };
+    // "newest" uses default createdAt: desc
 
-    const products = await db.product.findMany({
-        where,
-        orderBy,
-        take: options?.limit,
-        include: {
-            category: true,
-            reviews: { select: { rating: true } },
-        },
-    });
+    const skip = (page - 1) * limit;
 
-    return products.map((p) => ({
+    const [products, total] = await Promise.all([
+        db.product.findMany({
+            where,
+            orderBy,
+            take: limit,
+            skip,
+            include: {
+                category: true,
+                reviews: { select: { rating: true } },
+            },
+        }),
+        db.product.count({ where }),
+    ]);
+
+    const mappedProducts = products.map((p) => ({
         ...p,
         price: Number(p.price),
         comparePrice: p.comparePrice ? Number(p.comparePrice) : null,
@@ -52,6 +81,13 @@ export async function getProducts(options?: {
                 : 0,
         reviewCount: p.reviews.length,
     }));
+
+    return {
+        products: mappedProducts,
+        total,
+        totalPages: Math.ceil(total / limit),
+        currentPage: page,
+    };
 }
 
 export async function getProductBySlug(slug: string) {

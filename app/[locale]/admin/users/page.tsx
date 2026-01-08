@@ -2,25 +2,9 @@ import { db } from "@/lib/db";
 import { Prisma } from "@prisma/client";
 import Image from "next/image";
 import {
-    Ban,
     Search,
-    ShoppingBag,
-    CheckCircle
+    ShoppingBag
 } from "lucide-react";
-import { revalidatePath } from "next/cache";
-
-async function toggleSuspension(formData: FormData) {
-    "use server";
-    const userId = formData.get("userId") as string;
-    const isSuspended = formData.get("isSuspended") === "true";
-
-    await db.user.update({
-        where: { id: userId },
-        data: { isSuspended }
-    });
-
-    revalidatePath("/admin/users");
-}
 
 export default async function UsersPage({ searchParams }: { searchParams: Promise<{ search?: string }> }) {
     const search = (await searchParams).search;
@@ -74,14 +58,12 @@ export default async function UsersPage({ searchParams }: { searchParams: Promis
                                 <th className="px-6 py-4">Role</th>
                                 <th className="px-6 py-4">Orders</th>
                                 <th className="px-6 py-4">Joined</th>
-                                <th className="px-6 py-4">Status</th>
-                                <th className="px-6 py-4 text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-snow-primary/10">
                             {users.length === 0 ? (
                                 <tr>
-                                    <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
+                                    <td colSpan={4} className="px-6 py-12 text-center text-gray-500">
                                         No users found.
                                     </td>
                                 </tr>
@@ -125,32 +107,6 @@ export default async function UsersPage({ searchParams }: { searchParams: Promis
                                         </td>
                                         <td className="px-6 py-4">
                                             {new Date(user.createdAt).toLocaleDateString()}
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            {user.isSuspended ? (
-                                                <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium bg-red-500/10 text-red-400">
-                                                    Suspended
-                                                </span>
-                                            ) : (
-                                                <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium bg-green-500/10 text-green-400">
-                                                    Active
-                                                </span>
-                                            )}
-                                        </td>
-                                        <td className="px-6 py-4 text-right">
-                                            <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <form action={toggleSuspension}>
-                                                    <input type="hidden" name="userId" value={user.id} />
-                                                    <input type="hidden" name="isSuspended" value={user.isSuspended ? "false" : "true"} />
-                                                    <button
-                                                        type="submit"
-                                                        className="p-2 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors"
-                                                        title={user.isSuspended ? "Reactivate User" : "Suspend User"}
-                                                    >
-                                                        {user.isSuspended ? <CheckCircle className="w-4 h-4 text-green-400" /> : <Ban className="w-4 h-4 text-red-400" />}
-                                                    </button>
-                                                </form>
-                                            </div>
                                         </td>
                                     </tr>
                                 ))

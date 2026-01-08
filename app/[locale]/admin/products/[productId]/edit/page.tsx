@@ -57,8 +57,15 @@ export default async function EditProductPage({ params }: EditPageProps) {
             <ProductForm
                 categories={categories}
                 initialData={{
-                    ...product,
-                    price: Number(product.price)
+                    id: product.id,
+                    name: product.name,
+                    description: product.description,
+                    price: Number(product.price),
+                    categoryId: product.categoryId,
+                    images: product.images,
+                    isActive: product.isActive,
+                    isFeatured: product.isFeatured,
+                    stockQuantity: product.stockQuantity
                 }}
                 action={updateAction}
             />

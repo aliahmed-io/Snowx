@@ -32,7 +32,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
         : 0;
 
     // Get related products
-    const relatedProducts = await getProducts({
+    const { products: relatedProducts } = await getProducts({
         categorySlug: product.category.slug,
         limit: 4,
     });

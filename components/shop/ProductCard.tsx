@@ -1,9 +1,12 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/navigation";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
+import { ShoppingCart, Star } from "lucide-react";
 import { useCart } from "@/components/providers/CartProvider";
-import { useCurrency } from "@/components/providers/CurrencyProvider";
+import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 interface ProductCardProps {
     id: string;
@@ -28,90 +31,93 @@ export function ProductCard({
     avgRating,
     reviewCount,
 }: ProductCardProps) {
+    const t = useTranslations('Shop');
     const { addItem } = useCart();
-    const { formatPrice } = useCurrency();
-
-    const discount = comparePrice
-        ? Math.round(((comparePrice - price) / comparePrice) * 100)
-        : 0;
 
     const handleAddToCart = (e: React.MouseEvent) => {
         e.preventDefault();
-        addItem({ id, name, slug, price, image });
+        e.stopPropagation();
+        addItem({
+            id,
+            name,
+            slug,
+            price,
+            image,
+        });
+        toast.success(t('addedToCart'), {
+            description: name,
+        });
     };
 
+    const discountPercentage = comparePrice
+        ? Math.round(((comparePrice - price) / comparePrice) * 100)
+        : 0;
+
     return (
-        <Link href={`/products/${slug}`} className="group block">
-            <div className="relative bg-gray-900/50 rounded-2xl overflow-hidden border border-white/10 hover:border-snow-accent/50 transition-all duration-300 hover:shadow-[0_0_30px_rgba(56,189,248,0.15)]">
-                {/* Discount badge */}
-                {discount > 0 && (
-                    <div className="absolute top-3 left-3 z-10 bg-linear-to-r from-rose-500 to-pink-500 text-white text-xs font-bold px-2.5 py-1 rounded-full">
-                        -{discount}%
+        <Link
+            href={`/products/${slug}`}
+            className="group block h-full"
+        >
+            <div className="bg-white/5 rounded-xl overflow-hidden border border-white/10 hover:border-white/20 hover:bg-white/10 transition-all duration-300 flex flex-col h-full hover:-translate-y-1 group-hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)]">
+                {/* Image Section */}
+                <div className="relative aspect-square w-full bg-black/20 p-6 flex items-center justify-center overflow-hidden">
+                    {/* Hover Effect: Scale Image */}
+                    <div className="relative w-full h-full transition-transform duration-500 group-hover:scale-105">
+                        {image ? (
+                            <Image
+                                src={image}
+                                alt={name}
+                                fill
+                                className="object-contain"
+                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                            />
+                        ) : (
+                            <div className="w-full h-full bg-white/5 rounded-xl animate-pulse" />
+                        )}
                     </div>
-                )}
-
-                {/* Image */}
-                <div className="aspect-square relative overflow-hidden bg-linear-to-br from-gray-800 to-gray-900">
-                    {image ? (
-                        <Image
-                            src={image}
-                            alt={name}
-                            fill
-                            className="object-cover group-hover:scale-110 transition-transform duration-500"
-                        />
-                    ) : (
-                        <div className="w-full h-full flex items-center justify-center text-gray-600">
-                            <svg className="w-16 h-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                        </div>
-                    )}
-
-                    {/* Quick add button - Always visible on mobile/hover on desktop */}
-                    <button
-                        onClick={handleAddToCart}
-                        className="absolute bottom-3 right-3 bg-snow-accent text-gray-900 p-3 rounded-full md:opacity-0 md:group-hover:opacity-100 md:translate-y-2 md:group-hover:translate-y-0 transition-all duration-300 hover:bg-white shadow-lg active:scale-95 z-20"
-                    >
-                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                        </svg>
-                    </button>
                 </div>
 
-                {/* Content */}
-                <div className="p-4">
-                    <p className="text-snow-accent text-xs font-medium uppercase tracking-wider mb-1">
-                        {category}
-                    </p>
-                    <h3 className="text-white font-semibold text-lg mb-2 line-clamp-1 group-hover:text-snow-accent transition-colors">
+                {/* Content Section */}
+                <div className="p-4 flex flex-col flex-1">
+                    {/* Brand/Category */}
+                    <p className="text-xs font-medium text-gray-400 mb-1">{category}</p>
+
+                    {/* Title */}
+                    <h3 className="font-bold text-white text-lg leading-tight mb-1 line-clamp-1 group-hover:text-snow-accent transition-colors">
                         {name}
                     </h3>
 
-                    {/* Rating */}
-                    {reviewCount > 0 && (
-                        <div className="flex items-center gap-1 mb-3">
-                            <div className="flex">
-                                {[...Array(5)].map((_, i) => (
-                                    <svg
-                                        key={i}
-                                        className={`w-4 h-4 ${i < Math.round(avgRating) ? "text-yellow-400" : "text-gray-600"}`}
-                                        fill="currentColor"
-                                        viewBox="0 0 20 20"
-                                    >
-                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                    </svg>
-                                ))}
-                            </div>
-                            <span className="text-gray-400 text-sm">({reviewCount})</span>
-                        </div>
-                    )}
+                    {/* Subtitle/Description (Mock for visual match) */}
+                    <p className="text-sm text-gray-500 mb-3 line-clamp-1">
+                        Premium Subscription
+                    </p>
 
-                    {/* Price */}
-                    <div className="flex items-center gap-2">
-                        <span className="text-2xl font-bold text-white">{formatPrice(price)}</span>
-                        {comparePrice && (
-                            <span className="text-gray-500 line-through text-sm">{formatPrice(comparePrice)}</span>
+                    {/* Savings Badge & Price */}
+                    <div className="mt-auto">
+                        {discountPercentage > 0 && (
+                            <p className="text-emerald-400 text-xs font-bold mb-1">
+                                Save {discountPercentage}%
+                            </p>
                         )}
+
+                        <div className="flex items-baseline gap-2 mb-4">
+                            <span className="text-xl font-bold text-white">
+                                ${price.toFixed(2)} <span className="text-xs font-normal text-gray-500">USD</span>
+                            </span>
+                            {comparePrice && comparePrice > price && (
+                                <span className="text-sm text-gray-500 line-through">
+                                    ${comparePrice.toFixed(2)}
+                                </span>
+                            )}
+                        </div>
+
+                        {/* Add to Cart Button */}
+                        <button
+                            onClick={handleAddToCart}
+                            className="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2.5 rounded-lg flex items-center justify-center gap-2 transition-colors shadow-lg shadow-blue-900/20 hover:shadow-blue-600/40 active:scale-95 duration-200"
+                        >
+                            Add to Cart
+                        </button>
                     </div>
                 </div>
             </div>

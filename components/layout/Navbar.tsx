@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import { useCurrency, CurrencyCode } from "@/components/providers/CurrencyProvider";
 import { useLocale, useTranslations } from "next-intl";
 import { LoginLink, RegisterLink, LogoutLink } from "@kinde-oss/kinde-auth-nextjs/components";
-import { ShoppingCart, User } from "lucide-react";
+import { ShoppingCart, User, Search } from "lucide-react";
 import { useCart } from "@/components/providers/CartProvider";
 
 const currencies: CurrencyCode[] = ["USD", "SAR", "AED"];
@@ -26,7 +26,6 @@ export function Navbar({ user }: NavbarProps) {
     const t = useTranslations('Navbar');
     const router = useRouter();
     const pathname = usePathname();
-    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
 
     useEffect(() => {
@@ -42,10 +41,20 @@ export function Navbar({ user }: NavbarProps) {
     const navLinks = [
         { label: t('home'), href: "/" },
         { label: "All Products", href: "/products" },
-        { label: t('ai'), href: "/ai" },
-        { label: t('streaming'), href: "/streaming" },
-        { label: t('music'), href: "/music" },
+        { label: "About", href: "/about" },
+        { label: "Contact", href: "/contact" },
     ];
+
+    const [searchQuery, setSearchQuery] = useState("");
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
+
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (searchQuery.trim()) {
+            router.push(`/products?search=${encodeURIComponent(searchQuery)}`);
+            setIsSearchOpen(false);
+        }
+    };
 
     return (
         <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? "py-2" : "py-4"}`}>
@@ -86,6 +95,36 @@ export function Navbar({ user }: NavbarProps) {
 
                     {/* Actions */}
                     <div className="flex items-center gap-4">
+                        {/* Search Bar - Expandable */}
+                        <div className={`flex items-center transition-all duration-300 ${isSearchOpen ? "w-64" : "w-10"}`}>
+                            {isSearchOpen ? (
+                                <form onSubmit={handleSearch} className="w-full relative">
+                                    <input
+                                        type="text"
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        placeholder="Search..."
+                                        className="w-full bg-white/10 border border-white/20 rounded-full pl-4 pr-10 py-2 text-sm text-white focus:outline-none focus:border-snow-accent transition-all"
+                                        autoFocus
+                                        onBlur={() => !searchQuery && setIsSearchOpen(false)}
+                                    />
+                                    <button
+                                        type="submit"
+                                        className="absolute right-2 top-1/2 -translate-y-1/2 text-white/50 hover:text-white"
+                                    >
+                                        <Search className="w-4 h-4" />
+                                    </button>
+                                </form>
+                            ) : (
+                                <button
+                                    onClick={() => setIsSearchOpen(true)}
+                                    className="p-2 bg-white/5 rounded-full hover:bg-snow-accent/20 hover:text-snow-accent transition-colors"
+                                >
+                                    <Search className="w-5 h-5" />
+                                </button>
+                            )}
+                        </div>
+
                         {/* Cart Button */}
                         <button
                             onClick={openCart}
@@ -168,129 +207,7 @@ export function Navbar({ user }: NavbarProps) {
                             )}
                         </div>
                     </div>
-
-                    {/* Mobile Menu Button */}
-                    <button
-                        className="md:hidden w-12 h-12 flex items-center justify-center rounded-2xl bg-white/5 border border-white/10 text-white"
-                        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                    >
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            {isMobileMenuOpen ? (
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            ) : (
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                            )}
-                        </svg>
-                    </button>
                 </div>
-
-                {/* Mobile Menu */}
-                {isMobileMenuOpen && (
-                    <div className="md:hidden mt-4 bg-snow-primary/95 backdrop-blur-2xl border border-white/10 rounded-4xl p-6 shadow-2xl animate-in slide-in-from-top-10 duration-500 z-50 overflow-hidden relative">
-                        {/* Mobile Background Texture */}
-                        <div className="absolute inset-0 ice-texture opacity-20 pointer-events-none" />
-
-                        <div className="flex flex-col gap-3 relative z-10">
-                            {navLinks.map((item) => (
-                                <Link
-                                    key={item.label}
-                                    href={item.href}
-                                    onClick={() => setIsMobileMenuOpen(false)}
-                                    className={`px-6 py-4 rounded-2xl transition-all font-bold ${pathname === item.href
-                                        ? "bg-snow-accent text-white shadow-xl shadow-snow-accent/20"
-                                        : "text-white/70 hover:bg-white/5"
-                                        }`}
-                                >
-                                    {item.label}
-                                </Link>
-                            ))}
-
-                            {/* Mobile Cart */}
-                            <button
-                                onClick={() => {
-                                    setIsMobileMenuOpen(false);
-                                    openCart();
-                                }}
-                                className="px-6 py-4 rounded-2xl bg-white/5 text-left font-bold text-white hover:bg-white/10 flex items-center justify-between"
-                            >
-                                <span className="flex items-center gap-2">
-                                    <ShoppingCart className="w-5 h-5" />
-                                    Cart
-                                </span>
-                                {itemCount > 0 && (
-                                    <span className="bg-snow-accent text-white text-xs font-bold px-2 py-0.5 rounded-full">
-                                        {itemCount}
-                                    </span>
-                                )}
-                            </button>
-
-                            {/* Mobile Auth */}
-                            <div className="mt-4 pt-4 border-t border-white/10 flex flex-col gap-3">
-                                {user ? (
-                                    <>
-                                        <Link href="/admin" onClick={() => setIsMobileMenuOpen(false)} className="px-6 py-4 rounded-2xl bg-white/5 text-center font-bold text-white hover:bg-white/10 flex items-center justify-center gap-3">
-                                            {user.picture ? (
-                                                <Image
-                                                    src={user.picture}
-                                                    alt="Profile"
-                                                    width={24}
-                                                    height={24}
-                                                    className="object-cover rounded-full"
-                                                />
-                                            ) : (
-                                                <User className="w-5 h-5" />
-                                            )}
-                                            {t('admin')}
-                                        </Link>
-                                        <LogoutLink className="px-6 py-4 rounded-2xl bg-red-500/10 text-center font-bold text-red-400 hover:bg-red-500/20">
-                                            {t('signOut')}
-                                        </LogoutLink>
-                                    </>
-                                ) : (
-                                    <>
-                                        <LoginLink className="px-6 py-4 rounded-2xl bg-white/5 text-center font-bold text-white hover:bg-white/10">
-                                            {t('signIn')}
-                                        </LoginLink>
-                                        <RegisterLink className="px-6 py-4 rounded-2xl bg-snow-accent text-center font-bold text-[#020817] hover:bg-snow-accent/90">
-                                            {t('signUp')}
-                                        </RegisterLink>
-                                    </>
-                                )}
-                            </div>
-
-                            <div className="mt-6 pt-6 border-t border-white/10 space-y-6">
-                                <div className="space-y-3">
-                                    <span className="text-[10px] uppercase tracking-[0.2em] text-white/30 font-black ml-4">Currency</span>
-                                    <div className="flex gap-2 bg-white/5 rounded-2xl p-1.5">
-                                        {currencies.map((c) => (
-                                            <button
-                                                key={c}
-                                                onClick={() => setCurrency(c)}
-                                                className={`flex-1 py-3 rounded-xl text-xs font-black transition-all ${currency === c ? "bg-snow-accent text-white shadow-xl" : "text-white/40"}`}
-                                            >
-                                                {c}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                                <div className="space-y-3">
-                                    <span className="text-[10px] uppercase tracking-[0.2em] text-white/30 font-black ml-4">Language</span>
-                                    <div className="flex gap-2 bg-white/5 rounded-2xl p-1.5">
-                                        {languages.map((lang) => (
-                                            <button
-                                                key={lang.code}
-                                                onClick={() => handleLanguageChange(lang.code)}
-                                                className={`flex-1 py-3 rounded-xl text-xs font-black uppercase transition-all ${locale === lang.code ? "bg-white text-black shadow-xl" : "text-white/40"}`}
-                                            >
-                                                {lang.label}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )}
             </div>
         </nav>
     );

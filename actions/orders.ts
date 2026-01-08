@@ -19,7 +19,7 @@ export async function getUserOrders() {
     const orders = await db.order.findMany({
         where: { userId: user.id },
         include: {
-            items: {
+            orderItems: {
                 include: { product: { select: { name: true, images: true, slug: true } } },
             },
         },
@@ -32,7 +32,7 @@ export async function getUserOrders() {
         subtotal: Number(o.subtotal),
         tax: Number(o.tax),
         shipping: Number(o.shipping),
-        items: o.items.map((i) => ({
+        items: o.orderItems.map((i) => ({
             ...i,
             price: Number(i.price),
         })),
@@ -43,8 +43,8 @@ export async function getOrderById(orderId: string) {
     const order = await db.order.findUnique({
         where: { id: orderId },
         include: {
-            user: { select: { email: true, firstName: true, lastName: true } },
-            items: {
+            User: { select: { email: true, firstName: true, lastName: true } },
+            orderItems: {
                 include: { product: { select: { name: true, images: true, slug: true } } },
             },
         },
@@ -58,7 +58,7 @@ export async function getOrderById(orderId: string) {
         subtotal: Number(order.subtotal),
         tax: Number(order.tax),
         shipping: Number(order.shipping),
-        items: order.items.map((i) => ({
+        items: order.orderItems.map((i) => ({
             ...i,
             price: Number(i.price),
         })),
@@ -78,8 +78,8 @@ export async function getAllOrders(options?: {
     const orders = await db.order.findMany({
         where,
         include: {
-            user: { select: { email: true, firstName: true, lastName: true } },
-            _count: { select: { items: true } },
+            User: { select: { email: true, firstName: true, lastName: true } },
+            _count: { select: { orderItems: true } },
         },
         orderBy: { createdAt: "desc" },
         take: options?.limit,
@@ -88,7 +88,7 @@ export async function getAllOrders(options?: {
     return orders.map((o) => ({
         ...o,
         total: Number(o.total),
-        itemCount: o._count.items,
+        itemCount: o._count.orderItems,
     }));
 }
 
@@ -123,8 +123,7 @@ export async function createOrder(data: {
             tax: data.tax,
             shipping: data.shipping,
             total: data.total,
-            stripePaymentId: data.stripePaymentId,
-            items: {
+            orderItems: {
                 create: data.items.map((item) => ({
                     productId: item.productId,
                     quantity: item.quantity,

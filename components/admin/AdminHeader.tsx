@@ -10,7 +10,7 @@ export async function AdminHeader() {
 
     // Fetch alerts
     const lowStockCount = await db.product.count({
-        where: { inventory: { lt: 10 } }
+        where: { stockQuantity: { lt: 10 } }
     });
 
     return (

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, FormEvent } from "react";
 import {
     MessageSquare,
     Search,
@@ -79,7 +79,7 @@ export default function ContactPage() {
     const [selectedMessage, setSelectedMessage] = useState<ContactMessage | null>(null);
     const [replyText, setReplyText] = useState("");
 
-    const handleReply = (e: React.FormEvent) => {
+    const handleReply = (e: FormEvent) => {
         e.preventDefault();
         if (!selectedMessage) return;
 

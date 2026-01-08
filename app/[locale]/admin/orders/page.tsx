@@ -28,15 +28,15 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
     if (search) {
         where.OR = [
             { orderNumber: { contains: search, mode: 'insensitive' } },
-            { user: { email: { contains: search, mode: 'insensitive' } } }
+            { User: { email: { contains: search, mode: 'insensitive' } } }
         ];
     }
 
     const orders = await db.order.findMany({
         where,
         include: {
-            user: true,
-            _count: { select: { items: true } }
+            User: true,
+            _count: { select: { orderItems: true } }
         },
         orderBy: { createdAt: 'desc' },
         take: 50 // Limit for now
@@ -117,10 +117,10 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-2">
-                                                {order.user.profileImage ? (
+                                                {order.User?.profileImage ? (
                                                     <div className="relative w-6 h-6 rounded-full overflow-hidden">
                                                         <Image
-                                                            src={order.user.profileImage}
+                                                            src={order.User.profileImage}
                                                             alt=""
                                                             fill
                                                             className="object-cover"
@@ -128,12 +128,12 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
                                                     </div>
                                                 ) : (
                                                     <div className="w-6 h-6 rounded-full bg-snow-accent/20 flex items-center justify-center text-snow-accent text-[8px]">
-                                                        {order.user.firstName?.[0] || order.user.email[0].toUpperCase()}
+                                                        {order.User?.firstName?.[0] || order.User?.email[0].toUpperCase() || '?'}
                                                     </div>
                                                 )}
                                                 <div className="flex flex-col">
-                                                    <span className="text-white text-xs">{order.user.firstName} {order.user.lastName}</span>
-                                                    <span className="text-[10px] text-gray-500">{order.user.email}</span>
+                                                    <span className="text-white text-xs">{order.User?.firstName} {order.User?.lastName}</span>
+                                                    <span className="text-[10px] text-gray-500">{order.User?.email}</span>
                                                 </div>
                                             </div>
                                         </td>
@@ -149,7 +149,7 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
                                             </span>
                                         </td>
                                         <td className="px-6 py-4">
-                                            {order._count.items}
+                                            {order._count.orderItems}
                                         </td>
                                         <td className="px-6 py-4 font-mono text-white">
                                             {formatPrice(Number(order.total))}

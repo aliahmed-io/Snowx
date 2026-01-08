@@ -42,8 +42,8 @@ export async function POST(req: Request) {
                     await db.order.update({
                         where: { id: session.metadata.orderId },
                         data: {
-                            status: "PROCESSING",
-                            stripePaymentId: session.payment_intent as string,
+                            status: "PROCESSING"
+                            // Note: stripePaymentId would need to be added to Order schema to store
                         },
                     });
                 }

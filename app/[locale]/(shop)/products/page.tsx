@@ -1,8 +1,8 @@
 import { Suspense } from "react";
 import { getProducts } from "@/actions/products";
 import { getCategories } from "@/actions/categories";
-import { ProductGrid } from "@/components/shop/ProductGrid";
-import { ProductFilters } from "@/components/shop/ProductFilters";
+import { InfiniteProductGrid } from "@/components/shop/InfiniteProductGrid";
+import { ProductSidebarFilters } from "@/components/shop/ProductSidebarFilters";
 import { getTranslations } from "next-intl/server";
 import { Search } from "lucide-react";
 
@@ -16,65 +16,72 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 }
 
 interface ProductsPageProps {
-    searchParams: Promise<{ category?: string; sort?: string; search?: string }>;
+    searchParams: Promise<{ category?: string; sort?: string; search?: string; minPrice?: string; maxPrice?: string }>;
 }
 
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
     const params = await searchParams;
     const t = await getTranslations('Shop');
 
-    const [products, categories] = await Promise.all([
+    const [productData, categories] = await Promise.all([
         getProducts({
             categorySlug: params.category,
             sortBy: params.sort as "price-asc" | "price-desc" | "newest" | "name",
             search: params.search,
+            minPrice: params.minPrice ? Number(params.minPrice) : undefined,
+            maxPrice: params.maxPrice ? Number(params.maxPrice) : undefined,
         }),
         getCategories(),
     ]);
 
     return (
         <div className="pt-24 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-            {/* Header */}
-            <div className="mb-8">
-                <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-                    {t('title')}
-                </h1>
-                <p className="text-gray-400 text-lg max-w-2xl">
-                    {t('subtitle')}
-                </p>
-            </div>
+            <div className="flex flex-col lg:flex-row items-start gap-8">
+                {/* Sidebar Filters */}
+                <ProductSidebarFilters categories={categories} />
 
-            {/* Search and Filters Layout */}
-            <div className="flex flex-col md:flex-row gap-6 items-center justify-between mb-8">
-                {/* Search bar */}
-                <form className="w-full md:max-w-md">
-                    <div className="flex items-center w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-2.5 focus-within:bg-white/10 focus-within:border-white/20 transition-all duration-300">
-                        <Search className="w-5 h-5 text-white/40 mr-3" />
-                        <input
-                            type="text"
-                            name="search"
-                            placeholder={t('searchPlaceholder')}
-                            defaultValue={params.search}
-                            className="flex-1 bg-transparent border-none outline-none text-white placeholder:text-white/40 text-sm h-full w-full"
-                        />
+                {/* Main Content */}
+                <div className="flex-1">
+                    {/* Top Bar: Sort & Count */}
+                    <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div className="flex items-center gap-3">
+                            <span className="text-sm text-gray-400">Sort By:</span>
+                            <div className="relative">
+                                <select
+                                    className="bg-black/20 text-white text-sm border border-white/10 rounded-lg px-3 py-1.5 focus:outline-none focus:border-snow-accent appearance-none pr-8 cursor-pointer"
+                                    defaultValue={params.sort || "newest"}
+                                // In a real client component we'd use router.push, here we just show the UI for now or minimal interactions
+                                >
+                                    <option value="newest">Newest</option>
+                                    <option value="price-asc">Price: Low to High</option>
+                                    <option value="price-desc">Price: High to Low</option>
+                                    <option value="name">Name</option>
+                                </select>
+                                {/* Custom arrow pointer-events-none */}
+                                <div className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                                    <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="text-sm text-gray-400">
+                            <span className="font-semibold text-white">{productData.total}</span> products
+                        </div>
                     </div>
-                </form>
 
-                {/* Filters */}
-                <Suspense fallback={<div className="h-12" />}>
-                    <ProductFilters
-                        categories={categories}
-                        currentCategory={params.category}
-                        currentSort={params.sort}
+                    <InfiniteProductGrid
+                        initialProducts={productData.products}
+                        initialTotal={productData.total}
+                        categorySlug={params.category}
+                        search={params.search}
+                        sortBy={params.sort}
+                        minPrice={params.minPrice ? Number(params.minPrice) : undefined}
+                        maxPrice={params.maxPrice ? Number(params.maxPrice) : undefined}
                     />
-                </Suspense>
+                </div>
             </div>
-
-            {/* Products Grid */}
-            <ProductGrid
-                products={products}
-                emptyMessage={t('noResults')}
-            />
         </div>
     );
 }

@@ -120,7 +120,7 @@ export default async function ProductsPage() {
                                                 <span className={product._count.accounts > 0 ? "text-green-400" : "text-red-400"}>
                                                     {product._count.accounts}
                                                 </span>
-                                                <span className="text-gray-600">/ {product.inventory} Total</span>
+                                                <span className="text-gray-600">/ {product.stockQuantity} Total</span>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">

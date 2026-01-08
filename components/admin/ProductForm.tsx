@@ -25,7 +25,7 @@ interface ProductFormProps {
         images: string[];
         isActive: boolean;
         isFeatured: boolean;
-        inventory: number;
+        stockQuantity: number;
     };
     action: (formData: FormData) => Promise<void>;
 }
@@ -156,11 +156,11 @@ export function ProductForm({ categories, initialData, action }: ProductFormProp
                         </div>
 
                         <div className="grid gap-2">
-                            <label className="text-sm font-medium text-gray-400">Inventory</label>
+                            <label className="text-sm font-medium text-gray-400">Stock Quantity</label>
                             <input
                                 type="number"
-                                name="inventory"
-                                defaultValue={initialData?.inventory ?? 0}
+                                name="stockQuantity"
+                                defaultValue={initialData?.stockQuantity ?? 0}
                                 required
                                 className="bg-snow-primary/10 border border-snow-primary/20 rounded-lg p-2.5 text-white focus:border-snow-accent/50 focus:outline-none"
                             />
