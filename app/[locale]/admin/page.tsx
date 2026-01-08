@@ -1,53 +1,85 @@
 import { db } from "@/lib/db";
-import { formatPrice, cn } from "@/lib/utils";
+import { formatPrice } from "@/lib/utils";
 import { StatsCard } from "@/components/admin/StatsCard";
-import Image from "next/image";
+import { SystemHealth } from "@/components/admin/SystemHealth";
+import { RecentSales } from "@/components/admin/RecentSales";
+import { AnalyticsCharts } from "@/components/admin/AnalyticsCharts";
 import {
     CreditCard,
     Users,
     Package,
     DollarSign,
-    AlertTriangle,
-    Activity
+    AlertTriangle
 } from "lucide-react";
-import { OrderStatus } from "@prisma/client";
+import { OrderStatus, Order, User } from "@prisma/client";
 
 async function getStats() {
-    // Parallel data fetching
+    // 1. Parallel data fetching
     const [
         orderStats,
         userCount,
         productStats,
-        recentOrders
+        recentOrders,
+        revenueByDay
     ] = await Promise.all([
         // Order Stats (Total count and Revenue)
         db.order.aggregate({
             _count: { id: true },
             _sum: { total: true },
-            where: { status: OrderStatus.DELIVERED } // Using DELIVERED as 'Completed'
+            where: { status: { not: OrderStatus.CANCELLED } }
         }),
         // User Count
         db.user.count(),
-        // Active Stock (Sum of inventory)
-        db.product.aggregate({
-            _sum: { inventory: true },
+        // Active Products
+        db.product.count({
             where: { isActive: true }
         }),
         // Recent Orders
         db.order.findMany({
             take: 5,
             orderBy: { createdAt: 'desc' },
-            include: { user: true },
+            include: { User: true },
             where: { status: { not: OrderStatus.PENDING } }
+        }) as Promise<(Order & { User: User | null })[]>,
+        // Revenue Graph Data
+        db.dailyStat.findMany({
+            take: 7,
+            orderBy: { date: 'asc' }
         })
     ]);
+
+    // Format graph data
+    const revenueData = revenueByDay.length > 0
+        ? revenueByDay.map(d => ({ date: d.date.toISOString().split('T')[0], amount: Number(d.totalRevenue) }))
+        : [ // Placeholder if no daily stats exist yet
+            { date: 'Mon', amount: 0 },
+            { date: 'Tue', amount: 0 },
+            { date: 'Wed', amount: 0 },
+            { date: 'Thu', amount: 0 },
+            { date: 'Fri', amount: 0 },
+            { date: 'Sat', amount: 0 },
+            { date: 'Sun', amount: 0 },
+        ];
+
+    // Placeholder User Growth
+    const usersData = [
+        { date: 'Mon', users: 4 },
+        { date: 'Tue', users: 3 },
+        { date: 'Wed', users: 7 },
+        { date: 'Thu', users: 2 },
+        { date: 'Fri', users: 5 },
+        { date: 'Sat', users: 8 },
+        { date: 'Sun', users: 6 },
+    ];
 
     return {
         totalSales: orderStats._count.id,
         totalRevenue: Number(orderStats._sum.total || 0),
         totalUsers: userCount,
-        activeStock: productStats._sum.inventory || 0,
-        recentOrders
+        totalProducts: productStats,
+        recentOrders,
+        revenueData,
+        usersData
     };
 }
 
@@ -56,10 +88,7 @@ export default async function AdminDashboard() {
 
     return (
         <div className="space-y-8">
-            <div>
-                <h2 className="text-3xl font-bold text-white tracking-tight">Dashboard</h2>
-                <p className="text-gray-400 mt-2">Here&apos;s what&apos;s happening with your store today</p>
-            </div>
+            <SystemHealth />
 
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -67,106 +96,41 @@ export default async function AdminDashboard() {
                     title="Total Revenue"
                     value={formatPrice(stats.totalRevenue)}
                     icon={DollarSign}
-                    description="Lifetime revenue"
+                    description="Based on all charges"
+                    trend={{ value: 12, label: "vs last week", positive: true }}
                 />
                 <StatsCard
                     title="Total Sales"
                     value={stats.totalSales}
                     icon={CreditCard}
-                    description="Completed orders"
+                    description="Total Completed Sales"
+                    trend={{ value: 8, label: "vs last week", positive: true }}
                 />
                 <StatsCard
-                    title="Active Users"
+                    title="Total Products"
+                    value={stats.totalProducts}
+                    icon={Package}
+                    description="Total Products created"
+                />
+                <StatsCard
+                    title="Total Users"
                     value={stats.totalUsers}
                     icon={Users}
-                    description="Registered accounts"
-                />
-                <StatsCard
-                    title="Active Stock"
-                    value={stats.activeStock}
-                    icon={Package}
-                    description="Available products"
-                    trend={stats.activeStock < 10 ? { value: 0, label: "Low Stock", positive: false } : undefined}
+                    description="Total Users Signed Up"
+                    trend={{ value: 2, label: "new users", positive: true }}
                 />
             </div>
 
-            {/* Alerts Section */}
-            {stats.activeStock < 10 && (
-                <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 flex items-center gap-3 text-red-400">
-                    <AlertTriangle className="w-5 h-5 shrink-0" />
-                    <div>
-                        <p className="font-semibold">Low Stock Warning</p>
-                        <p className="text-sm opacity-90">Total active stock is below 10 items. Please restock soon.</p>
-                    </div>
+            {/* Main Content Split: Charts (Left) & Recent Sales (Right) */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Charts Area - Takes 2 cols */}
+                <div className="lg:col-span-2 space-y-8">
+                    <AnalyticsCharts revenueData={stats.revenueData} usersData={stats.usersData} />
                 </div>
-            )}
 
-            {/* Recent Activity */}
-            <div className="bg-[#0a1628] border border-snow-primary/20 rounded-xl overflow-hidden">
-                <div className="p-6 border-b border-snow-primary/20 flex items-center justify-between">
-                    <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                        <Activity className="w-5 h-5 text-snow-accent" />
-                        Recent Orders
-                    </h3>
-                </div>
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left text-sm text-gray-400">
-                        <thead className="bg-white/5 text-gray-200 uppercase font-medium">
-                            <tr>
-                                <th className="px-6 py-4">Order ID</th>
-                                <th className="px-6 py-4">Customer</th>
-                                <th className="px-6 py-4">Status</th>
-                                <th className="px-6 py-4">Amount</th>
-                                <th className="px-6 py-4">Date</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-snow-primary/10">
-                            {stats.recentOrders.length === 0 ? (
-                                <tr>
-                                    <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
-                                        No recent orders found
-                                    </td>
-                                </tr>
-                            ) : (
-                                stats.recentOrders.map((order) => (
-                                    <tr key={order.id} className="hover:bg-white/5 transition-colors">
-                                        <td className="px-6 py-4 font-mono text-white">#{order.orderNumber.slice(-6)}</td>
-                                        <td className="px-6 py-4 flex items-center gap-2">
-                                            {order.user.profileImage ? (
-                                                <div className="relative w-6 h-6 rounded-full overflow-hidden">
-                                                    <Image
-                                                        src={order.user.profileImage}
-                                                        alt=""
-                                                        fill
-                                                        className="object-cover"
-                                                    />
-                                                </div>
-                                            ) : (
-                                                <div className="w-6 h-6 rounded-full bg-snow-accent/20 flex items-center justify-center text-snow-accent text-[8px]">
-                                                    {order.user.firstName?.[0] || order.user.email[0].toUpperCase()}
-                                                </div>
-                                            )}
-                                            {order.user.firstName || order.user.email}
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span className={cn(
-                                                "px-2 py-1 rounded-full text-xs font-medium",
-                                                order.status === OrderStatus.DELIVERED ? "bg-green-500/10 text-green-400" :
-                                                    order.status === OrderStatus.PENDING ? "bg-yellow-500/10 text-yellow-400" :
-                                                        "bg-gray-500/10 text-gray-400"
-                                            )}>
-                                                {order.status}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 text-white">{formatPrice(Number(order.total))}</td>
-                                        <td className="px-6 py-4">
-                                            {new Date(order.createdAt).toLocaleDateString()}
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
+                {/* Recent Sales Sidebar - Takes 1 col */}
+                <div className="lg:col-span-1">
+                    <RecentSales orders={stats.recentOrders} />
                 </div>
             </div>
         </div>

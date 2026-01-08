@@ -3,6 +3,8 @@
 import React from 'react'
 import { KindeProvider } from '@kinde-oss/kinde-auth-nextjs'
 
+import { Toaster } from 'sonner'
+
 export default function ClientProviders({
     children,
 }: {
@@ -11,6 +13,7 @@ export default function ClientProviders({
     return (
         <KindeProvider>
             {children}
+            <Toaster position="top-center" richColors />
         </KindeProvider>
     )
 }

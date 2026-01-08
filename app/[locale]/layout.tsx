@@ -55,7 +55,13 @@ export default async function RootLayout({
   let setting: ClientSetting | null = null;
 
   try {
-    setting = await db.setting.findFirst() as unknown as ClientSetting;
+    const systemSetting = await db.systemSetting.findUnique({
+      where: { key: 'client-settings' }
+    });
+
+    if (systemSetting && systemSetting.value) {
+      setting = JSON.parse(systemSetting.value) as ClientSetting;
+    }
   } catch (error) {
     console.error("Failed to fetch settings:", error);
     // setting remains null, triggering fallback below
