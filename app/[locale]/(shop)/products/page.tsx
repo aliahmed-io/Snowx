@@ -1,10 +1,8 @@
-import { Suspense } from "react";
 import { getProducts } from "@/actions/products";
 import { getCategories } from "@/actions/categories";
 import { InfiniteProductGrid } from "@/components/shop/InfiniteProductGrid";
 import { ProductSidebarFilters } from "@/components/shop/ProductSidebarFilters";
 import { getTranslations } from "next-intl/server";
-import { Search } from "lucide-react";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
     const { locale } = await params;
@@ -21,7 +19,6 @@ interface ProductsPageProps {
 
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
     const params = await searchParams;
-    const t = await getTranslations('Shop');
 
     const [productData, categories] = await Promise.all([
         getProducts({

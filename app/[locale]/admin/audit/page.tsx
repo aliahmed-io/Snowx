@@ -28,7 +28,6 @@ import { Badge } from "@/components/ui/badge";
 import {
     DropdownMenu,
     DropdownMenuContent,
-    DropdownMenuItem,
     DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
@@ -66,7 +65,7 @@ export default function AuditLogsPage() {
             targetType: "PRODUCT",
             targetId: "prod_snow_board_v2",
             metadata: "Updated stock from 45 to 50",
-            timestamp: new Date(Date.now() - 1000 * 60 * 5).toISOString(),
+            timestamp: "2026-01-08T08:55:00.000Z",
             severity: "info"
         },
         {
@@ -77,7 +76,7 @@ export default function AuditLogsPage() {
             targetType: "ORDER",
             targetId: "ord_998877",
             metadata: "Processed refund for $129.99 (Reason: Defective)",
-            timestamp: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
+            timestamp: "2026-01-08T08:15:00.000Z",
             severity: "warning"
         },
         {
@@ -87,7 +86,7 @@ export default function AuditLogsPage() {
             userEmail: "unknown@ip-192.168.1.1",
             targetType: "AUTH",
             metadata: "Failed login attempt from IP 192.168.1.1",
-            timestamp: new Date(Date.now() - 1000 * 60 * 120).toISOString(),
+            timestamp: "2026-01-08T07:00:00.000Z",
             severity: "critical"
         },
         {
@@ -97,7 +96,7 @@ export default function AuditLogsPage() {
             userEmail: "superadmin@snowx.com",
             targetType: "SYSTEM",
             metadata: "Changed payment gateway settings",
-            timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
+            timestamp: "2026-01-07T09:00:00.000Z",
             severity: "warning"
         },
         {
@@ -108,7 +107,7 @@ export default function AuditLogsPage() {
             targetType: "USER",
             targetId: "usr_555",
             metadata: "Promoted user to Moderator",
-            timestamp: new Date(Date.now() - 1000 * 60 * 60 * 25).toISOString(),
+            timestamp: "2026-01-07T08:00:00.000Z",
             severity: "info"
         }
     ]);

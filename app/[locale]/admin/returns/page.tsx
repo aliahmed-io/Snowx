@@ -7,7 +7,6 @@ import {
     Eye,
     CheckCircle,
     XCircle,
-    MoreHorizontal,
     Undo2,
     AlertCircle
 } from "lucide-react";
@@ -22,14 +21,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+
 import { Badge } from "@/components/ui/badge";
 import {
     Dialog,
@@ -53,7 +45,7 @@ interface ReturnRequest {
 
 export default function ReturnsPage() {
     // Placeholder data
-    const [returns, setReturns] = useState<ReturnRequest[]>([
+    const [returns] = useState<ReturnRequest[]>([
         {
             id: "ret_1",
             orderNumber: "ORD-001-234",

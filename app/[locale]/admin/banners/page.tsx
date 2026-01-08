@@ -58,7 +58,7 @@ export default function BannersPage() {
         try {
             const data = await getBanners();
             setBanners(data);
-        } catch (error) {
+        } catch {
             toast.error("Failed to load banners");
         } finally {
             setIsLoading(false);
@@ -111,7 +111,7 @@ export default function BannersPage() {
 
         try {
             await toggleBannerStatus(id, !currentStatus);
-        } catch (error) {
+        } catch {
             // Revert on error
             setBanners(banners.map(b => b.id === id ? { ...b, isActive: currentStatus } : b));
             toast.error("Failed to update status");
@@ -265,7 +265,7 @@ export default function BannersPage() {
                                     <div className="text-center">
                                         <UploadButton
                                             endpoint="imageUploader"
-                                            onClientUploadComplete={(res: any) => {
+                                            onClientUploadComplete={(res: { url: string }[]) => {
                                                 if (res && res[0]) {
                                                     setImage(res[0].url);
                                                     toast.success("Image uploaded!");

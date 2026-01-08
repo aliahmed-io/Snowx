@@ -1,5 +1,4 @@
-export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
-    const { locale } = await params;
+export async function generateMetadata() {
     return {
         title: `About Us | SnowX`,
         description: "Learn more about SnowX and our mission.",

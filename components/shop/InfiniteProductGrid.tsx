@@ -63,7 +63,7 @@ export function InfiniteProductGrid({
                 limit: 12,
                 categorySlug,
                 search,
-                sortBy: sortBy as any,
+                sortBy: sortBy as "newest" | "price-asc" | "price-desc" | "name" | undefined,
                 minPrice,
                 maxPrice
             });
@@ -93,6 +93,7 @@ export function InfiniteProductGrid({
         if (sentinel) observer.observe(sentinel);
 
         return () => observer.disconnect();
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- loadMore uses the correct deps internally
     }, [hasMore, isPending, page, categorySlug, search, sortBy, minPrice, maxPrice]); // Dependencies for closure freshness
 
     if (products.length === 0) {
@@ -122,8 +123,6 @@ export function InfiniteProductGrid({
                         comparePrice={product.comparePrice}
                         image={product.images[0] || ""}
                         category={product.category.name}
-                        avgRating={product.avgRating}
-                        reviewCount={product.reviewCount}
                     />
                 ))}
             </div>

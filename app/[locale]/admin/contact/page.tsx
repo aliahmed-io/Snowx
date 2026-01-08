@@ -16,22 +16,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table";
-import {
     Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-    CardFooter
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 
@@ -54,7 +40,7 @@ export default function ContactPage() {
             subject: "Question about shipping",
             message: "Hi, I ordered a board 3 days ago and the tracking hasn't updated. Can you check? Order #12345.",
             status: "PENDING",
-            receivedAt: new Date(Date.now() - 1000 * 60 * 30).toISOString()
+            receivedAt: "2026-01-08T08:30:00.000Z"
         },
         {
             id: "msg_2",
@@ -63,7 +49,7 @@ export default function ContactPage() {
             subject: "Partnership Inquiry",
             message: "We are a local ski resort looking to partner with SnowX for rental equipment. Who should I talk to?",
             status: "replied",
-            receivedAt: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString()
+            receivedAt: "2026-01-08T04:00:00.000Z"
         },
         {
             id: "msg_3",
@@ -72,7 +58,7 @@ export default function ContactPage() {
             subject: "SEO Services",
             message: "Rank #1 on Google in 24 hours!!! Click here...",
             status: "ignored",
-            receivedAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString()
+            receivedAt: "2026-01-07T09:00:00.000Z"
         }
     ]);
 

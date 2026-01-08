@@ -44,9 +44,10 @@ export async function getProducts(options?: {
 
     // Price Filtering
     if (minPrice !== undefined || maxPrice !== undefined) {
-        where.price = {};
-        if (minPrice !== undefined) (where.price as any).gte = minPrice;
-        if (maxPrice !== undefined) (where.price as any).lte = maxPrice;
+        where.price = {
+            ...(minPrice !== undefined && { gte: minPrice }),
+            ...(maxPrice !== undefined && { lte: maxPrice }),
+        };
     }
 
     let orderBy: Record<string, string> = { createdAt: "desc" };

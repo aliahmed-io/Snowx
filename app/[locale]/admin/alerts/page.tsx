@@ -41,7 +41,7 @@ export default function SecurityAlertsPage() {
             type: "Suspicious Login",
             level: "high",
             message: "Multiple failed login attempts detected from IP 45.23.12.98 (Russia)",
-            timestamp: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
+            timestamp: "2026-01-08T08:45:00.000Z",
             isRead: false,
             source: "Auth System"
         },
@@ -50,7 +50,7 @@ export default function SecurityAlertsPage() {
             type: "API Rate Limit",
             level: "medium",
             message: "Client application 8f92-xxxx exceeded rate limit (1000 req/min)",
-            timestamp: new Date(Date.now() - 1000 * 60 * 120).toISOString(),
+            timestamp: "2026-01-08T07:00:00.000Z",
             isRead: false,
             source: "API Gateway"
         },
@@ -59,7 +59,7 @@ export default function SecurityAlertsPage() {
             type: "Database Backup",
             level: "low",
             message: "Daily backup completed successfully. Size: 1.2GB",
-            timestamp: new Date(Date.now() - 1000 * 60 * 60 * 12).toISOString(),
+            timestamp: "2026-01-07T21:00:00.000Z",
             isRead: true,
             source: "System Task"
         },
@@ -68,7 +68,7 @@ export default function SecurityAlertsPage() {
             type: "Privilege Escalation",
             level: "critical",
             message: "User usr_777 attempted to access /admin/settings without permission",
-            timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
+            timestamp: "2026-01-08T07:00:00.000Z",
             isRead: false,
             source: "Access Control"
         }

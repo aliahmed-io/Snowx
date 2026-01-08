@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getStripe } from "@/lib/stripe";
+import { createPayPalOrder } from "@/lib/paypal";
 
 export async function POST(request: NextRequest) {
     try {
@@ -13,66 +13,24 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const lineItems = items.map((item: {
-            id: string;
-            name: string;
-            price: number;
-            quantity: number;
-            image?: string;
-        }) => ({
-            price_data: {
-                currency: "usd",
-                product_data: {
-                    name: item.name,
-                    images: item.image ? [item.image] : [],
-                    metadata: {
-                        productId: item.id,
-                    },
-                },
-                unit_amount: Math.round(item.price * 100), // Convert to cents
-            },
-            quantity: item.quantity,
-        }));
+        const origin = request.nextUrl.origin;
 
-        // Calculate subtotal for shipping
-        const subtotal = items.reduce(
-            (acc: number, item: { price: number; quantity: number }) =>
-                acc + item.price * item.quantity,
-            0
-        );
-
-        // Add tax (10%)
-        lineItems.push({
-            price_data: {
-                currency: "usd",
-                product_data: {
-                    name: "Tax (10%)",
-                },
-                unit_amount: Math.round(subtotal * 0.1 * 100),
-            },
-            quantity: 1,
-        });
-
-        // Add shipping if applicable
-        if (subtotal < 50) {
-            lineItems.push({
-                price_data: {
-                    currency: "usd",
-                    product_data: {
-                        name: "Shipping",
-                    },
-                    unit_amount: 599, // $5.99
-                },
-                quantity: 1,
-            });
-        }
-
-        const session = await getStripe().checkout.sessions.create({
-            payment_method_types: ["card"],
-            line_items: lineItems,
-            mode: "payment",
-            success_url: `${request.nextUrl.origin}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `${request.nextUrl.origin}/cart`,
+        const order = await createPayPalOrder({
+            items: items.map((item: {
+                id: string;
+                name: string;
+                price: number;
+                quantity: number;
+                image?: string;
+            }) => ({
+                id: item.id,
+                name: item.name,
+                price: item.price,
+                quantity: item.quantity,
+                image: item.image,
+            })),
+            successUrl: `${origin}/checkout/success`,
+            cancelUrl: `${origin}/cart`,
             metadata: {
                 items: JSON.stringify(items.map((item: { id: string; quantity: number; price: number }) => ({
                     productId: item.id,
@@ -82,7 +40,14 @@ export async function POST(request: NextRequest) {
             },
         });
 
-        return NextResponse.json({ sessionId: session.id, url: session.url });
+        if (!order.approvalUrl) {
+            throw new Error("Failed to get PayPal approval URL");
+        }
+
+        return NextResponse.json({
+            orderId: order.orderId,
+            url: order.approvalUrl
+        });
     } catch (error) {
         console.error("Checkout error:", error);
         return NextResponse.json(

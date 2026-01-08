@@ -3,10 +3,10 @@
 import { Link } from "@/navigation";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { ShoppingCart, Star } from "lucide-react";
+
 import { useCart } from "@/components/providers/CartProvider";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
+
 
 interface ProductCardProps {
     id: string;
@@ -16,8 +16,6 @@ interface ProductCardProps {
     comparePrice?: number | null;
     image: string;
     category: string;
-    avgRating: number;
-    reviewCount: number;
 }
 
 export function ProductCard({
@@ -28,8 +26,6 @@ export function ProductCard({
     comparePrice,
     image,
     category,
-    avgRating,
-    reviewCount,
 }: ProductCardProps) {
     const t = useTranslations('Shop');
     const { addItem } = useCart();

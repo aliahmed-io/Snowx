@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Link } from "@/navigation";
-import { useTranslations } from "next-intl";
 
 interface Category {
     id: string;
@@ -21,7 +20,7 @@ interface ProductSidebarFiltersProps {
 export function ProductSidebarFilters({ categories }: ProductSidebarFiltersProps) {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const t = useTranslations('Shop');
+
 
     const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
     // Track if the change is internal (user sliding) to avoid circular updates
@@ -44,6 +43,7 @@ export function ProductSidebarFilters({ categories }: ProductSidebarFiltersProps
         if (newMin !== priceRange[0] || newMax !== priceRange[1]) {
             setPriceRange([newMin, newMax]);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- Intentional: sync URL to state
     }, [searchParams]); // Removing priceRange from deps effectively
 
     const handlePriceChange = (value: [number, number]) => {

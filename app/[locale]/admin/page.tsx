@@ -5,11 +5,10 @@ import { SystemHealth } from "@/components/admin/SystemHealth";
 import { RecentSales } from "@/components/admin/RecentSales";
 import { AnalyticsCharts } from "@/components/admin/AnalyticsCharts";
 import {
-    CreditCard,
     Users,
-    Package,
     DollarSign,
-    AlertTriangle
+    Package,
+    CreditCard
 } from "lucide-react";
 import { OrderStatus, Order, User } from "@prisma/client";
 

@@ -44,6 +44,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const isHydratedRef = useRef(false);
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional: hydration from localStorage
         setItems(getInitialCart());
     }, []);
 

@@ -50,15 +50,6 @@ export default function SystemHealthPage() {
         }
     };
 
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case "operational": return "text-green-500";
-            case "degraded": return "text-yellow-500";
-            case "down": return "text-red-500";
-            default: return "text-slate-500";
-        }
-    };
-
     const handleRefresh = () => {
         setIsLoading(true);
         setTimeout(() => {

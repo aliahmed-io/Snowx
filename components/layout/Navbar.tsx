@@ -16,7 +16,13 @@ const languages = [
 ] as const;
 
 interface NavbarProps {
-    user: any; // Kinde user type
+    user: {
+        id: string;
+        email?: string | null;
+        given_name?: string | null;
+        family_name?: string | null;
+        picture?: string | null;
+    } | null;
 }
 
 export function Navbar({ user }: NavbarProps) {

@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, useActionState } from "react";
+import { useActionState } from "react";
 import { submitContactForm } from "@/actions/contact";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea"; // Assuming Textarea exists or I need to create/use generic textarea
 import { Label } from "@/components/ui/label";
 import { Loader2, Send } from "lucide-react";
 import { toast } from "sonner";
@@ -36,7 +35,7 @@ export default function ContactPage() {
                 <div className="text-center mb-10">
                     <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">Contact Us</h1>
                     <p className="text-gray-400 text-lg">
-                        Have a question or need assistance? We're here to help.
+                        Have a question or need assistance? We&apos;re here to help.
                     </p>
                 </div>
 

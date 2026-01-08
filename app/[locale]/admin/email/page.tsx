@@ -38,7 +38,6 @@ import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
-    DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -60,18 +59,17 @@ interface Campaign {
 }
 
 export default function EmailPage() {
-    const [activeTab, setActiveTab] = useState("campaigns");
 
     // Placeholder data
     const [subscribers] = useState<Subscriber[]>([
-        { id: "sub_1", email: "alex@example.com", status: "subscribed", joinedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5).toISOString() },
-        { id: "sub_2", email: "sarah@design.co", status: "subscribed", joinedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 12).toISOString() },
-        { id: "sub_3", email: "mike@tech.io", status: "unsubscribed", joinedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 45).toISOString() },
-        { id: "sub_4", email: "emma@snowx.com", status: "subscribed", joinedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2).toISOString() },
+        { id: "sub_1", email: "alex@example.com", status: "subscribed", joinedAt: "2026-01-03T09:00:00.000Z" },
+        { id: "sub_2", email: "sarah@design.co", status: "subscribed", joinedAt: "2025-12-27T09:00:00.000Z" },
+        { id: "sub_3", email: "mike@tech.io", status: "unsubscribed", joinedAt: "2025-11-24T09:00:00.000Z" },
+        { id: "sub_4", email: "emma@snowx.com", status: "subscribed", joinedAt: "2026-01-06T09:00:00.000Z" },
     ]);
 
-    const [campaigns, setCampaigns] = useState<Campaign[]>([
-        { id: "cam_1", subject: "Winter Collection Early Access", sentAt: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(), status: "sent", recipients: 2450, openRate: "42%" },
+    const [campaigns] = useState<Campaign[]>([
+        { id: "cam_1", subject: "Winter Collection Early Access", sentAt: "2026-01-06T09:00:00.000Z", status: "sent", recipients: 2450, openRate: "42%" },
         { id: "cam_2", subject: "New Features Update", sentAt: null, status: "draft", recipients: 0 },
     ]);
 
@@ -96,7 +94,7 @@ export default function EmailPage() {
                 </div>
             </div>
 
-            <Tabs defaultValue="campaigns" className="space-y-4" onValueChange={setActiveTab}>
+            <Tabs defaultValue="campaigns" className="space-y-4">
                 <TabsList className="bg-[#0f172a] border border-[#1e293b]">
                     <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
                     <TabsTrigger value="subscribers">Subscribers</TabsTrigger>

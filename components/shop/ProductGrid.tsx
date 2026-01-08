@@ -41,8 +41,6 @@ export function ProductGrid({ products, emptyMessage = "No products found" }: Pr
                     comparePrice={product.comparePrice}
                     image={product.images[0] || ""}
                     category={product.category.name}
-                    avgRating={product.avgRating}
-                    reviewCount={product.reviewCount}
                 />
             ))}
         </div>
