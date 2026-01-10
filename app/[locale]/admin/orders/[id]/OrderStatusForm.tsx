@@ -13,7 +13,13 @@ export function OrderStatusForm({ orderId, initialStatus }: OrderStatusFormProps
     const [status, setStatus] = useState<OrderStatus>(initialStatus);
     const [isLoading, setIsLoading] = useState(false);
 
-    const statuses = Object.values(OrderStatus);
+    const statusOptions = [
+        { value: OrderStatus.PENDING, label: "Pending Payment" },
+        { value: OrderStatus.PROCESSING, label: "Processing" },
+        { value: OrderStatus.DELIVERED, label: "Completed (Email Sent)" },
+        { value: OrderStatus.CANCELLED, label: "Cancelled" },
+        { value: OrderStatus.REFUNDED, label: "Refunded" },
+    ];
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -35,10 +41,11 @@ export function OrderStatusForm({ orderId, initialStatus }: OrderStatusFormProps
                     value={status}
                     onChange={(e) => setStatus(e.target.value as OrderStatus)}
                     disabled={isLoading}
-                    className="w-full bg-snow-primary/10 border border-snow-primary/20 rounded-lg p-2.5 text-white focus:border-snow-accent/50 focus:outline-none disabled:opacity-50"
                 >
-                    {statuses.map((s) => (
-                        <option key={s} value={s}>{s}</option>
+                    {statusOptions.map((option) => (
+                        <option key={option.value} value={option.value}>
+                            {option.label}
+                        </option>
                     ))}
                 </select>
                 <button

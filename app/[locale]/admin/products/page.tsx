@@ -4,15 +4,22 @@ import { Link } from "@/navigation";
 import Image from "next/image";
 import {
     Plus,
-    Search,
     Edit,
     Trash,
     Package,
     Key
 } from "lucide-react";
+import { AdminSearchInput } from "@/components/admin/AdminSearchInput";
 
-async function getProducts() {
+async function getProducts(search?: string) {
     const products = await db.product.findMany({
+        where: search ? {
+            OR: [
+                { name: { contains: search, mode: 'insensitive' } },
+                { description: { contains: search, mode: 'insensitive' } },
+                { slug: { contains: search, mode: 'insensitive' } }
+            ]
+        } : undefined,
         include: {
             category: true,
             _count: {
@@ -24,8 +31,15 @@ async function getProducts() {
     return products;
 }
 
-export default async function ProductsPage() {
-    const products = await getProducts();
+interface ProductsPageProps {
+    searchParams: Promise<{
+        search?: string;
+    }>;
+}
+
+export default async function ProductsPage({ searchParams }: ProductsPageProps) {
+    const { search } = await searchParams;
+    const products = await getProducts(search);
 
     return (
         <div className="space-y-8">
@@ -45,14 +59,11 @@ export default async function ProductsPage() {
 
             {/* Filters & Search */}
             <div className="flex items-center gap-4 bg-[#0a1628] border border-snow-primary/20 p-4 rounded-xl">
-                <div className="relative flex-1 max-w-md">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-                    <input
-                        type="text"
-                        placeholder="Search products..."
-                        className="w-full bg-snow-primary/10 border border-snow-primary/20 rounded-lg pl-10 pr-4 py-2 text-sm text-gray-300 focus:outline-none focus:border-snow-accent/50 transition-colors"
-                    />
-                </div>
+                <AdminSearchInput
+                    placeholder="Search products..."
+                    paramName="search"
+                    className="flex-1 max-w-md"
+                />
             </div>
 
             {/* Products Table */}

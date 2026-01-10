@@ -2,7 +2,18 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { createProduct, updateProduct } from "@/actions/products";
+import { createFilterOption } from "@/actions/filters";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Separator } from "@/components/ui/separator";
+import { ArrowLeft, Plus, Loader2, Trash2, Percent } from "lucide-react";
+import { UploadDropzone } from "@/utils/uploadthing";
 
 interface Category {
     id: string;
@@ -12,38 +23,48 @@ interface Category {
 
 interface ProductFormProps {
     categories: Category[];
+    durations: string[];
+    platforms: string[];
     product?: {
         id: string;
         name: string;
         slug: string;
         description: string;
         price: number;
-        comparePrice?: number | null;
+        discountPercentage?: number;
         images: string[];
         categoryId: string;
         inventory: number;
         isActive: boolean;
-        isFeatured: boolean;
+        duration?: string | null;
+        platform?: string | null;
     };
 }
 
-export function ProductForm({ categories, product }: ProductFormProps) {
+export function ProductForm({ categories, durations, platforms, product }: ProductFormProps) {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [addingDuration, setAddingDuration] = useState(false);
+    const [addingPlatform, setAddingPlatform] = useState(false);
+    const [newDuration, setNewDuration] = useState("");
+    const [newPlatform, setNewPlatform] = useState("");
+    const [localDurations, setLocalDurations] = useState<string[]>(durations);
+    const [localPlatforms, setLocalPlatforms] = useState<string[]>(platforms);
 
     const [formData, setFormData] = useState({
         name: product?.name || "",
         slug: product?.slug || "",
         description: product?.description || "",
         price: product?.price?.toString() || "",
-        comparePrice: product?.comparePrice?.toString() || "",
-        images: product?.images?.join("\n") || "",
+        discountPercentage: product?.discountPercentage?.toString() || "0",
         categoryId: product?.categoryId || "",
         inventory: product?.inventory?.toString() || "0",
         isActive: product?.isActive ?? true,
-        isFeatured: product?.isFeatured || false,
+        duration: product?.duration || "",
+        platform: product?.platform || "",
     });
+    const [images, setImages] = useState<string[]>(product?.images || []);
 
     const generateSlug = (name: string) => {
         return name
@@ -63,12 +84,14 @@ export function ProductForm({ categories, product }: ProductFormProps) {
                 slug: formData.slug || generateSlug(formData.name),
                 description: formData.description,
                 price: parseFloat(formData.price),
-                comparePrice: formData.comparePrice ? parseFloat(formData.comparePrice) : undefined,
-                images: formData.images.split("\n").filter((url) => url.trim()),
+                discountPercentage: parseInt(formData.discountPercentage) || 0,
+                images: images,
                 categoryId: formData.categoryId,
                 inventory: parseInt(formData.inventory),
                 isActive: formData.isActive,
-                isFeatured: formData.isFeatured,
+                isFeatured: false,
+                duration: formData.duration || undefined,
+                platform: formData.platform || undefined,
             };
 
             if (product) {
@@ -87,179 +110,390 @@ export function ProductForm({ categories, product }: ProductFormProps) {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="max-w-2xl space-y-6">
+        <form onSubmit={handleSubmit} className="max-w-[1200px] mx-auto mb-8">
+            <div className="flex items-center gap-4 mb-6">
+                <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => router.back()}
+                    className="text-gray-400 hover:text-white hover:bg-white/10"
+                >
+                    <ArrowLeft className="w-5 h-5" />
+                </Button>
+                <div>
+                    <h1 className="text-2xl font-bold text-white">
+                        {product ? "Edit Product" : "Create New Product"}
+                    </h1>
+                    <p className="text-gray-400 text-sm">
+                        {product ? "Update your product details" : "Add a new product to your store"}
+                    </p>
+                </div>
+                <div className="ml-auto flex items-center gap-2">
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={() => router.back()}
+                        className="text-gray-400 hover:text-white hover:bg-white/10"
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        type="submit"
+                        disabled={loading}
+                        className="bg-snow-accent text-gray-900 hover:bg-cyan-400 font-bold"
+                    >
+                        {loading ? (
+                            <>
+                                <svg className="w-4 h-4 mr-2 animate-spin" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                </svg>
+                                Saving...
+                            </>
+                        ) : (
+                            product ? "Update Product" : "Create Product"
+                        )}
+                    </Button>
+                </div>
+            </div>
+
             {error && (
-                <div className="bg-red-500/20 border border-red-500/50 text-red-300 rounded-lg p-4">
+                <div className="bg-red-500/10 border border-red-500/20 text-red-400 rounded-lg p-4 mb-6">
                     {error}
                 </div>
             )}
 
-            <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                    <label className="block text-gray-400 text-sm mb-2">Product Name *</label>
-                    <input
-                        type="text"
-                        required
-                        value={formData.name}
-                        onChange={(e) => {
-                            setFormData({
-                                ...formData,
-                                name: e.target.value,
-                                slug: formData.slug || generateSlug(e.target.value),
-                            });
-                        }}
-                        className="w-full bg-white/10 border border-white/20 text-white rounded-lg px-4 py-3 focus:outline-none focus:border-snow-accent"
-                        placeholder="GPT Plus Subscription"
-                    />
+            <div className="grid lg:grid-cols-[1fr_300px] gap-6">
+                <div className="space-y-6">
+                    <Card className="glass-card border-white/10">
+                        <CardHeader>
+                            <CardTitle className="text-white">Product Details</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="grid gap-2">
+                                <Label htmlFor="name" className="text-gray-300">Product Name</Label>
+                                <Input
+                                    id="name"
+                                    required
+                                    value={formData.name}
+                                    onChange={(e) => {
+                                        setFormData({
+                                            ...formData,
+                                            name: e.target.value,
+                                            slug: formData.slug || generateSlug(e.target.value),
+                                        });
+                                    }}
+                                    className="bg-white/5 border-white/10 text-white focus:border-snow-accent"
+                                    placeholder="e.g. GPT Plus Subscription"
+                                />
+                            </div>
+
+                            <div className="grid gap-2">
+                                <Label htmlFor="slug" className="text-gray-300">Slug</Label>
+                                <Input
+                                    id="slug"
+                                    required
+                                    value={formData.slug}
+                                    onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                                    className="bg-white/5 border-white/10 text-white focus:border-snow-accent"
+                                    placeholder="e.g. gpt-plus-subscription"
+                                />
+                            </div>
+
+                            <div className="grid gap-2">
+                                <Label htmlFor="description" className="text-gray-300">Description</Label>
+                                <Textarea
+                                    id="description"
+                                    required
+                                    rows={5}
+                                    value={formData.description}
+                                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                    className="bg-white/5 border-white/10 text-white focus:border-snow-accent resize-none"
+                                    placeholder="Enter full product description..."
+                                />
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card className="glass-card border-white/10">
+                        <CardHeader>
+                            <CardTitle className="text-white">Media</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            {/* Image Preview Grid */}
+                            {images.length > 0 && (
+                                <div className="grid grid-cols-3 gap-3">
+                                    {images.map((url, index) => (
+                                        <div key={index} className="relative aspect-square rounded-lg overflow-hidden group bg-black/40 border border-white/10">
+                                            <Image src={url} alt={`Product ${index + 1}`} fill className="object-cover" />
+                                            <button
+                                                type="button"
+                                                onClick={() => setImages(images.filter((_, i) => i !== index))}
+                                                className="absolute top-2 right-2 bg-red-500/80 p-1.5 rounded-md text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                                            >
+                                                <Trash2 className="w-3 h-3" />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Upload Dropzone */}
+                            <UploadDropzone
+                                endpoint="imageUploader"
+                                onClientUploadComplete={(res) => {
+                                    if (res) {
+                                        setImages(prev => [...prev, ...res.map(f => f.url)]);
+                                    }
+                                }}
+                                onUploadError={(error: Error) => {
+                                    setError(`Upload failed: ${error.message}`);
+                                }}
+                                className="bg-white/5 border-white/10 border-dashed ut-label:text-snow-accent ut-button:bg-snow-accent ut-button:text-black ut-button:font-bold ut-button:hover:bg-snow-accent/90"
+                            />
+                        </CardContent>
+                    </Card>
+
+                    <Card className="glass-card border-white/10">
+                        <CardHeader>
+                            <CardTitle className="text-white">Pricing</CardTitle>
+                        </CardHeader>
+                        <CardContent className="grid md:grid-cols-2 gap-6">
+                            <div className="grid gap-2">
+                                <Label htmlFor="price" className="text-gray-300">Price ($)</Label>
+                                <Input
+                                    id="price"
+                                    type="number"
+                                    required
+                                    step="0.01"
+                                    min="0"
+                                    value={formData.price}
+                                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                                    className="bg-white/5 border-white/10 text-white focus:border-snow-accent"
+                                    placeholder="0.00"
+                                />
+                            </div>
+
+                            <div className="grid gap-2">
+                                <Label htmlFor="discountPercentage" className="text-gray-300 flex items-center gap-2">
+                                    <Percent className="w-4 h-4" /> Discount
+                                </Label>
+                                <div className="relative">
+                                    <Input
+                                        id="discountPercentage"
+                                        type="number"
+                                        min="0"
+                                        max="100"
+                                        value={formData.discountPercentage}
+                                        onChange={(e) => setFormData({ ...formData, discountPercentage: e.target.value })}
+                                        className="bg-white/5 border-white/10 text-white focus:border-snow-accent pr-8"
+                                        placeholder="0"
+                                    />
+                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">%</span>
+                                </div>
+                                {parseInt(formData.discountPercentage) > 0 && formData.price && (
+                                    <p className="text-xs text-green-400">
+                                        Sale price: ${(parseFloat(formData.price) * (1 - parseInt(formData.discountPercentage) / 100)).toFixed(2)}
+                                    </p>
+                                )}
+                            </div>
+                        </CardContent>
+                    </Card>
                 </div>
 
-                <div>
-                    <label className="block text-gray-400 text-sm mb-2">Slug *</label>
-                    <input
-                        type="text"
-                        required
-                        value={formData.slug}
-                        onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                        className="w-full bg-white/10 border border-white/20 text-white rounded-lg px-4 py-3 focus:outline-none focus:border-snow-accent"
-                        placeholder="gpt-plus-subscription"
-                    />
+                <div className="space-y-6">
+                    <Card className="glass-card border-white/10">
+                        <CardHeader>
+                            <CardTitle className="text-white">Status</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="flex items-center justify-between p-3 rounded-lg border border-white/10 bg-white/5">
+                                <div className="space-y-0.5">
+                                    <Label className="text-base text-gray-200">Active</Label>
+                                    <p className="text-xs text-gray-500">Visible in store</p>
+                                </div>
+                                <Switch
+                                    checked={formData.isActive}
+                                    onCheckedChange={(checked) => setFormData({ ...formData, isActive: checked })}
+                                />
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card className="glass-card border-white/10">
+                        <CardHeader>
+                            <CardTitle className="text-white">Organization & Filters</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="grid gap-2">
+                                <Label htmlFor="categoryId" className="text-gray-300">Category *</Label>
+                                <select
+                                    id="categoryId"
+                                    required
+                                    value={formData.categoryId}
+                                    onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
+                                    className="flex h-10 w-full rounded-md border border-white/10 bg-[#0f172a] px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-snow-accent focus:border-snow-accent cursor-pointer appearance-none"
+                                    style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%239ca3af'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.75rem center', backgroundSize: '1rem' }}
+                                >
+                                    <option value="">Select category</option>
+                                    {categories.map((cat) => (
+                                        <option key={cat.id} value={cat.id}>
+                                            {cat.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <Separator className="bg-white/10" />
+
+                            <div className="grid gap-2">
+                                <div className="flex items-center justify-between">
+                                    <Label htmlFor="duration" className="text-gray-300">Duration</Label>
+                                    {!addingDuration && (
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            className="text-xs text-snow-accent h-6 px-2"
+                                            onClick={() => setAddingDuration(true)}
+                                        >
+                                            <Plus className="w-3 h-3 mr-1" /> New
+                                        </Button>
+                                    )}
+                                </div>
+                                {addingDuration ? (
+                                    <div className="flex gap-2">
+                                        <Input
+                                            value={newDuration}
+                                            onChange={(e) => setNewDuration(e.target.value)}
+                                            placeholder="e.g. 2 Years"
+                                            className="flex-1 bg-white/5 border-white/10 text-white h-10"
+                                            autoFocus
+                                        />
+                                        <Button
+                                            type="button"
+                                            size="sm"
+                                            className="bg-green-500/20 text-green-400 hover:bg-green-500/30 h-10"
+                                            onClick={async () => {
+                                                if (!newDuration.trim()) return;
+                                                await createFilterOption({ type: "duration", value: newDuration.trim() });
+                                                setLocalDurations([...localDurations, newDuration.trim()]);
+                                                setFormData({ ...formData, duration: newDuration.trim() });
+                                                setNewDuration("");
+                                                setAddingDuration(false);
+                                            }}
+                                        >
+                                            Add
+                                        </Button>
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            className="text-gray-400 h-10"
+                                            onClick={() => { setAddingDuration(false); setNewDuration(""); }}
+                                        >
+                                            Cancel
+                                        </Button>
+                                    </div>
+                                ) : (
+                                    <select
+                                        id="duration"
+                                        value={formData.duration}
+                                        onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
+                                        className="flex h-10 w-full rounded-md border border-white/10 bg-[#0f172a] px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-snow-accent cursor-pointer appearance-none"
+                                        style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%239ca3af'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.75rem center', backgroundSize: '1rem' }}
+                                    >
+                                        <option value="">Select duration</option>
+                                        {localDurations.map((d) => (
+                                            <option key={d} value={d}>{d}</option>
+                                        ))}
+                                    </select>
+                                )}
+                            </div>
+
+                            <div className="grid gap-2">
+                                <div className="flex items-center justify-between">
+                                    <Label htmlFor="platform" className="text-gray-300">Platform</Label>
+                                    {!addingPlatform && (
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            className="text-xs text-snow-accent h-6 px-2"
+                                            onClick={() => setAddingPlatform(true)}
+                                        >
+                                            <Plus className="w-3 h-3 mr-1" /> New
+                                        </Button>
+                                    )}
+                                </div>
+                                {addingPlatform ? (
+                                    <div className="flex gap-2">
+                                        <Input
+                                            value={newPlatform}
+                                            onChange={(e) => setNewPlatform(e.target.value)}
+                                            placeholder="e.g. ChatGPT"
+                                            className="flex-1 bg-white/5 border-white/10 text-white h-10"
+                                            autoFocus
+                                        />
+                                        <Button
+                                            type="button"
+                                            size="sm"
+                                            className="bg-green-500/20 text-green-400 hover:bg-green-500/30 h-10"
+                                            onClick={async () => {
+                                                if (!newPlatform.trim()) return;
+                                                await createFilterOption({ type: "platform", value: newPlatform.trim() });
+                                                setLocalPlatforms([...localPlatforms, newPlatform.trim()]);
+                                                setFormData({ ...formData, platform: newPlatform.trim() });
+                                                setNewPlatform("");
+                                                setAddingPlatform(false);
+                                            }}
+                                        >
+                                            Add
+                                        </Button>
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            className="text-gray-400 h-10"
+                                            onClick={() => { setAddingPlatform(false); setNewPlatform(""); }}
+                                        >
+                                            Cancel
+                                        </Button>
+                                    </div>
+                                ) : (
+                                    <select
+                                        id="platform"
+                                        value={formData.platform}
+                                        onChange={(e) => setFormData({ ...formData, platform: e.target.value })}
+                                        className="flex h-10 w-full rounded-md border border-white/10 bg-[#0f172a] px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-snow-accent cursor-pointer appearance-none"
+                                        style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%239ca3af'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.75rem center', backgroundSize: '1rem' }}
+                                    >
+                                        <option value="">Select platform</option>
+                                        {localPlatforms.map((p) => (
+                                            <option key={p} value={p}>{p}</option>
+                                        ))}
+                                    </select>
+                                )}
+                            </div>
+
+                            <Separator className="bg-white/10" />
+
+                            <div className="grid gap-2">
+                                <Label htmlFor="inventory" className="text-gray-300">Inventory</Label>
+                                <Input
+                                    id="inventory"
+                                    type="number"
+                                    min="0"
+                                    value={formData.inventory}
+                                    onChange={(e) => setFormData({ ...formData, inventory: e.target.value })}
+                                    className="bg-white/5 border-white/10 text-white focus:border-snow-accent"
+                                    placeholder="0"
+                                />
+                            </div>
+                        </CardContent>
+                    </Card>
                 </div>
-            </div>
-
-            <div>
-                <label className="block text-gray-400 text-sm mb-2">Description *</label>
-                <textarea
-                    required
-                    rows={4}
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    className="w-full bg-white/10 border border-white/20 text-white rounded-lg px-4 py-3 focus:outline-none focus:border-snow-accent resize-none"
-                    placeholder="Full access to ChatGPT Plus with all premium features..."
-                />
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-6">
-                <div>
-                    <label className="block text-gray-400 text-sm mb-2">Price ($) *</label>
-                    <input
-                        type="number"
-                        required
-                        step="0.01"
-                        min="0"
-                        value={formData.price}
-                        onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                        className="w-full bg-white/10 border border-white/20 text-white rounded-lg px-4 py-3 focus:outline-none focus:border-snow-accent"
-                        placeholder="19.99"
-                    />
-                </div>
-
-                <div>
-                    <label className="block text-gray-400 text-sm mb-2">Compare Price ($)</label>
-                    <input
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        value={formData.comparePrice}
-                        onChange={(e) => setFormData({ ...formData, comparePrice: e.target.value })}
-                        className="w-full bg-white/10 border border-white/20 text-white rounded-lg px-4 py-3 focus:outline-none focus:border-snow-accent"
-                        placeholder="29.99"
-                    />
-                </div>
-
-                <div>
-                    <label className="block text-gray-400 text-sm mb-2">Inventory</label>
-                    <input
-                        type="number"
-                        min="0"
-                        value={formData.inventory}
-                        onChange={(e) => setFormData({ ...formData, inventory: e.target.value })}
-                        className="w-full bg-white/10 border border-white/20 text-white rounded-lg px-4 py-3 focus:outline-none focus:border-snow-accent"
-                        placeholder="100"
-                    />
-                </div>
-            </div>
-
-            <div>
-                <label className="block text-gray-400 text-sm mb-2">Category *</label>
-                <select
-                    required
-                    value={formData.categoryId}
-                    onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
-                    className="w-full bg-white/10 border border-white/20 text-white rounded-lg px-4 py-3 focus:outline-none focus:border-snow-accent"
-                >
-                    <option value="">Select a category</option>
-                    {categories.map((cat) => (
-                        <option key={cat.id} value={cat.id}>
-                            {cat.name}
-                        </option>
-                    ))}
-                </select>
-            </div>
-
-            <div>
-                <label className="block text-gray-400 text-sm mb-2">Image URLs (one per line)</label>
-                <textarea
-                    rows={3}
-                    value={formData.images}
-                    onChange={(e) => setFormData({ ...formData, images: e.target.value })}
-                    className="w-full bg-white/10 border border-white/20 text-white rounded-lg px-4 py-3 focus:outline-none focus:border-snow-accent resize-none font-mono text-sm"
-                    placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg"
-                />
-            </div>
-
-            <div className="flex items-center gap-6">
-                <label className="flex items-center gap-3 cursor-pointer">
-                    <input
-                        type="checkbox"
-                        checked={formData.isActive}
-                        onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                        className="w-5 h-5 rounded border-white/20 bg-white/10 text-snow-accent focus:ring-snow-accent"
-                    />
-                    <span className="text-white">Active</span>
-                </label>
-
-                <label className="flex items-center gap-3 cursor-pointer">
-                    <input
-                        type="checkbox"
-                        checked={formData.isFeatured}
-                        onChange={(e) => setFormData({ ...formData, isFeatured: e.target.checked })}
-                        className="w-5 h-5 rounded border-white/20 bg-white/10 text-snow-accent focus:ring-snow-accent"
-                    />
-                    <span className="text-white">Featured</span>
-                </label>
-            </div>
-
-            <div className="flex items-center gap-4 pt-4">
-                <button
-                    type="submit"
-                    disabled={loading}
-                    className="bg-snow-accent text-gray-900 font-bold px-6 py-3 rounded-lg hover:bg-cyan-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                >
-                    {loading ? (
-                        <>
-                            <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                            </svg>
-                            Saving...
-                        </>
-                    ) : (
-                        <>
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                            </svg>
-                            {product ? "Update Product" : "Create Product"}
-                        </>
-                    )}
-                </button>
-
-                <button
-                    type="button"
-                    onClick={() => router.back()}
-                    className="text-gray-400 hover:text-white transition-colors px-6 py-3"
-                >
-                    Cancel
-                </button>
             </div>
         </form>
     );

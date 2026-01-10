@@ -12,7 +12,8 @@ export async function getProducts(options?: {
     page?: number;
     minPrice?: number;
     maxPrice?: number;
-    platforms?: string[]; // For filtering by platform/tag if implemented
+    platforms?: string[];
+    duration?: string;
 }) {
     const {
         categorySlug,
@@ -22,7 +23,9 @@ export async function getProducts(options?: {
         limit = 12,
         page = 1,
         minPrice,
-        maxPrice
+        maxPrice,
+        duration,
+        platforms
     } = options || {};
 
     const where: Record<string, unknown> = { isActive: true };
@@ -48,6 +51,16 @@ export async function getProducts(options?: {
             ...(minPrice !== undefined && { gte: minPrice }),
             ...(maxPrice !== undefined && { lte: maxPrice }),
         };
+    }
+
+    // Platform Filtering - use exact field match
+    if (platforms && platforms.length > 0) {
+        where.platform = { in: platforms };
+    }
+
+    // Duration Filtering - use exact field match
+    if (duration) {
+        where.duration = duration;
     }
 
     let orderBy: Record<string, string> = { createdAt: "desc" };
@@ -121,18 +134,29 @@ export async function createProduct(data: {
     slug: string;
     description: string;
     price: number;
-    comparePrice?: number;
+    discountPercentage?: number;
     images: string[];
     categoryId: string;
     inventory: number;
     isActive: boolean;
     isFeatured: boolean;
+    duration?: string;
+    platform?: string;
 }) {
     const product = await db.product.create({
         data: {
-            ...data,
+            name: data.name,
+            slug: data.slug,
+            description: data.description,
             price: data.price,
-            comparePrice: data.comparePrice,
+            discountPercentage: data.discountPercentage || 0,
+            images: data.images,
+            categoryId: data.categoryId,
+            stockQuantity: data.inventory,
+            isActive: data.isActive,
+            isFeatured: data.isFeatured,
+            duration: data.duration,
+            platform: data.platform,
         },
     });
 
@@ -148,12 +172,14 @@ export async function updateProduct(
         slug: string;
         description: string;
         price: number;
-        comparePrice: number | null;
+        discountPercentage: number;
         images: string[];
         categoryId: string;
         inventory: number;
         isActive: boolean;
         isFeatured: boolean;
+        duration: string | null;
+        platform: string | null;
     }>
 ) {
     const product = await db.product.update({

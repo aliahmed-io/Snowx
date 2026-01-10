@@ -1,36 +1,154 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Snow X - Digital Subscription Store
 
-## Getting Started
+A modern, production-ready e-commerce platform for selling digital subscriptions and accounts. Built with Next.js 15, TypeScript, Prisma, and Tailwind CSS.
 
-First, run the development server:
+![Snow X](public/snowx.png)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## ✨ Features
+
+- **🛒 E-Commerce Core**
+  - Product catalog with categories
+  - Shopping cart & checkout
+  - Order management
+  - Digital account delivery system
+
+- **👤 User Management**
+  - Authentication via Kinde
+  - User profiles & order history
+  - Wishlist functionality
+  - Review system
+
+- **🔐 Admin Panel**
+  - Dashboard with analytics
+  - Product & category management
+  - Order tracking
+  - Inventory management
+  - Filter options management
+
+- **💳 Payments**
+  - Stripe integration
+  - Secure checkout
+  - Webhook handling
+
+- **🌍 Internationalization**
+  - English & Arabic support
+  - RTL layout support
+
+- **⚡ Performance**
+  - Server-side rendering
+  - Image optimization
+  - Redis caching (optional)
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Node.js 18+
+- PostgreSQL database
+- Kinde account
+- Stripe account
+- UploadThing account
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/your-username/snow-x.git
+   cd snow-x
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Set up environment variables**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your credentials
+   ```
+
+4. **Set up the database**
+   ```bash
+   npx prisma db push
+   npx prisma generate
+   ```
+
+5. **Run the development server**
+   ```bash
+   npm run dev
+   ```
+
+6. **Open [http://localhost:3000](http://localhost:3000)**
+
+## 📁 Project Structure
+
+```
+├── app/                    # Next.js App Router
+│   ├── [locale]/          # Internationalized routes
+│   │   ├── admin/         # Admin panel
+│   │   ├── products/      # Product pages
+│   │   └── ...
+│   └── api/               # API routes
+├── actions/               # Server actions
+├── components/            # React components
+│   ├── admin/            # Admin components
+│   ├── shop/             # Shop components
+│   └── ui/               # UI primitives
+├── lib/                   # Utilities & config
+├── prisma/               # Database schema
+└── public/               # Static assets
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🔧 Configuration
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+See [.env.example](.env.example) for all required environment variables.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Key Services
 
-## Learn More
+| Service | Purpose | Required |
+|---------|---------|----------|
+| PostgreSQL | Database | ✅ |
+| Kinde | Authentication | ✅ |
+| Stripe | Payments | ✅ |
+| UploadThing | File uploads | ✅ |
+| Resend | Emails | Optional |
+| Upstash Redis | Caching | Optional |
 
-To learn more about Next.js, take a look at the following resources:
+## 📖 Documentation
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- [Deployment Guide](docs/DEPLOYMENT.md)
+- [API Reference](docs/API.md)
+- [Contributing](CONTRIBUTING.md)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🚢 Deployment
 
-## Deploy on Vercel
+### Vercel (Recommended)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. Push your code to GitHub
+2. Import project in Vercel
+3. Add environment variables
+4. Deploy
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Other Platforms
+
+See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for detailed deployment instructions.
+
+## 🛠️ Tech Stack
+
+- **Framework**: Next.js 15 (App Router)
+- **Language**: TypeScript
+- **Database**: PostgreSQL + Prisma
+- **Styling**: Tailwind CSS
+- **Auth**: Kinde
+- **Payments**: Stripe
+- **Uploads**: UploadThing
+- **Email**: Resend
+
+## 📄 License
+
+This project is proprietary software. All rights reserved.
+
+## 🤝 Support
+
+For support, email support@snowx.com or open an issue.

@@ -30,6 +30,9 @@ interface InfiniteProductGridProps {
     sortBy?: string;
     minPrice?: number;
     maxPrice?: number;
+    platforms?: string[];
+    duration?: string;
+    className?: string;
 }
 
 export function InfiniteProductGrid({
@@ -39,7 +42,10 @@ export function InfiniteProductGrid({
     search,
     sortBy,
     minPrice,
-    maxPrice
+    maxPrice,
+    platforms,
+    duration,
+    className
 }: InfiniteProductGridProps) {
     const [products, setProducts] = useState<Product[]>(initialProducts);
     const [page, setPage] = useState(1);
@@ -51,7 +57,7 @@ export function InfiniteProductGrid({
         setProducts(initialProducts);
         setPage(1);
         setHasMore(initialProducts.length < initialTotal);
-    }, [initialProducts, initialTotal]);
+    }, [initialProducts, initialTotal, categorySlug, search, sortBy, minPrice, maxPrice, platforms, duration]);
 
     const loadMore = async () => {
         if (isPending || !hasMore) return;
@@ -65,7 +71,9 @@ export function InfiniteProductGrid({
                 search,
                 sortBy: sortBy as "newest" | "price-asc" | "price-desc" | "name" | undefined,
                 minPrice,
-                maxPrice
+                maxPrice,
+                platforms,
+                duration
             });
 
             if (result.products.length > 0) {
@@ -94,11 +102,11 @@ export function InfiniteProductGrid({
 
         return () => observer.disconnect();
         // eslint-disable-next-line react-hooks/exhaustive-deps -- loadMore uses the correct deps internally
-    }, [hasMore, isPending, page, categorySlug, search, sortBy, minPrice, maxPrice]); // Dependencies for closure freshness
+    }, [hasMore, isPending, page, categorySlug, search, sortBy, minPrice, maxPrice, platforms, duration]); // Dependencies for closure freshness
 
     if (products.length === 0) {
         return (
-            <div className="text-center py-20">
+            <div className="text-center py-20 pb-0 w-full">
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/5 mb-4">
                     <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -112,7 +120,7 @@ export function InfiniteProductGrid({
 
     return (
         <div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div className={className || "grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6"}>
                 {products.map((product) => (
                     <ProductCard
                         key={product.id}

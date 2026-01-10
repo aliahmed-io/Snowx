@@ -30,6 +30,7 @@ export async function createCategory(data: {
 }) {
     const category = await db.category.create({ data });
     revalidatePath("/admin/categories");
+    revalidatePath("/admin/products");
     revalidatePath("/products");
     return category;
 }
@@ -49,6 +50,7 @@ export async function updateCategory(
     });
 
     revalidatePath("/admin/categories");
+    revalidatePath("/admin/products");
     revalidatePath("/products");
     return category;
 }
@@ -56,5 +58,6 @@ export async function updateCategory(
 export async function deleteCategory(id: string) {
     await db.category.delete({ where: { id } });
     revalidatePath("/admin/categories");
+    revalidatePath("/admin/products");
     revalidatePath("/products");
 }

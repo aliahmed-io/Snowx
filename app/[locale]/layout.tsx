@@ -1,20 +1,17 @@
 import type { Metadata } from "next";
 import { Outfit, Plus_Jakarta_Sans } from "next/font/google";
 import "../globals.css";
-import { Footer } from "@/components/layout/Footer";
-import { LiveChat } from "@/components/ui/LiveChat";
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { CurrencyProvider } from "@/components/providers/CurrencyProvider";
 import { CartProvider } from "@/components/providers/CartProvider";
-import { CartSidebar } from "@/components/shop/CartSidebar";
 import { notFound } from "next/navigation";
 import AppInitializer from "@/components/shared/app-initializer";
 import ClientProviders from "@/components/shared/client-providers";
 import { db } from "@/lib/db";
 import { ClientSetting } from "@/types";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
-import { Navbar } from "@/components/layout/Navbar";
+import { ConditionalLayout } from "@/components/layout/ConditionalLayout";
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -65,10 +62,9 @@ export default async function RootLayout({
     }
   } catch (error) {
     console.error("Failed to fetch settings:", error);
-    // setting remains null, triggering fallback below
   }
+
   if (!setting) {
-    // Fallback to minimal setting if DB is empty or during first run
     setting = {
       common: { pageSize: 9, isMaintenanceMode: false, freeShippingMinPrice: 0, defaultTheme: "light", defaultColor: "gold" },
       site: { name: "SnowX", slogan: "Premium Subscriptions", logo: "/snowx2-icon.png", url: "", description: "", keywords: "", email: "", phone: "", author: "", copyright: "", address: "" },
@@ -90,7 +86,16 @@ export default async function RootLayout({
   const messages = await getMessages();
 
   const { getUser } = getKindeServerSession();
-  const user = await getUser();
+  const kindeUser = await getUser();
+
+  // Determine user role from environment variable
+  let userRole: string | null = null;
+  if (kindeUser && kindeUser.email) {
+    const adminEmails = process.env.ADMIN_EMAILS?.split(',') || [];
+    if (adminEmails.includes(kindeUser.email)) {
+      userRole = 'ADMIN';
+    }
+  }
 
   return (
     <html lang={locale} dir={locale === 'ar' ? 'rtl' : 'ltr'} suppressHydrationWarning>
@@ -103,11 +108,9 @@ export default async function RootLayout({
             <NextIntlClientProvider messages={messages}>
               <CurrencyProvider>
                 <CartProvider>
-                  <Navbar user={user} />
-                  <CartSidebar />
-                  <main className="min-h-screen">{children}</main>
-                  <Footer />
-                  <LiveChat />
+                  <ConditionalLayout user={kindeUser} role={userRole}>
+                    {children}
+                  </ConditionalLayout>
                 </CartProvider>
               </CurrencyProvider>
             </NextIntlClientProvider>

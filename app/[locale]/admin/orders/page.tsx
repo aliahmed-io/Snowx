@@ -42,7 +42,21 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
         take: 50 // Limit for now
     });
 
-    const statuses = Object.values(OrderStatus);
+    const statusLabels: Record<string, string> = {
+        [OrderStatus.PENDING]: "Pending",
+        [OrderStatus.PROCESSING]: "Processing",
+        [OrderStatus.DELIVERED]: "Completed",
+        [OrderStatus.CANCELLED]: "Cancelled",
+        [OrderStatus.REFUNDED]: "Refunded",
+    };
+
+    const displayStatuses = [
+        OrderStatus.PENDING,
+        OrderStatus.PROCESSING,
+        OrderStatus.DELIVERED,
+        OrderStatus.CANCELLED,
+        OrderStatus.REFUNDED
+    ];
 
     return (
         <div className="space-y-8">
@@ -63,7 +77,7 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
                     >
                         All Orders
                     </Link>
-                    {statuses.map((s) => (
+                    {displayStatuses.map((s) => (
                         <Link
                             key={s}
                             href={`/admin/orders?status=${s}`}
@@ -72,7 +86,7 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
                                 status === s ? "bg-snow-accent text-[#020817]" : "bg-white/5 text-gray-400 hover:bg-white/10"
                             )}
                         >
-                            {s}
+                            {statusLabels[s]}
                         </Link>
                     ))}
                 </div>
@@ -145,7 +159,7 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
                                                         order.status === OrderStatus.CANCELLED ? "bg-red-500/10 text-red-400" :
                                                             "bg-gray-500/10 text-gray-400"
                                             )}>
-                                                {order.status}
+                                                {statusLabels[order.status] || order.status}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4">

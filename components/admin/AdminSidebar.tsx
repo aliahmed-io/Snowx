@@ -9,7 +9,6 @@ import {
     ShoppingBag,
     Package,
     Component,
-    Image as ImageIcon,
     Undo2,
     Activity,
     FileText,
@@ -19,7 +18,8 @@ import {
     Settings,
     LogOut,
     BarChart3,
-    Key
+    Key,
+    SlidersHorizontal
 } from "lucide-react";
 
 const sidebarGroups = [
@@ -62,9 +62,9 @@ const sidebarGroups = [
                 icon: Key
             },
             {
-                title: "Banner Picture",
-                href: "/admin/banners",
-                icon: ImageIcon
+                title: "Filters",
+                href: "/admin/filters",
+                icon: SlidersHorizontal
             },
             {
                 title: "Returns",

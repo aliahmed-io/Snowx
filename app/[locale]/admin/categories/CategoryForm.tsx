@@ -2,19 +2,22 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { createCategory } from "@/actions/categories";
+import { UploadDropzone } from "@/utils/uploadthing";
+import { Trash2 } from "lucide-react";
 
 export function CategoryForm() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
+    const [image, setImage] = useState<string>("");
 
     const [formData, setFormData] = useState({
         name: "",
         slug: "",
         description: "",
-        image: "",
     });
 
     const generateSlug = (name: string) => {
@@ -35,11 +38,12 @@ export function CategoryForm() {
                 name: formData.name,
                 slug: formData.slug || generateSlug(formData.name),
                 description: formData.description || undefined,
-                image: formData.image || undefined,
+                image: image || undefined,
             });
 
             setSuccess(true);
-            setFormData({ name: "", slug: "", description: "", image: "" });
+            setFormData({ name: "", slug: "", description: "" });
+            setImage("");
             router.refresh();
         } catch (err) {
             setError(err instanceof Error ? err.message : "Something went wrong");
@@ -68,27 +72,9 @@ export function CategoryForm() {
                     type="text"
                     required
                     value={formData.name}
-                    onChange={(e) => {
-                        setFormData({
-                            ...formData,
-                            name: e.target.value,
-                            slug: formData.slug || generateSlug(e.target.value),
-                        });
-                    }}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     className="w-full bg-white/10 border border-white/20 text-white rounded-lg px-4 py-2.5 focus:outline-none focus:border-snow-accent"
                     placeholder="AI Tools"
-                />
-            </div>
-
-            <div>
-                <label className="block text-gray-400 text-sm mb-2">Slug *</label>
-                <input
-                    type="text"
-                    required
-                    value={formData.slug}
-                    onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                    className="w-full bg-white/10 border border-white/20 text-white rounded-lg px-4 py-2.5 focus:outline-none focus:border-snow-accent"
-                    placeholder="ai-tools"
                 />
             </div>
 
@@ -104,14 +90,32 @@ export function CategoryForm() {
             </div>
 
             <div>
-                <label className="block text-gray-400 text-sm mb-2">Image URL</label>
-                <input
-                    type="url"
-                    value={formData.image}
-                    onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                    className="w-full bg-white/10 border border-white/20 text-white rounded-lg px-4 py-2.5 focus:outline-none focus:border-snow-accent"
-                    placeholder="https://example.com/image.jpg"
-                />
+                <label className="block text-gray-400 text-sm mb-2">Image</label>
+                {image ? (
+                    <div className="relative w-full h-32 rounded-lg overflow-hidden group bg-black/40 border border-white/10">
+                        <Image src={image} alt="Category" fill className="object-cover" />
+                        <button
+                            type="button"
+                            onClick={() => setImage("")}
+                            className="absolute top-2 right-2 bg-red-500/80 p-1.5 rounded-md text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                            <Trash2 className="w-4 h-4" />
+                        </button>
+                    </div>
+                ) : (
+                    <UploadDropzone
+                        endpoint="imageUploader"
+                        onClientUploadComplete={(res) => {
+                            if (res && res[0]) {
+                                setImage(res[0].url);
+                            }
+                        }}
+                        onUploadError={(error: Error) => {
+                            setError(`Upload failed: ${error.message}`);
+                        }}
+                        className="bg-white/5 border-white/10 border-dashed ut-label:text-snow-accent ut-button:bg-snow-accent ut-button:text-black ut-button:font-bold ut-button:hover:bg-snow-accent/90"
+                    />
+                )}
             </div>
 
             <button

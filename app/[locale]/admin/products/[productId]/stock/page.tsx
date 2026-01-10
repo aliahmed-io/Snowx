@@ -9,6 +9,7 @@ import { notFound } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { AccountStatus } from "@prisma/client";
 import { AccountService } from "@/lib/services/account-service";
+import { CsvImport } from "@/components/admin/CsvImport";
 
 interface StockPageProps {
     params: Promise<{
@@ -132,6 +133,8 @@ export default async function ProductStockPage({ params }: StockPageProps) {
                                 Upload Stock
                             </button>
                         </form>
+
+                        <CsvImport productId={product.id} />
                     </div>
 
                     <div className="bg-[#0a1628] border border-snow-primary/20 rounded-xl p-6">

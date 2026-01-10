@@ -106,7 +106,7 @@ export default async function OrderDetailsPage({ params }: OrderDetailsPageProps
                                         order.status === OrderStatus.CANCELLED ? "bg-red-500/10 text-red-400" :
                                             "bg-gray-500/10 text-gray-400"
                             )}>
-                                {order.status}
+                                {order.status === 'DELIVERED' ? 'COMPLETED' : order.status}
                             </span>
                         </div>
                         <p className="text-gray-400 text-sm mt-1 flex items-center gap-2">
@@ -187,10 +187,7 @@ export default async function OrderDetailsPage({ params }: OrderDetailsPageProps
                                     <span>Tax</span>
                                     <span>{formatPrice(Number(order.tax))}</span>
                                 </div>
-                                <div className="flex justify-between text-gray-400">
-                                    <span>Shipping</span>
-                                    <span>{formatPrice(Number(order.shipping))}</span>
-                                </div>
+                                {/* Shipping removed for digital services */}
                                 <div className="flex justify-between text-white font-bold text-lg pt-4 border-t border-snow-primary/10">
                                     <span>Total</span>
                                     <span>{formatPrice(Number(order.total))}</span>
@@ -310,21 +307,6 @@ export default async function OrderDetailsPage({ params }: OrderDetailsPageProps
                                 <div className="text-sm">
                                     <p className="text-gray-400">Email</p>
                                     <p className="text-gray-300">{order.User.email}</p>
-                                </div>
-                            </div>
-                            <div className="flex gap-3">
-                                <MapPin className="w-4 h-4 text-gray-500 shrink-0 mt-0.5" />
-                                <div className="text-sm">
-                                    <p className="text-gray-400">Shipping Address</p>
-                                    {shippingAddress ? (
-                                        <p className="text-gray-300">
-                                            {shippingAddress.line1}<br />
-                                            {shippingAddress.city}, {shippingAddress.state} {shippingAddress.postal_code}<br />
-                                            {shippingAddress.country}
-                                        </p>
-                                    ) : (
-                                        <p className="text-gray-500 italic">No address provided</p>
-                                    )}
                                 </div>
                             </div>
                         </div>

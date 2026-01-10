@@ -60,8 +60,13 @@ model Product {
   categoryId String
   isFeatured Boolean  @default(false)
   isActive   Boolean  @default(true) // Kept from current for compatibility
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+
+  // Filter attributes
+  duration String? // e.g. "1 Month", "12 Months", "Lifetime"
+  platform String? // e.g. "Netflix", "Spotify", "Adobe"
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Removed clothing specific fields (color, size, etc.) and AI/3D fields
 
@@ -96,22 +101,18 @@ model Category {
   products    Product[]
 }
 
-model Banner {
-  id          String     @id @default(cuid())
-  title       String
-  description String?
-  image       String
-  link        String
-  type        BannerType @default(MAIN)
-  isActive    Boolean    @default(true)
-  order       Int        @default(0)
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-}
+model FilterOption {
+  id        String   @id @default(cuid())
+  type      String // "duration", "platform", "price_settings"
+  value     String // The option value or JSON for settings
+  label     String? // Display label (optional, defaults to value)
+  order     Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-enum BannerType {
-  MAIN
-  CATEGORY
+  @@unique([type, value])
+  @@index([type])
 }
 
 // Account Inventory System

@@ -1,7 +1,9 @@
 import { getProducts } from "@/actions/products";
 import { getCategories } from "@/actions/categories";
+import { getFilterOptions } from "@/actions/filters";
 import { InfiniteProductGrid } from "@/components/shop/InfiniteProductGrid";
 import { ProductSidebarFilters } from "@/components/shop/ProductSidebarFilters";
+import { SortSelector } from "@/components/shop/SortSelector";
 import { getTranslations } from "next-intl/server";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
@@ -14,69 +16,74 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 }
 
 interface ProductsPageProps {
-    searchParams: Promise<{ category?: string; sort?: string; search?: string; minPrice?: string; maxPrice?: string }>;
+    searchParams: Promise<{
+        category?: string;
+        sort?: string;
+        search?: string;
+        minPrice?: string;
+        maxPrice?: string;
+        duration?: string;
+        platforms?: string;
+    }>;
 }
 
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
-    const params = await searchParams;
+    const resolvedSearchParams = await searchParams;
 
-    const [productData, categories] = await Promise.all([
+    const [productData, categories, durationOptions, platformOptions] = await Promise.all([
         getProducts({
-            categorySlug: params.category,
-            sortBy: params.sort as "price-asc" | "price-desc" | "newest" | "name",
-            search: params.search,
-            minPrice: params.minPrice ? Number(params.minPrice) : undefined,
-            maxPrice: params.maxPrice ? Number(params.maxPrice) : undefined,
+            categorySlug: resolvedSearchParams.category,
+            sortBy: resolvedSearchParams.sort as "price-asc" | "price-desc" | "newest" | "name",
+            search: resolvedSearchParams.search,
+            minPrice: resolvedSearchParams.minPrice ? Number(resolvedSearchParams.minPrice) : undefined,
+            maxPrice: resolvedSearchParams.maxPrice ? Number(resolvedSearchParams.maxPrice) : undefined,
+            duration: resolvedSearchParams.duration,
+            platforms: resolvedSearchParams.platforms ? resolvedSearchParams.platforms.split(',') : undefined,
         }),
         getCategories(),
+        getFilterOptions("duration"),
+        getFilterOptions("platform")
     ]);
 
     return (
         <div className="pt-24 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-            <div className="flex flex-col lg:flex-row items-start gap-8">
-                {/* Sidebar Filters */}
-                <ProductSidebarFilters categories={categories} />
+            <div className="grid grid-cols-1 md:grid-cols-[288px_1fr] gap-8">
+                {/* Sidebar Filters - No scroll, shows everything */}
+                <aside>
+                    <ProductSidebarFilters
+                        categories={categories}
+                        durations={durationOptions.map(d => d.value)}
+                        platforms={platformOptions.map(p => p.value)}
+                    />
+                </aside>
 
-                {/* Main Content */}
-                <div className="flex-1">
-                    {/* Top Bar: Sort & Count */}
-                    <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <div className="flex items-center gap-3">
-                            <span className="text-sm text-gray-400">Sort By:</span>
-                            <div className="relative">
-                                <select
-                                    className="bg-black/20 text-white text-sm border border-white/10 rounded-lg px-3 py-1.5 focus:outline-none focus:border-snow-accent appearance-none pr-8 cursor-pointer"
-                                    defaultValue={params.sort || "newest"}
-                                // In a real client component we'd use router.push, here we just show the UI for now or minimal interactions
-                                >
-                                    <option value="newest">Newest</option>
-                                    <option value="price-asc">Price: Low to High</option>
-                                    <option value="price-desc">Price: High to Low</option>
-                                    <option value="name">Name</option>
-                                </select>
-                                {/* Custom arrow pointer-events-none */}
-                                <div className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
-                                    <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                                    </svg>
-                                </div>
+                {/* Main Content - Scrollable */}
+                <div className="min-w-0">
+                    {/* Top Bar: Sort & Count - Sticky */}
+                    <div className="sticky top-20 z-10 bg-snow-primary/95 backdrop-blur-sm pb-4 mb-2">
+                        <div className="flex items-center justify-between gap-4 flex-wrap">
+                            <SortSelector />
+                            <div className="text-sm text-gray-400">
+                                <span className="font-semibold text-white">{productData.total}</span> products
                             </div>
-                        </div>
-
-                        <div className="text-sm text-gray-400">
-                            <span className="font-semibold text-white">{productData.total}</span> products
                         </div>
                     </div>
 
-                    <InfiniteProductGrid
-                        initialProducts={productData.products}
-                        initialTotal={productData.total}
-                        categorySlug={params.category}
-                        search={params.search}
-                        sortBy={params.sort}
-                        minPrice={params.minPrice ? Number(params.minPrice) : undefined}
-                        maxPrice={params.maxPrice ? Number(params.maxPrice) : undefined}
-                    />
+                    {/* Products Grid - Scrollable Area */}
+                    <div className="h-[calc(100vh-12rem)] overflow-y-auto premium-scrollbar">
+                        <InfiniteProductGrid
+                            initialProducts={productData.products}
+                            initialTotal={productData.total}
+                            categorySlug={resolvedSearchParams.category}
+                            search={resolvedSearchParams.search}
+                            sortBy={resolvedSearchParams.sort}
+                            minPrice={resolvedSearchParams.minPrice ? Number(resolvedSearchParams.minPrice) : undefined}
+                            maxPrice={resolvedSearchParams.maxPrice ? Number(resolvedSearchParams.maxPrice) : undefined}
+                            duration={resolvedSearchParams.duration}
+                            platforms={resolvedSearchParams.platforms ? resolvedSearchParams.platforms.split(',') : undefined}
+                            className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 pb-8"
+                        />
+                    </div>
                 </div>
             </div>
         </div>

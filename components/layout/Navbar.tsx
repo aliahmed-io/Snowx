@@ -8,6 +8,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { LoginLink, RegisterLink, LogoutLink } from "@kinde-oss/kinde-auth-nextjs/components";
 import { ShoppingCart, User, Search } from "lucide-react";
 import { useCart } from "@/components/providers/CartProvider";
+import { UserDropdown } from "./UserDropdown";
 
 const currencies: CurrencyCode[] = ["USD", "SAR", "AED"];
 const languages = [
@@ -23,9 +24,10 @@ interface NavbarProps {
         family_name?: string | null;
         picture?: string | null;
     } | null;
+    role?: string | null;
 }
 
-export function Navbar({ user }: NavbarProps) {
+export function Navbar({ user, role }: NavbarProps) {
     const { currency, setCurrency } = useCurrency();
     const { openCart, itemCount } = useCart();
     const locale = useLocale();
@@ -179,28 +181,7 @@ export function Navbar({ user }: NavbarProps) {
                         {/* Auth Buttons */}
                         <div className="pl-4 border-l border-white/10 flex items-center gap-4">
                             {user ? (
-                                <div className="flex items-center gap-4">
-                                    <Link href="/admin" className="relative group">
-                                        <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white/10 group-hover:border-snow-accent transition-colors">
-                                            {user.picture ? (
-                                                <Image
-                                                    src={user.picture}
-                                                    alt="Profile"
-                                                    width={40}
-                                                    height={40}
-                                                    className="object-cover"
-                                                />
-                                            ) : (
-                                                <div className="w-full h-full bg-white/5 flex items-center justify-center">
-                                                    <User className="w-5 h-5 text-white/70" />
-                                                </div>
-                                            )}
-                                        </div>
-                                    </Link>
-                                    <LogoutLink className="text-sm font-bold text-white/70 hover:text-white transition-colors">
-                                        {t('signOut')}
-                                    </LogoutLink>
-                                </div>
+                                <UserDropdown user={user} role={role} />
                             ) : (
                                 <div className="flex items-center gap-4">
                                     <LoginLink className="text-sm font-bold text-white/70 hover:text-white transition-colors">

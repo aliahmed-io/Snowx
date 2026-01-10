@@ -210,24 +210,6 @@ async function main() {
     }
 
     console.log('✅ Orders & Stats seeded');
-
-    // 6. Banners
-    await prisma.banner.upsert({
-        where: { id: 'seed-banner-1' },
-        update: {},
-        create: {
-            id: 'seed-banner-1',
-            title: 'Summer Sale',
-            description: 'Get 50% off all productivity apps',
-            image: 'https://placehold.co/1920x600/101010/FFF?text=Summer+Sale',
-            link: '/products?category=productivity',
-            type: 'MAIN',
-            isActive: true,
-            order: 1
-        }
-    });
-
-    console.log('✅ Banners seeded');
     console.log('🏁 Seed completed!');
 }
 

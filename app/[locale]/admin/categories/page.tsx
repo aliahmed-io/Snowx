@@ -1,5 +1,6 @@
 import { getCategories } from "@/actions/categories";
 import { CategoryForm } from "./CategoryForm";
+import { CategoryActions } from "./CategoryActions";
 import Image from "next/image";
 
 export const metadata = {
@@ -55,7 +56,7 @@ export default async function AdminCategoriesPage() {
                                             <p className="text-gray-500 text-sm">{category.productCount} products</p>
                                         </div>
                                     </div>
-                                    <span className="text-gray-500 text-sm">{category.slug}</span>
+                                    <CategoryActions category={category} />
                                 </div>
                             ))}
                         </div>
@@ -65,3 +66,4 @@ export default async function AdminCategoriesPage() {
         </div>
     );
 }
+

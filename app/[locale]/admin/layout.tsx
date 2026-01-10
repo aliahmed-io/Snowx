@@ -28,13 +28,11 @@ export default async function AdminLayout({
         redirect("/api/auth/login");
     }
 
-    // Verify admin role in DB
-    const dbUser = await db.user.findUnique({
-        where: { kindeId: user.id },
-        select: { role: true }
-    });
+    // Verify admin access via Environment Variable
+    const adminEmails = process.env.ADMIN_EMAILS?.split(',') || [];
+    const userEmail = user.email;
 
-    if (!dbUser || dbUser.role !== 'ADMIN') {
+    if (!userEmail || !adminEmails.includes(userEmail)) {
         redirect("/");
     }
 

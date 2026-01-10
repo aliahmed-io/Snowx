@@ -3,12 +3,12 @@ import { Link } from "@/navigation";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import {
-    Search,
     User,
     Download
 } from "lucide-react";
 import { AccountStatus, Prisma } from "@prisma/client";
 import Image from "next/image";
+import { AdminSearchInput } from "@/components/admin/AdminSearchInput";
 
 export default async function InventoryPage({
     searchParams
@@ -54,26 +54,24 @@ export default async function InventoryPage({
                 </div>
                 <div className="flex gap-2">
                     {/* Add Account Dialog Trigger would go here */}
-                    <button className="flex items-center gap-2 bg-white/5 hover:bg-white/10 text-white px-4 py-2 rounded-lg transition-colors">
+                    <a
+                        href={`/api/admin/export/inventory${status ? `?status=${status}` : ''}`}
+                        download
+                        className="flex items-center gap-2 bg-white/5 hover:bg-white/10 text-white px-4 py-2 rounded-lg transition-colors"
+                    >
                         <Download className="w-4 h-4" />
                         <span className="text-sm font-medium">Export CSV</span>
-                    </button>
+                    </a>
                 </div>
             </div>
 
             {/* Filters */}
             <div className="flex flex-col md:flex-row gap-4 bg-[#0a1628] border border-snow-primary/20 p-4 rounded-xl">
-                <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-                    <form>
-                        <input
-                            name="q"
-                            defaultValue={q}
-                            placeholder="Search by Username, Service, Order ID..."
-                            className="w-full bg-snow-primary/10 border border-snow-primary/20 rounded-lg pl-10 pr-4 py-2 text-sm text-gray-300 focus:outline-none focus:border-snow-accent/50 transition-colors"
-                        />
-                    </form>
-                </div>
+                <AdminSearchInput
+                    placeholder="Search by Username, Service, Order ID..."
+                    paramName="q"
+                    className="flex-1"
+                />
                 <div className="flex items-center gap-2 overflow-x-auto">
                     {statuses.map(s => (
                         <Link

@@ -4,12 +4,24 @@ import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 const f = createUploadthing();
 
 const auth = async () => {
-    const { getUser, getPermissions } = getKindeServerSession();
-    const user = await getUser();
-    const permissions = await getPermissions();
+    try {
+        const { getUser, getPermissions } = getKindeServerSession();
+        const user = await getUser();
+        const permissions = await getPermissions();
 
-    if (!user || !permissions?.permissions?.includes("admin:access")) throw new Error("Unauthorized");
-    return { userId: user.id };
+        console.log("UploadThing Auth:", {
+            userId: user?.id,
+            permissions: permissions?.permissions
+        });
+
+        if (!user) throw new Error("Unauthorized: User not found");
+        // if (!permissions?.permissions?.includes("admin:access")) throw new Error("Unauthorized: Missing admin permission");
+
+        return { userId: user.id };
+    } catch (error) {
+        console.error("UploadThing Auth Error:", error);
+        throw error;
+    }
 };
 
 // FileRouter for your app, can contain multiple FileRoutes

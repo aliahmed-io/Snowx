@@ -44,6 +44,72 @@ body {
   /* Prevent horizontal scroll from animations */
 }
 
+/* Custom Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  transition: background 0.3s;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(59, 130, 246, 0.5);
+  /* snow-accent with transparency */
+}
+
+/* Scrollbar Hide Utility */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+  /* Safari and Chrome */
+}
+
+/* Premium Scrollbar Styling */
+.premium-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(59, 130, 246, 0.3) transparent;
+}
+
+.premium-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.premium-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 10px;
+}
+
+.premium-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(59, 130, 246, 0.4), rgba(59, 130, 246, 0.6));
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  transition: all 0.3s ease;
+}
+
+.premium-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, rgba(59, 130, 246, 0.6), rgba(59, 130, 246, 0.8));
+  border-width: 1px;
+}
+
+.premium-scrollbar::-webkit-scrollbar-thumb:active {
+  background: linear-gradient(180deg, rgba(59, 130, 246, 0.7), rgba(59, 130, 246, 0.9));
+}
+
 h1,
 h2,
 h3,
@@ -281,4 +347,35 @@ h6 {
   opacity: 0.8;
   pointer-events: none;
   z-index: 1;
+}
+
+/* Hide number input spinners */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* Custom select styling for dark theme */
+select {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  color: white;
+}
+
+select option {
+  background-color: #0f172a;
+  color: white;
+  padding: 8px;
+}
+
+select option:hover,
+select option:focus,
+select option:checked {
+  background-color: #1e293b !important;
+  color: white;
 }

@@ -15,9 +15,11 @@ interface Category {
 
 interface ProductSidebarFiltersProps {
     categories: Category[];
+    durations?: string[];
+    platforms?: string[];
 }
 
-export function ProductSidebarFilters({ categories }: ProductSidebarFiltersProps) {
+export function ProductSidebarFilters({ categories, durations = [], platforms = [] }: ProductSidebarFiltersProps) {
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -99,7 +101,7 @@ export function ProductSidebarFilters({ categories }: ProductSidebarFiltersProps
     }, [priceRange, router, searchParams]);
 
     return (
-        <div className="w-full lg:w-72 shrink-0 space-y-10 lg:pr-6 border-b lg:border-b-0 lg:border-r border-white/10 pb-8 lg:pb-0 mb-8 lg:mb-0">
+        <div className="space-y-6">
             {/* Header */}
             <div>
                 <h2 className="text-xl font-bold text-white mb-6">Filters</h2>
@@ -168,37 +170,70 @@ export function ProductSidebarFilters({ categories }: ProductSidebarFiltersProps
                 </div>
             </div>
 
-            {/* Subscription Duration (Mock) */}
-            <div>
-                <h3 className="text-lg font-bold text-white mb-6">Duration</h3>
-                <div className="space-y-3">
-                    {['1 Month', '3 Months', '6 Months', '12 Months', 'Lifetime'].map((duration) => (
-                        <label key={duration} className="flex items-center gap-3 cursor-pointer group">
-                            <Checkbox
-                                checked={false}
-                                onCheckedChange={() => { }}
-                            />
-                            <span className="text-sm text-snow-gray group-hover:text-white transition-colors">{duration}</span>
-                        </label>
-                    ))}
+            {/* Subscription Duration */}
+            {durations.length > 0 && (
+                <div>
+                    <h3 className="text-lg font-bold text-white mb-6">Duration</h3>
+                    <div className="space-y-3">
+                        {durations.map((duration) => (
+                            <label key={duration} className="flex items-center gap-3 cursor-pointer group">
+                                <Checkbox
+                                    checked={searchParams.get('duration') === duration}
+                                    onCheckedChange={(checked) => {
+                                        const params = new URLSearchParams(searchParams.toString());
+                                        if (checked) {
+                                            params.set('duration', duration);
+                                        } else {
+                                            params.delete('duration');
+                                        }
+                                        params.delete('page');
+                                        router.push(`/products?${params.toString()}`, { scroll: false });
+                                    }}
+                                />
+                                <span className={`text-sm transition-colors ${searchParams.get('duration') === duration ? 'text-snow-accent' : 'text-snow-gray group-hover:text-white'}`}>{duration}</span>
+                            </label>
+                        ))}
+                    </div>
                 </div>
-            </div>
+            )}
 
-            {/* Platform (Mock) */}
-            <div>
-                <h3 className="text-lg font-bold text-white mb-6">Platform</h3>
-                <div className="space-y-3">
-                    {['Netflix', 'Spotify', 'YouTube', 'Adobe', 'Microsoft'].map((platform) => (
-                        <label key={platform} className="flex items-center gap-3 cursor-pointer group">
-                            <Checkbox
-                                checked={false}
-                                onCheckedChange={() => { }}
-                            />
-                            <span className="text-sm text-snow-gray group-hover:text-white transition-colors">{platform}</span>
-                        </label>
-                    ))}
+            {/* Platform */}
+            {platforms.length > 0 && (
+                <div>
+                    <h3 className="text-lg font-bold text-white mb-6">Platform</h3>
+                    <div className="space-y-3">
+                        {platforms.map((platform) => {
+                            const currentPlatforms = searchParams.get('platforms')?.split(',') || [];
+                            const isActive = currentPlatforms.includes(platform);
+                            return (
+                                <label key={platform} className="flex items-center gap-3 cursor-pointer group">
+                                    <Checkbox
+                                        checked={isActive}
+                                        onCheckedChange={(checked) => {
+                                            const params = new URLSearchParams(searchParams.toString());
+                                            let newPlatforms = [...currentPlatforms];
+                                            if (checked) {
+                                                newPlatforms.push(platform);
+                                            } else {
+                                                newPlatforms = newPlatforms.filter(p => p !== platform);
+                                            }
+
+                                            if (newPlatforms.length > 0) {
+                                                params.set('platforms', newPlatforms.join(','));
+                                            } else {
+                                                params.delete('platforms');
+                                            }
+                                            params.delete('page');
+                                            router.push(`/products?${params.toString()}`, { scroll: false });
+                                        }}
+                                    />
+                                    <span className={`text-sm transition-colors ${isActive ? 'text-snow-accent' : 'text-snow-gray group-hover:text-white'}`}>{platform}</span>
+                                </label>
+                            );
+                        })}
+                    </div>
                 </div>
-            </div>
+            )}
         </div>
     );
 }

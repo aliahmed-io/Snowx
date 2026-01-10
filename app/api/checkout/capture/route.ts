@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { capturePayPalPayment, getPayPalOrderDetails } from "@/lib/paypal";
 import { db } from "@/lib/db";
+import { sendEmail } from "@/lib/mail";
+import { generateOrderConfirmationEmail } from "@/lib/email-templates";
 
 export async function POST(request: NextRequest) {
     try {
@@ -46,6 +48,7 @@ export async function POST(request: NextRequest) {
         // Get payer info
         const payerEmail = capture.payer?.email_address;
         const payerName = capture.payer?.name;
+        const customerName = payerName ? `${payerName.given_name} ${payerName.surname}` : null;
 
         // Get amount info
         const amount = purchaseUnit?.amount;
@@ -65,10 +68,10 @@ export async function POST(request: NextRequest) {
                 tax,
                 shipping,
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                userId: (metadata as Record<string, any>)?.userId || null, // Try to link user
+                userId: (metadata as Record<string, any>)?.userId || null,
                 shippingAddress: {
                     email: payerEmail,
-                    name: payerName ? `${payerName.given_name} ${payerName.surname}` : null,
+                    name: customerName,
                 },
                 orderItems: cartItems.length > 0 ? {
                     create: cartItems.map((item) => ({
@@ -78,30 +81,81 @@ export async function POST(request: NextRequest) {
                     })),
                 } : undefined,
             },
+            include: {
+                orderItems: {
+                    include: {
+                        product: true,
+                    },
+                },
+            },
         });
 
-        // Assign Licenses
+        // Assign Accounts
+        let assignedAccounts: { productName: string; username: string; password: string }[] = [];
         try {
-            // Need a userId. If null, maybe use email to find or create?
-            // For now, if userId exists, we assign.
-            // Or we assign to the Order regardless of user (LicenseKey has orderId).
-
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const userIdToAssign = (metadata as Record<string, any>)?.userId;
 
-            // If we have items and it's a digital product, assign accounts.
             if (cartItems.length > 0) {
                 await import("@/lib/services/account-service").then(({ AccountService }) =>
                     AccountService.assignAccountsToOrder(
                         order.id,
-                        userIdToAssign, // Can be null/undefined? Service expects string.
+                        userIdToAssign,
                         cartItems
                     )
                 );
+
+                // Fetch the assigned accounts for the email
+                const accounts = await db.account.findMany({
+                    where: { orderId: order.id },
+                    include: { product: { select: { name: true } } },
+                });
+
+                assignedAccounts = accounts.map((acc) => ({
+                    productName: acc.product?.name || "Digital Product",
+                    username: acc.username,
+                    password: acc.password, // Encrypted - will be decrypted in email template
+                }));
             }
         } catch (err) {
             console.error("Failed to assign licenses:", err);
-            // Don't fail the request, just log. Admin can fix.
+        }
+
+        // Send confirmation email
+        if (payerEmail) {
+            try {
+                const emailData = generateOrderConfirmationEmail({
+                    orderNumber: order.orderNumber!,
+                    orderDate: order.createdAt,
+                    customerName,
+                    customerEmail: payerEmail,
+                    subtotal,
+                    tax,
+                    shipping,
+                    total,
+                    items: order.orderItems.map((item) => ({
+                        productName: item.product?.name || "Product",
+                        quantity: item.quantity,
+                        price: Number(item.price),
+                    })),
+                    accounts: assignedAccounts,
+                });
+
+                const emailResult = await sendEmail({
+                    to: payerEmail,
+                    subject: emailData.subject,
+                    html: emailData.html,
+                });
+
+                if (emailResult.success) {
+                    console.log(`Order confirmation email sent to ${payerEmail}`);
+                } else {
+                    console.error("Failed to send order confirmation email:", emailResult.error);
+                }
+            } catch (emailErr) {
+                console.error("Email sending error:", emailErr);
+                // Don't fail the order, just log
+            }
         }
 
         return NextResponse.json({
