@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Plus, Loader2, Trash2, Percent } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Percent } from "lucide-react";
 import { UploadDropzone } from "@/utils/uploadthing";
 
 interface Category {
@@ -28,8 +28,10 @@ interface ProductFormProps {
     product?: {
         id: string;
         name: string;
+        nameAr?: string | null;
         slug: string;
         description: string;
+        descriptionAr?: string | null;
         price: number;
         discountPercentage?: number;
         images: string[];
@@ -54,8 +56,9 @@ export function ProductForm({ categories, durations, platforms, product }: Produ
 
     const [formData, setFormData] = useState({
         name: product?.name || "",
-        slug: product?.slug || "",
+        nameAr: product?.nameAr || "",
         description: product?.description || "",
+        descriptionAr: product?.descriptionAr || "",
         price: product?.price?.toString() || "",
         discountPercentage: product?.discountPercentage?.toString() || "0",
         categoryId: product?.categoryId || "",
@@ -79,10 +82,13 @@ export function ProductForm({ categories, durations, platforms, product }: Produ
         setError(null);
 
         try {
+            const slug = product?.slug || generateSlug(formData.name);
             const data = {
                 name: formData.name,
-                slug: formData.slug || generateSlug(formData.name),
+                nameAr: formData.nameAr || undefined,
+                slug,
                 description: formData.description,
+                descriptionAr: formData.descriptionAr || undefined,
                 price: parseFloat(formData.price),
                 discountPercentage: parseInt(formData.discountPercentage) || 0,
                 images: images,
@@ -181,23 +187,10 @@ export function ProductForm({ categories, durations, platforms, product }: Produ
                                         setFormData({
                                             ...formData,
                                             name: e.target.value,
-                                            slug: formData.slug || generateSlug(e.target.value),
                                         });
                                     }}
                                     className="bg-white/5 border-white/10 text-white focus:border-snow-accent"
                                     placeholder="e.g. GPT Plus Subscription"
-                                />
-                            </div>
-
-                            <div className="grid gap-2">
-                                <Label htmlFor="slug" className="text-gray-300">Slug</Label>
-                                <Input
-                                    id="slug"
-                                    required
-                                    value={formData.slug}
-                                    onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                                    className="bg-white/5 border-white/10 text-white focus:border-snow-accent"
-                                    placeholder="e.g. gpt-plus-subscription"
                                 />
                             </div>
 
@@ -211,6 +204,41 @@ export function ProductForm({ categories, durations, platforms, product }: Produ
                                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                                     className="bg-white/5 border-white/10 text-white focus:border-snow-accent resize-none"
                                     placeholder="Enter full product description..."
+                                />
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* Arabic Localization */}
+                    <Card className="glass-card border-white/10">
+                        <CardHeader>
+                            <CardTitle className="text-white flex items-center gap-2">
+                                <span className="text-lg">🌍</span> Arabic Localization
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="grid gap-2">
+                                <Label htmlFor="nameAr" className="text-gray-300">Product Name (Arabic)</Label>
+                                <Input
+                                    id="nameAr"
+                                    value={formData.nameAr}
+                                    onChange={(e) => setFormData({ ...formData, nameAr: e.target.value })}
+                                    className="bg-white/5 border-white/10 text-white focus:border-snow-accent text-right"
+                                    placeholder="اسم المنتج بالعربية"
+                                    dir="rtl"
+                                />
+                            </div>
+
+                            <div className="grid gap-2">
+                                <Label htmlFor="descriptionAr" className="text-gray-300">Description (Arabic)</Label>
+                                <Textarea
+                                    id="descriptionAr"
+                                    rows={5}
+                                    value={formData.descriptionAr}
+                                    onChange={(e) => setFormData({ ...formData, descriptionAr: e.target.value })}
+                                    className="bg-white/5 border-white/10 text-white focus:border-snow-accent resize-none text-right"
+                                    placeholder="وصف المنتج بالعربية..."
+                                    dir="rtl"
                                 />
                             </div>
                         </CardContent>

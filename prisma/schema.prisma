@@ -47,11 +47,13 @@ model WishlistItem {
 }
 
 model Product {
-  id          String        @id @default(cuid())
-  name        String
-  slug        String        @unique
-  description String
-  status      ProductStatus @default(published)
+  id            String        @id @default(cuid())
+  name          String
+  nameAr        String? // Arabic name for i18n
+  slug          String        @unique
+  description   String
+  descriptionAr String? // Arabic description for i18n
+  status        ProductStatus @default(published)
 
   price        Decimal  @db.Decimal(10, 2)
   comparePrice Decimal? @db.Decimal(10, 2)

@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getProductBySlug, getProducts } from "@/actions/products";
 import { AddToCartButton } from "./AddToCartButton";
+import { ProductPrice } from "./ProductPrice";
 import Image from "next/image";
 import { Link } from "@/navigation";
 
@@ -118,17 +119,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                     )}
 
                     {/* Price */}
-                    <div className="flex items-center gap-4 mb-6">
-                        <span className="text-4xl font-bold text-white">${product.price.toFixed(2)}</span>
-                        {product.comparePrice && (
-                            <>
-                                <span className="text-xl text-gray-500 line-through">${product.comparePrice.toFixed(2)}</span>
-                                <span className="bg-linear-to-r from-rose-500 to-pink-500 text-white text-sm font-bold px-3 py-1 rounded-full">
-                                    Save {discount}%
-                                </span>
-                            </>
-                        )}
-                    </div>
+                    <ProductPrice price={product.price} comparePrice={product.comparePrice} />
 
                     {/* Description */}
                     <p className="text-gray-400 mb-8 leading-relaxed">{product.description}</p>

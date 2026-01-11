@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 
 import { useCart } from "@/components/providers/CartProvider";
+import { PriceDisplay } from "@/components/shop/PriceDisplay";
 import { toast } from "sonner";
 
 
@@ -97,14 +98,12 @@ export function ProductCard({
                         )}
 
                         <div className="flex items-baseline gap-2 mb-4">
-                            <span className="text-xl font-bold text-white">
-                                ${price.toFixed(2)} <span className="text-xs font-normal text-gray-500">USD</span>
-                            </span>
-                            {comparePrice && comparePrice > price && (
-                                <span className="text-sm text-gray-500 line-through">
-                                    ${comparePrice.toFixed(2)}
-                                </span>
-                            )}
+                            <PriceDisplay
+                                amount={price}
+                                comparePrice={comparePrice}
+                                size="lg"
+                                className="text-white"
+                            />
                         </div>
 
                         {/* Add to Cart Button */}

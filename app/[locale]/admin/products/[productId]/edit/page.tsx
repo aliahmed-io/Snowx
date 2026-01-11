@@ -31,15 +31,16 @@ export default async function EditProductPage({ params }: EditPageProps) {
             product={{
                 id: product.id,
                 name: product.name,
+                nameAr: product.nameAr,
                 slug: product.slug,
                 description: product.description,
+                descriptionAr: product.descriptionAr,
                 price: Number(product.price),
                 discountPercentage: product.discountPercentage,
                 images: product.images,
                 categoryId: product.categoryId,
                 inventory: product.stockQuantity,
                 isActive: product.isActive,
-                isFeatured: product.isFeatured,
                 duration: product.duration,
                 platform: product.platform,
             }}

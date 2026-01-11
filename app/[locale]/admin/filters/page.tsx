@@ -1,7 +1,5 @@
 import { getAllFilterOptions, seedDefaultFilters } from "@/actions/filters";
 import { FilterSection } from "./FilterSection";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 

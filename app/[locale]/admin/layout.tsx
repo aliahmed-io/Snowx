@@ -1,7 +1,6 @@
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { redirect } from "next/navigation";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
-import { db } from "@/lib/db";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import type { Metadata } from "next";
 

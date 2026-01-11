@@ -8,7 +8,6 @@ import {
     Mail,
     Package,
     Calendar,
-    MapPin,
     User as UserIcon,
     Printer
 } from "lucide-react";
@@ -67,23 +66,6 @@ export default async function OrderDetailsPage({ params }: OrderDetailsPageProps
     });
 
     if (!order || !order.User) notFound();
-
-
-    interface Address {
-        line1?: string;
-        city?: string;
-        state?: string;
-        postal_code?: string;
-        country?: string;
-    }
-
-    // Helper to safely parse JSON address
-    const getAddress = (json: unknown): Address | null => {
-        if (!json || typeof json !== 'object') return null;
-        return json as Address;
-    };
-
-    const shippingAddress = getAddress(order.shippingAddress);
 
     return (
         <div className="space-y-8 max-w-6xl mx-auto">

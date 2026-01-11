@@ -8,7 +8,8 @@
         "home": "الرئيسية",
         "products": "المنتجات",
         "categories": "التصنيفات",
-        "about": "قصتنا",
+        "about": "من نحن",
+        "contact": "اتصل بنا",
         "support": "الدعم",
         "faq": "الأسئلة الشائعة",
         "admin": "الإدارة",
@@ -35,7 +36,39 @@
     },
     "Shop": {
         "title": "المنتجات",
-        "subtitle": "استكشف اشتراكاتنا الرقمية المميزة"
+        "subtitle": "استكشف اشتراكاتنا الرقمية المميزة",
+        "searchPlaceholder": "ابحث عن المنتجات...",
+        "noResults": "لم يتم العثور على منتجات.",
+        "addedToCart": "تمت الإضافة إلى السلة",
+        "addToCart": "أضف إلى السلة",
+        "filters": "التصفية",
+        "platform": "المنصة",
+        "duration": "المدة",
+        "priceRange": "نطاق السعر",
+        "sortBy": "ترتيب حسب",
+        "newest": "الأحدث",
+        "priceLowHigh": "السعر: من الأقل إلى الأعلى",
+        "priceHighLow": "السعر: من الأعلى إلى الأقل",
+        "clearFilters": "مسح التصفية",
+        "showingResults": "عرض {count} نتيجة",
+        "save": "وفّر"
+    },
+    "Product": {
+        "reviews": "تقييمات",
+        "customerReviews": "تقييمات العملاء",
+        "relatedProducts": "منتجات ذات صلة",
+        "whySnowX": "لماذا SnowX؟",
+        "instantDelivery": "تسليم رقمي فوري",
+        "securePayment": "دفع آمن عبر Stripe",
+        "support247": "دعم على مدار الساعة",
+        "moneyBack": "ضمان استرجاع الأموال",
+        "premiumSubscription": "اشتراك مميز"
+    },
+    "Home": {
+        "bannerTitle": "عروض محدودة",
+        "shopByCategory": "تسوق حسب التصنيف",
+        "featuredItems": "منتجات مميزة",
+        "browseAll": "تصفح جميع المنتجات"
     },
     "Hero": {
         "title": "اشتراكات رقمية",
@@ -58,5 +91,47 @@
         "secureReliableDesc": "أمانك هو أولويتنا القصوى.",
         "expertSupport": "دعم الخبراء",
         "expertSupportDesc": "فريقنا هنا لمساعدتك على مدار الساعة."
+    },
+    "cart": {
+        "title": "سلة التسوق",
+        "emptyTitle": "سلتك فارغة",
+        "emptySubtitle": "يبدو أنك لم تضف أي شيء إلى سلتك بعد",
+        "shopNow": "تسوق الآن",
+        "subtotal": "المجموع الفرعي",
+        "total": "الإجمالي",
+        "checkout": "إتمام الشراء",
+        "clearCart": "إفراغ السلة"
+    },
+    "About": {
+        "title": "عن SnowX",
+        "subtitle": "شريكك الموثوق للاشتراكات الرقمية المميزة",
+        "mission": "مهمتنا",
+        "missionText": "في SnowX، نؤمن بأن الجميع يستحق الوصول إلى الخدمات الرقمية المميزة. نقدم اشتراكات أصلية بأسعار تنافسية مع تسليم فوري ودعم عالمي المستوى.",
+        "values": "قيمنا",
+        "quality": "الجودة أولاً",
+        "qualityDesc": "نقدم فقط اشتراكات موثقة وأصلية.",
+        "trust": "الثقة والأمان",
+        "trustDesc": "بياناتك ومدفوعاتك آمنة دائماً.",
+        "speed": "سرعة البرق",
+        "speedDesc": "تسليم فوري، بدون انتظار."
+    },
+    "Contact": {
+        "title": "اتصل بنا",
+        "subtitle": "يسعدنا سماعك",
+        "name": "الاسم",
+        "email": "البريد الإلكتروني",
+        "message": "الرسالة",
+        "send": "إرسال الرسالة",
+        "sending": "جاري الإرسال...",
+        "successTitle": "تم إرسال الرسالة!",
+        "successMessage": "سنتواصل معك قريباً.",
+        "errorTitle": "خطأ",
+        "errorMessage": "حدث خطأ ما. يرجى المحاولة مرة أخرى."
+    },
+    "Legal": {
+        "privacy": "سياسة الخصوصية",
+        "terms": "شروط الخدمة",
+        "refund": "سياسة الاسترجاع",
+        "lastUpdated": "آخر تحديث"
     }
 }

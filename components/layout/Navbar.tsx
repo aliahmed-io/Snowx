@@ -5,8 +5,8 @@ import { Link, usePathname, useRouter } from "@/navigation";
 import { useState, useEffect } from "react";
 import { useCurrency, CurrencyCode } from "@/components/providers/CurrencyProvider";
 import { useLocale, useTranslations } from "next-intl";
-import { LoginLink, RegisterLink, LogoutLink } from "@kinde-oss/kinde-auth-nextjs/components";
-import { ShoppingCart, User, Search } from "lucide-react";
+import { LoginLink, RegisterLink } from "@kinde-oss/kinde-auth-nextjs/components";
+import { ShoppingCart, Search } from "lucide-react";
 import { useCart } from "@/components/providers/CartProvider";
 import { UserDropdown } from "./UserDropdown";
 

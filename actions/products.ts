@@ -131,8 +131,10 @@ export async function getProductBySlug(slug: string) {
 
 export async function createProduct(data: {
     name: string;
+    nameAr?: string;
     slug: string;
     description: string;
+    descriptionAr?: string;
     price: number;
     discountPercentage?: number;
     images: string[];
@@ -146,8 +148,10 @@ export async function createProduct(data: {
     const product = await db.product.create({
         data: {
             name: data.name,
+            nameAr: data.nameAr,
             slug: data.slug,
             description: data.description,
+            descriptionAr: data.descriptionAr,
             price: data.price,
             discountPercentage: data.discountPercentage || 0,
             images: data.images,
@@ -169,8 +173,10 @@ export async function updateProduct(
     id: string,
     data: Partial<{
         name: string;
+        nameAr: string | null;
         slug: string;
         description: string;
+        descriptionAr: string | null;
         price: number;
         discountPercentage: number;
         images: string[];

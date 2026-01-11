@@ -22,7 +22,7 @@ export function AlertActions({ alertId, isRead }: AlertActionsProps) {
             await markAlertAsRead(alertId);
             router.refresh();
             toast.success("Alert marked as read");
-        } catch (error) {
+        } catch {
             toast.error("Failed to mark as read");
         } finally {
             setLoading(null);
@@ -35,7 +35,7 @@ export function AlertActions({ alertId, isRead }: AlertActionsProps) {
             await dismissAlert(alertId);
             router.refresh();
             toast.success("Alert dismissed");
-        } catch (error) {
+        } catch {
             toast.error("Failed to dismiss alert");
         } finally {
             setLoading(null);

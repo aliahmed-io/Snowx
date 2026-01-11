@@ -9,6 +9,7 @@
         "products": "Products",
         "categories": "Categories",
         "about": "About",
+        "contact": "Contact",
         "support": "Support",
         "faq": "FAQ",
         "admin": "Admin",
@@ -37,7 +38,31 @@
         "title": "Products",
         "subtitle": "Explore our premium digital subscriptions",
         "searchPlaceholder": "Search for products...",
-        "noResults": "No products found matching your search."
+        "noResults": "No products found matching your search.",
+        "addedToCart": "Added to cart",
+        "addToCart": "Add to Cart",
+        "filters": "Filters",
+        "platform": "Platform",
+        "duration": "Duration",
+        "priceRange": "Price Range",
+        "sortBy": "Sort By",
+        "newest": "Newest",
+        "priceLowHigh": "Price: Low to High",
+        "priceHighLow": "Price: High to Low",
+        "clearFilters": "Clear Filters",
+        "showingResults": "Showing {count} results",
+        "save": "Save"
+    },
+    "Product": {
+        "reviews": "reviews",
+        "customerReviews": "Customer Reviews",
+        "relatedProducts": "Related Products",
+        "whySnowX": "Why SnowX?",
+        "instantDelivery": "Instant digital delivery",
+        "securePayment": "Secure payment with Stripe",
+        "support247": "24/7 customer support",
+        "moneyBack": "Money-back guarantee",
+        "premiumSubscription": "Premium Subscription"
     },
     "Home": {
         "bannerTitle": "Limited Drops",
@@ -76,5 +101,37 @@
         "total": "Total",
         "checkout": "Checkout",
         "clearCart": "Clear Cart"
+    },
+    "About": {
+        "title": "About SnowX",
+        "subtitle": "Your trusted partner for premium digital subscriptions",
+        "mission": "Our Mission",
+        "missionText": "At SnowX, we believe everyone deserves access to premium digital services. We provide authentic subscriptions at competitive prices with instant delivery and world-class support.",
+        "values": "Our Values",
+        "quality": "Quality First",
+        "qualityDesc": "We only offer verified, genuine subscriptions.",
+        "trust": "Trust & Security",
+        "trustDesc": "Your data and payments are always secure.",
+        "speed": "Lightning Fast",
+        "speedDesc": "Instant delivery, no waiting around."
+    },
+    "Contact": {
+        "title": "Contact Us",
+        "subtitle": "We'd love to hear from you",
+        "name": "Name",
+        "email": "Email",
+        "message": "Message",
+        "send": "Send Message",
+        "sending": "Sending...",
+        "successTitle": "Message sent!",
+        "successMessage": "We'll get back to you soon.",
+        "errorTitle": "Error",
+        "errorMessage": "Something went wrong. Please try again."
+    },
+    "Legal": {
+        "privacy": "Privacy Policy",
+        "terms": "Terms of Service",
+        "refund": "Refund Policy",
+        "lastUpdated": "Last updated"
     }
 }

@@ -47,7 +47,7 @@ export function FilterSection({ title, description, type, options }: FilterSecti
             setIsAdding(false);
             router.refresh();
             toast.success(`${type === "duration" ? "Duration" : "Platform"} added`);
-        } catch (error) {
+        } catch {
             toast.error("Failed to add option");
         } finally {
             setLoading(null);
@@ -62,7 +62,7 @@ export function FilterSection({ title, description, type, options }: FilterSecti
             setEditingId(null);
             router.refresh();
             toast.success("Option updated");
-        } catch (error) {
+        } catch {
             toast.error("Failed to update option");
         } finally {
             setLoading(null);
@@ -74,7 +74,7 @@ export function FilterSection({ title, description, type, options }: FilterSecti
         try {
             await updateFilterOption(id, { isActive: !isActive });
             router.refresh();
-        } catch (error) {
+        } catch {
             toast.error("Failed to toggle option");
         } finally {
             setLoading(null);
@@ -88,7 +88,7 @@ export function FilterSection({ title, description, type, options }: FilterSecti
             await deleteFilterOption(id);
             router.refresh();
             toast.success("Option deleted");
-        } catch (error) {
+        } catch {
             toast.error("Failed to delete option");
         } finally {
             setLoading(null);
@@ -149,8 +149,8 @@ export function FilterSection({ title, description, type, options }: FilterSecti
                         <div
                             key={option.id}
                             className={`flex items-center gap-3 p-3 rounded-lg border transition-colors ${option.isActive
-                                    ? "bg-[#1e293b] border-[#1e293b]"
-                                    : "bg-[#1e293b]/50 border-[#1e293b]/50 opacity-60"
+                                ? "bg-[#1e293b] border-[#1e293b]"
+                                : "bg-[#1e293b]/50 border-[#1e293b]/50 opacity-60"
                                 }`}
                         >
                             <GripVertical className="w-4 h-4 text-slate-600 cursor-grab" />
