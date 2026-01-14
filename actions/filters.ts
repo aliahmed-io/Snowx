@@ -2,6 +2,7 @@
 
 import { db } from "@/lib/db";
 import { revalidatePath, revalidateTag } from "next/cache";
+import { requireAdmin } from "@/lib/auth";
 
 export type FilterType = "duration" | "platform" | "price_settings";
 
@@ -25,6 +26,7 @@ export async function createFilterOption(data: {
     label?: string;
     order?: number;
 }) {
+    await requireAdmin();
     const option = await db.filterOption.create({
         data: {
             type: data.type,
@@ -47,6 +49,7 @@ export async function updateFilterOption(
         isActive: boolean;
     }>
 ) {
+    await requireAdmin();
     const option = await db.filterOption.update({
         where: { id },
         data
@@ -57,6 +60,7 @@ export async function updateFilterOption(
 }
 
 export async function deleteFilterOption(id: string) {
+    await requireAdmin();
     await db.filterOption.delete({ where: { id } });
     revalidatePath("/admin/filters");
     revalidatePath("/products");

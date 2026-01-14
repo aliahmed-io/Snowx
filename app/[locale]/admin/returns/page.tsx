@@ -1,16 +1,9 @@
-"use client";
-
-import { useState } from "react";
+import { db } from "@/lib/db";
 import {
     Search,
     Filter,
-    Eye,
-    CheckCircle,
-    XCircle,
     Undo2,
-    AlertCircle
 } from "lucide-react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -21,71 +14,50 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-
 import { Badge } from "@/components/ui/badge";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from "@/components/ui/dialog";
+import { formatPrice } from "@/lib/utils";
+import { ReturnActions } from "./ReturnActions";
 
-// Placeholder type matches schema
-interface ReturnRequest {
-    id: string;
-    orderNumber: string;
-    customerEmail: string;
-    reason: string;
-    status: "PENDING" | "APPROVED" | "REJECTED" | "REFUNDED";
-    amount: number;
-    requestedAt: string;
+export const dynamic = "force-dynamic";
+
+async function getReturns() {
+    return db.returnRequest.findMany({
+        orderBy: { createdAt: "desc" },
+        include: {
+            order: {
+                select: {
+                    orderNumber: true,
+                    total: true
+                }
+            },
+            user: {
+                select: {
+                    email: true,
+                    firstName: true,
+                    lastName: true
+                }
+            }
+        }
+    });
 }
 
-export default function ReturnsPage() {
-    // Placeholder data
-    const [returns] = useState<ReturnRequest[]>([
-        {
-            id: "ret_1",
-            orderNumber: "ORD-001-234",
-            customerEmail: "alice@example.com",
-            reason: "Wrong size",
-            status: "PENDING",
-            amount: 129.99,
-            requestedAt: new Date().toISOString()
-        }
-    ]);
+function getStatusBadge(status: string) {
+    switch (status) {
+        case "PENDING":
+            return <Badge variant="outline" className="border-yellow-500/50 text-yellow-500 bg-yellow-500/10">Pending</Badge>;
+        case "APPROVED":
+            return <Badge variant="outline" className="border-blue-500/50 text-blue-500 bg-blue-500/10">Approved</Badge>;
+        case "REJECTED":
+            return <Badge variant="outline" className="border-red-500/50 text-red-500 bg-red-500/10">Rejected</Badge>;
+        case "REFUNDED":
+            return <Badge variant="outline" className="border-green-500/50 text-green-500 bg-green-500/10">Refunded</Badge>;
+        default:
+            return <Badge variant="secondary">{status}</Badge>;
+    }
+}
 
-    const [selectedReturn, setSelectedReturn] = useState<ReturnRequest | null>(null);
-    const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-
-    const handleAction = (id: string, action: string) => {
-        toast.promise(
-            new Promise((resolve) => setTimeout(resolve, 1000)),
-            {
-                loading: `${action} return request...`,
-                success: `Return request ${action.toLowerCase()} successfully`,
-                error: `Failed to ${action.toLowerCase()} request`
-            }
-        );
-        setIsDetailsOpen(false);
-    };
-
-    const getStatusBadge = (status: string) => {
-        switch (status) {
-            case "PENDING":
-                return <Badge variant="outline" className="border-yellow-500/50 text-yellow-500 bg-yellow-500/10">Pending</Badge>;
-            case "APPROVED":
-                return <Badge variant="outline" className="border-blue-500/50 text-blue-500 bg-blue-500/10">Approved</Badge>;
-            case "REJECTED":
-                return <Badge variant="outline" className="border-red-500/50 text-red-500 bg-red-500/10">Rejected</Badge>;
-            case "REFUNDED":
-                return <Badge variant="outline" className="border-green-500/50 text-green-500 bg-green-500/10">Refunded</Badge>;
-            default:
-                return <Badge variant="secondary">{status}</Badge>;
-        }
-    };
+export default async function ReturnsPage() {
+    const returns = await getReturns();
 
     return (
         <div className="space-y-6">
@@ -140,27 +112,32 @@ export default function ReturnsPage() {
                         ) : (
                             returns.map((request) => (
                                 <TableRow key={request.id} className="border-b border-[#1e293b] hover:bg-[#1e293b]/50">
-                                    <TableCell className="font-mono text-slate-300">{request.orderNumber}</TableCell>
-                                    <TableCell className="text-slate-300">{request.customerEmail}</TableCell>
-                                    <TableCell className="text-slate-400 truncate max-w-[200px]">{request.reason}</TableCell>
-                                    <TableCell className="text-slate-300">${request.amount.toFixed(2)}</TableCell>
+                                    <TableCell className="font-mono text-slate-300">
+                                        {request.order.orderNumber.slice(0, 12)}
+                                    </TableCell>
+                                    <TableCell className="text-slate-300">
+                                        {request.user.email}
+                                    </TableCell>
+                                    <TableCell className="text-slate-400 truncate max-w-[200px]">
+                                        {request.reason}
+                                    </TableCell>
+                                    <TableCell className="text-slate-300">
+                                        {formatPrice(Number(request.order.total))}
+                                    </TableCell>
                                     <TableCell>{getStatusBadge(request.status)}</TableCell>
                                     <TableCell className="text-slate-400 text-sm">
-                                        {new Date(request.requestedAt).toLocaleDateString()}
+                                        {new Date(request.createdAt).toLocaleDateString()}
                                     </TableCell>
                                     <TableCell className="text-right">
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            className="text-slate-400 hover:text-white"
-                                            onClick={() => {
-                                                setSelectedReturn(request);
-                                                setIsDetailsOpen(true);
-                                            }}
-                                        >
-                                            <Eye className="w-4 h-4 mr-1" />
-                                            Details
-                                        </Button>
+                                        <ReturnActions
+                                            returnId={request.id}
+                                            status={request.status}
+                                            orderNumber={request.order.orderNumber}
+                                            customerEmail={request.user.email}
+                                            reason={request.reason}
+                                            amount={Number(request.order.total)}
+                                            requestedAt={request.createdAt.toISOString()}
+                                        />
                                     </TableCell>
                                 </TableRow>
                             ))
@@ -168,69 +145,6 @@ export default function ReturnsPage() {
                     </TableBody>
                 </Table>
             </div>
-
-            {/* Details Dialog */}
-            <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
-                <DialogContent className="bg-[#0f172a] border-[#1e293b] text-white sm:max-w-[600px]">
-                    <DialogHeader>
-                        <DialogTitle>Return Details</DialogTitle>
-                        <DialogDescription className="text-slate-400">
-                            Review return request for Order #{selectedReturn?.orderNumber}
-                        </DialogDescription>
-                    </DialogHeader>
-
-                    {selectedReturn && (
-                        <div className="space-y-6 py-4">
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-1">
-                                    <h4 className="text-sm font-medium text-slate-400">Customer</h4>
-                                    <p className="text-sm text-white">{selectedReturn.customerEmail}</p>
-                                </div>
-                                <div className="space-y-1">
-                                    <h4 className="text-sm font-medium text-slate-400">Date Requested</h4>
-                                    <p className="text-sm text-white">{new Date(selectedReturn.requestedAt).toLocaleString()}</p>
-                                </div>
-                                <div className="space-y-1">
-                                    <h4 className="text-sm font-medium text-slate-400">Refund Amount</h4>
-                                    <p className="text-lg font-semibold text-white">${selectedReturn.amount.toFixed(2)}</p>
-                                </div>
-                                <div className="space-y-1">
-                                    <h4 className="text-sm font-medium text-slate-400">Status</h4>
-                                    <div>{getStatusBadge(selectedReturn.status)}</div>
-                                </div>
-                            </div>
-
-                            <div className="bg-[#1e293b]/50 p-4 rounded-lg space-y-2">
-                                <h4 className="text-sm font-medium text-slate-300 flex items-center gap-2">
-                                    <AlertCircle className="w-4 h-4" />
-                                    Reason for Return
-                                </h4>
-                                <p className="text-sm text-slate-400">{selectedReturn.reason}</p>
-                            </div>
-
-                            {selectedReturn.status === "PENDING" && (
-                                <DialogFooter className="gap-2 sm:gap-0">
-                                    <Button
-                                        variant="outline"
-                                        className="border-red-900/50 text-red-500 hover:bg-red-950 hover:text-red-400 hover:border-red-800"
-                                        onClick={() => handleAction(selectedReturn.id, "Rejected")}
-                                    >
-                                        <XCircle className="w-4 h-4 mr-2" />
-                                        Reject Request
-                                    </Button>
-                                    <Button
-                                        className="bg-green-600 hover:bg-green-700 text-white"
-                                        onClick={() => handleAction(selectedReturn.id, "Approved")}
-                                    >
-                                        <CheckCircle className="w-4 h-4 mr-2" />
-                                        Approve Refund
-                                    </Button>
-                                </DialogFooter>
-                            )}
-                        </div>
-                    )}
-                </DialogContent>
-            </Dialog>
         </div>
     );
 }

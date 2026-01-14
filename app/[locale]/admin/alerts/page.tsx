@@ -8,7 +8,6 @@ import {
     Lock,
     Check
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import {
     Card,
     CardContent,
@@ -19,6 +18,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AlertActions } from "./AlertActions";
+import { SecurityAuditButton, LockdownButton } from "./SecurityButtons";
 
 export const dynamic = "force-dynamic";
 
@@ -134,10 +134,7 @@ export default async function SecurityAlertsPage() {
                             </div>
                         </CardContent>
                         <CardFooter>
-                            <Button className="w-full bg-[#1e293b] hover:bg-[#2d3a4f] text-white">
-                                <ShieldCheck className="w-4 h-4 mr-2" />
-                                Run Security Audit
-                            </Button>
+                            <SecurityAuditButton />
                         </CardFooter>
                     </Card>
 
@@ -147,10 +144,7 @@ export default async function SecurityAlertsPage() {
                             <CardDescription className="text-slate-400">Lock down system if under attack</CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <Button variant="destructive" className="w-full bg-red-900/80 hover:bg-red-800 text-white">
-                                <Lock className="w-4 h-4 mr-2" />
-                                Enable Lockdown Mode
-                            </Button>
+                            <LockdownButton />
                         </CardContent>
                     </Card>
                 </div>

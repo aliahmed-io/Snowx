@@ -1,25 +1,10 @@
-"use client";
-
-import { useState, FormEvent } from "react";
+import { db } from "@/lib/db";
 import {
     Send,
-    MoreHorizontal,
-    Trash2,
-    Copy,
-    RefreshCw
+    RefreshCw,
+    Download
 } from "lucide-react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table";
 import {
     Card,
     CardContent,
@@ -34,70 +19,60 @@ import {
     TabsTrigger,
 } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { AutoRefresh } from "@/components/admin/AutoRefresh";
+import Link from "next/link";
+import { CampaignForm } from "./CampaignForm";
+import { SubscriberTable } from "./SubscriberTable";
 
-interface Subscriber {
-    id: string;
-    email: string;
-    status: "subscribed" | "unsubscribed";
-    joinedAt: string;
-}
+export const dynamic = "force-dynamic";
 
-interface Campaign {
-    id: string;
-    subject: string;
-    sentAt: string | null;
-    status: "draft" | "sent";
-    recipients: number;
-    openRate?: string;
-}
-
-export default function EmailPage() {
-
-    // Placeholder data
-    const [subscribers] = useState<Subscriber[]>([
-        { id: "sub_1", email: "alex@example.com", status: "subscribed", joinedAt: "2026-01-03T09:00:00.000Z" },
-        { id: "sub_2", email: "sarah@design.co", status: "subscribed", joinedAt: "2025-12-27T09:00:00.000Z" },
-        { id: "sub_3", email: "mike@tech.io", status: "unsubscribed", joinedAt: "2025-11-24T09:00:00.000Z" },
-        { id: "sub_4", email: "emma@snowx.com", status: "subscribed", joinedAt: "2026-01-06T09:00:00.000Z" },
-    ]);
-
-    const [campaigns] = useState<Campaign[]>([
-        { id: "cam_1", subject: "Winter Collection Early Access", sentAt: "2026-01-06T09:00:00.000Z", status: "sent", recipients: 2450, openRate: "42%" },
-        { id: "cam_2", subject: "New Features Update", sentAt: null, status: "draft", recipients: 0 },
-    ]);
-
-    const handleSendCampaign = (e: FormEvent) => {
-        e.preventDefault();
-        toast.promise(
-            new Promise((resolve) => setTimeout(resolve, 2000)),
-            {
-                loading: 'Sending campaign...',
-                success: 'Campaign scheduled for delivery!',
-                error: 'Failed to send campaign'
+async function getEmailData() {
+    const [subscribers, campaigns] = await Promise.all([
+        db.newsletterSubscriber.findMany({
+            orderBy: { createdAt: "desc" },
+            include: {
+                user: {
+                    select: { firstName: true, lastName: true }
+                }
             }
-        );
-    };
+        }),
+        db.broadcast.findMany({
+            where: { type: "EMAIL" },
+            orderBy: { createdAt: "desc" },
+            take: 10
+        })
+    ]);
+
+    return { subscribers, campaigns };
+}
+
+export default async function EmailPage() {
+    const { subscribers, campaigns } = await getEmailData();
+
+    const activeSubscribers = subscribers.filter(s => s.status === "subscribed");
 
     return (
         <div className="space-y-6">
+            <AutoRefresh intervalMs={30000} />
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-bold text-white tracking-tight">Email Marketing</h1>
                     <p className="text-slate-400 mt-1">Manage newsletters and subscriber campaigns</p>
                 </div>
+                <Link href="/api/admin/export/subscribers" target="_blank">
+                    <Button variant="outline" className="border-[#1e293b] text-slate-300 hover:bg-[#1e293b] hover:text-white gap-2">
+                        <Download className="w-4 h-4" />
+                        Export Subscribers
+                    </Button>
+                </Link>
             </div>
 
             <Tabs defaultValue="campaigns" className="space-y-4">
                 <TabsList className="bg-[#0f172a] border border-[#1e293b]">
                     <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
-                    <TabsTrigger value="subscribers">Subscribers</TabsTrigger>
+                    <TabsTrigger value="subscribers">
+                        Subscribers ({activeSubscribers.length})
+                    </TabsTrigger>
                 </TabsList>
 
                 {/* Campaigns Tab */}
@@ -111,30 +86,11 @@ export default function EmailPage() {
                                     New Campaign
                                 </CardTitle>
                                 <CardDescription className="text-slate-400">
-                                    Create and send emails to your subscribers
+                                    Create and send emails to your {activeSubscribers.length} subscribers
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>
-                                <form onSubmit={handleSendCampaign} className="space-y-4">
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-medium text-slate-300">Subject Line</label>
-                                        <Input placeholder="Enter a catchy subject..." className="bg-[#1e293b] border-[#020817] text-white focus-visible:ring-blue-600" required />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-medium text-slate-300">Content</label>
-                                        <Textarea placeholder="Write your email content here (Markdown supported)..." rows={10} className="bg-[#1e293b] border-[#020817] text-white focus-visible:ring-blue-600 font-mono text-sm" required />
-                                    </div>
-                                    <div className="flex justify-between items-center pt-2">
-                                        <p className="text-xs text-slate-500">Targeting: All Subscribers ({subscribers.filter(s => s.status === 'subscribed').length})</p>
-                                        <div className="flex gap-2">
-                                            <Button type="button" variant="outline" className="border-[#1e293b] text-slate-300 hover:bg-[#1e293b] hover:text-white">Save Draft</Button>
-                                            <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
-                                                <Send className="w-4 h-4 mr-2" />
-                                                Send Now
-                                            </Button>
-                                        </div>
-                                    </div>
-                                </form>
+                                <CampaignForm subscriberCount={activeSubscribers.length} />
                             </CardContent>
                         </Card>
 
@@ -145,21 +101,27 @@ export default function EmailPage() {
                                     <CardTitle className="text-white text-lg">History</CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-4">
-                                    {campaigns.map((camp) => (
-                                        <div key={camp.id} className="p-3 bg-[#1e293b]/30 rounded-lg border border-[#1e293b] space-y-2">
-                                            <div className="flex items-start justify-between">
-                                                <h4 className="text-sm font-medium text-white line-clamp-1 mr-2">{camp.subject}</h4>
-                                                <Badge variant="secondary" className={`text-[10px] px-1.5 py-0 ${camp.status === 'sent' ? 'bg-green-500/10 text-green-500' : 'bg-slate-500/10 text-slate-400'}`}>
-                                                    {camp.status}
-                                                </Badge>
-                                            </div>
-                                            <div className="flex items-center justify-between text-xs text-slate-500">
-                                                <span>{camp.sentAt ? new Date(camp.sentAt).toLocaleDateString() : 'Last edited just now'}</span>
-                                                {camp.openRate && <span>Open Rate: {camp.openRate}</span>}
-                                            </div>
-                                        </div>
-                                    ))}
-                                    <Button variant="ghost" className="w-full text-sm text-slate-400 hover:text-white">View All History</Button>
+                                    {campaigns.length === 0 ? (
+                                        <p className="text-slate-500 text-sm">No campaigns sent yet</p>
+                                    ) : (
+                                        campaigns.map((camp) => {
+                                            const stats = camp.stats as { sent?: number; opened?: number } | null;
+                                            return (
+                                                <div key={camp.id} className="p-3 bg-[#1e293b]/30 rounded-lg border border-[#1e293b] space-y-2">
+                                                    <div className="flex items-start justify-between">
+                                                        <h4 className="text-sm font-medium text-white line-clamp-1 mr-2">{camp.subject}</h4>
+                                                        <Badge variant="secondary" className="text-[10px] px-1.5 py-0 bg-green-500/10 text-green-500">
+                                                            sent
+                                                        </Badge>
+                                                    </div>
+                                                    <div className="flex items-center justify-between text-xs text-slate-500">
+                                                        <span>{camp.sentAt ? new Date(camp.sentAt).toLocaleDateString() : 'Draft'}</span>
+                                                        {stats?.sent && <span>Sent to: {stats.sent}</span>}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })
+                                    )}
                                 </CardContent>
                             </Card>
                         </div>
@@ -180,51 +142,13 @@ export default function EmailPage() {
                             </Button>
                         </CardHeader>
                         <CardContent>
-                            <div className="rounded-md border border-[#1e293b] overflow-hidden">
-                                <Table>
-                                    <TableHeader className="bg-[#1e293b]">
-                                        <TableRow className="border-b border-[#020817] hover:bg-transparent">
-                                            <TableHead className="text-slate-300">Email</TableHead>
-                                            <TableHead className="text-slate-300">Status</TableHead>
-                                            <TableHead className="text-slate-300">Joined</TableHead>
-                                            <TableHead className="text-right text-slate-300">Actions</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {subscribers.map((sub) => (
-                                            <TableRow key={sub.id} className="border-b border-[#1e293b] hover:bg-[#1e293b]/50 last:border-0">
-                                                <TableCell className="font-medium text-slate-200">{sub.email}</TableCell>
-                                                <TableCell>
-                                                    <Badge variant="outline" className={`border-0 ${sub.status === 'subscribed' ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
-                                                        {sub.status}
-                                                    </Badge>
-                                                </TableCell>
-                                                <TableCell className="text-slate-400 text-sm">{new Date(sub.joinedAt).toLocaleDateString()}</TableCell>
-                                                <TableCell className="text-right">
-                                                    <DropdownMenu>
-                                                        <DropdownMenuTrigger asChild>
-                                                            <Button variant="ghost" className="h-8 w-8 p-0 text-slate-400 hover:text-white">
-                                                                <MoreHorizontal className="w-4 h-4" />
-                                                            </Button>
-                                                        </DropdownMenuTrigger>
-                                                        <DropdownMenuContent align="end" className="bg-[#1e293b] border-[#020817] text-slate-200">
-                                                            <DropdownMenuItem className="cursor-pointer">
-                                                                <Copy className="mr-2 h-4 w-4" />
-                                                                Copy Email
-                                                            </DropdownMenuItem>
-                                                            <DropdownMenuSeparator className="bg-[#020817]" />
-                                                            <DropdownMenuItem className="text-red-400 cursor-pointer focus:bg-red-900/20 focus:text-red-300">
-                                                                <Trash2 className="mr-2 h-4 w-4" />
-                                                                Remove
-                                                            </DropdownMenuItem>
-                                                        </DropdownMenuContent>
-                                                    </DropdownMenu>
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </div>
+                            <SubscriberTable subscribers={subscribers.map(s => ({
+                                id: s.id,
+                                email: s.email,
+                                status: s.status,
+                                userName: s.user ? `${s.user.firstName || ''} ${s.user.lastName || ''}`.trim() : null,
+                                joinedAt: s.createdAt.toISOString()
+                            }))} />
                         </CardContent>
                     </Card>
                 </TabsContent>

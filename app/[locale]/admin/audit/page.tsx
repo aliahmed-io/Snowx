@@ -7,10 +7,13 @@ import {
     Package,
     Settings,
     Download,
-    Upload,
     ChevronDown,
     ChevronUp,
-    Clock
+    Clock,
+    AlertTriangle,
+    CheckCircle,
+    Filter,
+    Activity
 } from "lucide-react";
 import {
     Table,
@@ -21,6 +24,7 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 
 export const dynamic = "force-dynamic";
 
@@ -91,17 +95,47 @@ function MetadataDisplay({ metadata }: { metadata: unknown }) {
     );
 }
 
-export default async function AuditLogsPage() {
-    // Fetch real audit logs from database
+interface AuditPageProps {
+    searchParams: Promise<{ type?: string; severity?: string }>;
+}
+
+export default async function AuditLogsPage({ searchParams }: AuditPageProps) {
+    const params = await searchParams;
+    const typeFilter = params.type;
+    const severityFilter = params.severity;
+
+    // Fetch real audit logs from database with optional filters
     const logs = await db.auditLog.findMany({
         orderBy: { createdAt: "desc" },
-        take: 50,
+        take: 100,
+        where: typeFilter ? { targetType: typeFilter } : undefined,
         include: {
             user: {
                 select: { email: true, firstName: true, lastName: true, role: true }
             }
         }
     });
+
+    // Filter by severity if specified
+    const getSeverityFromAction = (action: string) => {
+        if (action.includes("DELETE") || action.includes("FAILED")) return "critical";
+        if (action.includes("UPDATE") || action.includes("REFUND")) return "warning";
+        return "info";
+    };
+
+    const filteredLogs = severityFilter
+        ? logs.filter(log => getSeverityFromAction(log.action) === severityFilter)
+        : logs;
+
+    // Calculate stats
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const thisWeek = new Date();
+    thisWeek.setDate(thisWeek.getDate() - 7);
+
+    const todayLogs = logs.filter(log => new Date(log.createdAt) >= today);
+    const weekLogs = logs.filter(log => new Date(log.createdAt) >= thisWeek);
+    const criticalLogs = logs.filter(log => getSeverityFromAction(log.action) === "critical");
 
     const getActionIcon = (type: string) => {
         switch (type) {
@@ -112,12 +146,6 @@ export default async function AuditLogsPage() {
             case "SYSTEM": return <Settings className="w-4 h-4 text-slate-400" />;
             default: return <FileText className="w-4 h-4 text-slate-400" />;
         }
-    };
-
-    const getSeverityFromAction = (action: string) => {
-        if (action.includes("DELETE") || action.includes("FAILED")) return "critical";
-        if (action.includes("UPDATE") || action.includes("REFUND")) return "warning";
-        return "info";
     };
 
     const getSeverityBadge = (action: string) => {
@@ -137,6 +165,9 @@ export default async function AuditLogsPage() {
         return { name, role: user.role, email: user.email };
     };
 
+    // Get unique types for filter
+    const uniqueTypes = Array.from(new Set(logs.map(log => log.targetType)));
+
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -145,13 +176,6 @@ export default async function AuditLogsPage() {
                     <p className="text-slate-400 mt-1">Track administrative actions and system changes</p>
                 </div>
                 <div className="flex gap-2">
-                    <label
-                        className="inline-flex items-center justify-center rounded-md border border-[#1e293b] bg-transparent px-4 py-2 text-sm font-medium text-slate-300 hover:bg-[#1e293b] hover:text-white gap-2 transition-colors cursor-pointer"
-                    >
-                        <Upload className="w-4 h-4" />
-                        Import CSV
-                        <input type="file" accept=".csv" className="hidden" />
-                    </label>
                     <a
                         href="/api/admin/export/audit"
                         download
@@ -161,6 +185,104 @@ export default async function AuditLogsPage() {
                         Export CSV
                     </a>
                 </div>
+            </div>
+
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <Card className="bg-[#0a1628] border-snow-primary/20">
+                    <CardContent className="p-4 flex items-center gap-4">
+                        <div className="p-3 rounded-lg bg-blue-500/10">
+                            <Activity className="w-5 h-5 text-blue-400" />
+                        </div>
+                        <div>
+                            <p className="text-2xl font-bold text-white">{todayLogs.length}</p>
+                            <p className="text-xs text-slate-400">Actions Today</p>
+                        </div>
+                    </CardContent>
+                </Card>
+                <Card className="bg-[#0a1628] border-snow-primary/20">
+                    <CardContent className="p-4 flex items-center gap-4">
+                        <div className="p-3 rounded-lg bg-green-500/10">
+                            <CheckCircle className="w-5 h-5 text-green-400" />
+                        </div>
+                        <div>
+                            <p className="text-2xl font-bold text-white">{weekLogs.length}</p>
+                            <p className="text-xs text-slate-400">This Week</p>
+                        </div>
+                    </CardContent>
+                </Card>
+                <Card className="bg-[#0a1628] border-snow-primary/20">
+                    <CardContent className="p-4 flex items-center gap-4">
+                        <div className="p-3 rounded-lg bg-red-500/10">
+                            <AlertTriangle className="w-5 h-5 text-red-400" />
+                        </div>
+                        <div>
+                            <p className="text-2xl font-bold text-white">{criticalLogs.length}</p>
+                            <p className="text-xs text-slate-400">Critical Actions</p>
+                        </div>
+                    </CardContent>
+                </Card>
+                <Card className="bg-[#0a1628] border-snow-primary/20">
+                    <CardContent className="p-4 flex items-center gap-4">
+                        <div className="p-3 rounded-lg bg-purple-500/10">
+                            <User className="w-5 h-5 text-purple-400" />
+                        </div>
+                        <div>
+                            <p className="text-2xl font-bold text-white">
+                                {new Set(logs.map(l => l.userId).filter(Boolean)).size}
+                            </p>
+                            <p className="text-xs text-slate-400">Active Users</p>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+
+            {/* Filters */}
+            <div className="flex gap-2 flex-wrap items-center">
+                <div className="flex items-center gap-2 text-sm text-slate-400">
+                    <Filter className="w-4 h-4" />
+                    <span>Filter by:</span>
+                </div>
+                <a
+                    href="/admin/audit"
+                    className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${!typeFilter && !severityFilter
+                        ? 'bg-snow-accent text-[#020817]'
+                        : 'bg-[#1e293b] text-slate-300 hover:bg-[#2d3a4f]'
+                        }`}
+                >
+                    All
+                </a>
+                {uniqueTypes.map(type => (
+                    <a
+                        key={type}
+                        href={`/admin/audit?type=${type}`}
+                        className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${typeFilter === type
+                            ? 'bg-snow-accent text-[#020817]'
+                            : 'bg-[#1e293b] text-slate-300 hover:bg-[#2d3a4f]'
+                            }`}
+                    >
+                        {type}
+                    </a>
+                ))}
+                <div className="w-px h-6 bg-slate-700 mx-2" />
+                <a
+                    href="/admin/audit?severity=critical"
+                    className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${severityFilter === 'critical'
+                        ? 'bg-red-500 text-white'
+                        : 'bg-red-500/10 text-red-400 hover:bg-red-500/20'
+                        }`}
+                >
+                    Critical Only
+                </a>
+                <a
+                    href="/admin/audit?severity=warning"
+                    className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${severityFilter === 'warning'
+                        ? 'bg-yellow-500 text-[#020817]'
+                        : 'bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500/20'
+                        }`}
+                >
+                    Warnings
+                </a>
             </div>
 
             {/* Logs Table */}
@@ -177,14 +299,16 @@ export default async function AuditLogsPage() {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {logs.length === 0 ? (
+                        {filteredLogs.length === 0 ? (
                             <TableRow>
                                 <TableCell colSpan={6} className="text-center py-8 text-slate-500">
-                                    No audit logs found. Actions will appear here as they occur.
+                                    {logs.length === 0
+                                        ? "No audit logs found. Actions will appear here as they occur."
+                                        : "No logs match the selected filters."}
                                 </TableCell>
                             </TableRow>
                         ) : (
-                            logs.map((log) => {
+                            filteredLogs.map((log) => {
                                 const admin = getAdminName(log.user);
                                 return (
                                     <TableRow key={log.id} className="border-b border-[#1e293b] hover:bg-[#1e293b]/50">
@@ -211,10 +335,10 @@ export default async function AuditLogsPage() {
                                                     <Badge
                                                         variant="outline"
                                                         className={`text-[10px] px-1.5 py-0 border-0 ${admin.role === 'ADMIN'
-                                                                ? 'bg-purple-500/10 text-purple-400'
-                                                                : admin.role === 'SYSTEM'
-                                                                    ? 'bg-slate-500/10 text-slate-400'
-                                                                    : 'bg-blue-500/10 text-blue-400'
+                                                            ? 'bg-purple-500/10 text-purple-400'
+                                                            : admin.role === 'SYSTEM'
+                                                                ? 'bg-slate-500/10 text-slate-400'
+                                                                : 'bg-blue-500/10 text-blue-400'
                                                             }`}
                                                     >
                                                         {admin.role}
@@ -250,6 +374,13 @@ export default async function AuditLogsPage() {
                     </TableBody>
                 </Table>
             </div>
+
+            {/* Footer */}
+            <div className="flex items-center justify-between text-sm text-slate-500">
+                <span>Showing {filteredLogs.length} of {logs.length} logs</span>
+                <span>Last 100 entries</span>
+            </div>
         </div>
     );
 }
+

@@ -59,3 +59,98 @@ export async function submitContactForm(prevState: { error?: string; success?: s
         return { error: "Failed to send message. Please try again later." };
     }
 }
+
+// Admin functions for managing contacts
+import { requireAdmin } from "@/lib/auth";
+
+export async function getContacts(search?: string) {
+    await requireAdmin();
+    return db.contact.findMany({
+        orderBy: { createdAt: "desc" },
+        where: search ? {
+            OR: [
+                { name: { contains: search, mode: 'insensitive' } },
+                { email: { contains: search, mode: 'insensitive' } },
+                { subject: { contains: search, mode: 'insensitive' } }
+            ]
+        } : undefined
+    });
+}
+
+export async function updateContactStatus(id: string, status: "PENDING" | "COMPLETED" | "IGNORED") {
+    await requireAdmin();
+    await db.contact.update({
+        where: { id },
+        data: { status, isRead: true }
+    });
+    revalidatePath("/admin/contact");
+}
+
+export async function markContactAsRead(id: string) {
+    await requireAdmin();
+    await db.contact.update({
+        where: { id },
+        data: { isRead: true }
+    });
+    revalidatePath("/admin/contact");
+}
+
+export async function deleteContact(id: string) {
+    await requireAdmin();
+    await db.contact.delete({
+        where: { id }
+    });
+    revalidatePath("/admin/contact");
+}
+
+export async function bulkDeleteContacts(ids: string[]) {
+    await requireAdmin();
+    await db.contact.deleteMany({
+        where: { id: { in: ids } }
+    });
+    revalidatePath("/admin/contact");
+}
+
+export async function bulkUpdateContactStatus(ids: string[], status: "PENDING" | "COMPLETED" | "IGNORED") {
+    await requireAdmin();
+    await db.contact.updateMany({
+        where: { id: { in: ids } },
+        data: { status, isRead: true }
+    });
+    revalidatePath("/admin/contact");
+}
+
+export async function replyToContact(id: string, replyMessage: string) {
+    await requireAdmin();
+    const contact = await db.contact.findUnique({ where: { id } });
+
+    if (!contact) {
+        throw new Error("Contact not found");
+    }
+
+    // Send reply email
+    await sendEmail({
+        to: contact.email,
+        subject: `Re: ${contact.subject}`,
+        html: `
+            <p>Hi ${contact.name},</p>
+            <br/>
+            <p>${replyMessage.replace(/\n/g, '<br/>')}</p>
+            <br/>
+            <p>Best regards,<br/>SnowX Team</p>
+            <hr/>
+            <p style="color: #666; font-size: 12px;">Original message: ${contact.message}</p>
+        `
+    });
+
+    // Update status
+    await db.contact.update({
+        where: { id },
+        data: { status: "COMPLETED", isRead: true }
+    });
+
+    revalidatePath("/admin/contact");
+    return { success: true };
+}
+
+

@@ -5,6 +5,7 @@ import { StatsCard } from "@/components/admin/StatsCard";
 import { SystemHealth } from "@/components/admin/SystemHealth";
 import { RecentSales } from "@/components/admin/RecentSales";
 import { AnalyticsCharts } from "@/components/admin/AnalyticsCharts";
+import { AutoRefresh } from "@/components/admin/AutoRefresh";
 import {
     Users,
     DollarSign,
@@ -115,6 +116,7 @@ async function getStats() {
     return {
         totalSales: orderStats._count.id,
         totalRevenue: Number(orderStats._sum.total || 0),
+        weeklyRevenue: thisWeekRevenueVal,
         totalUsers: userCount,
         totalProducts: productStats,
         recentOrders,
@@ -133,15 +135,16 @@ export default async function AdminDashboard() {
 
     return (
         <div className="space-y-8">
+            <AutoRefresh intervalMs={30000} />
             <SystemHealth />
 
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <StatsCard
-                    title="Total Revenue"
-                    value={formatPrice(stats.totalRevenue)}
+                    title="Weekly Revenue"
+                    value={formatPrice(stats.weeklyRevenue)}
                     icon={DollarSign}
-                    description="Based on all charges"
+                    description="Revenue this week"
                     trend={stats.revenueChange !== 0 ? {
                         value: Math.abs(stats.revenueChange),
                         label: "vs last week",

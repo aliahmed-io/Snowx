@@ -2,6 +2,7 @@
 
 import { db } from "@/lib/db";
 import { revalidatePath, revalidateTag } from "next/cache";
+import { requireAdmin } from "@/lib/auth";
 
 export async function getCategories() {
     const categories = await db.category.findMany({
@@ -28,6 +29,7 @@ export async function createCategory(data: {
     description?: string;
     image?: string;
 }) {
+    await requireAdmin();
     const category = await db.category.create({ data });
     revalidatePath("/admin/categories");
     revalidatePath("/admin/products");
@@ -44,6 +46,7 @@ export async function updateCategory(
         image: string | null;
     }>
 ) {
+    await requireAdmin();
     const category = await db.category.update({
         where: { id },
         data,
@@ -56,6 +59,7 @@ export async function updateCategory(
 }
 
 export async function deleteCategory(id: string) {
+    await requireAdmin();
     await db.category.delete({ where: { id } });
     revalidatePath("/admin/categories");
     revalidatePath("/admin/products");
@@ -63,3 +67,4 @@ export async function deleteCategory(id: string) {
     // @ts-ignore
     revalidateTag("categories");
 }
+
