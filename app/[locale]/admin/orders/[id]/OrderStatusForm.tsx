@@ -1,8 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { OrderStatus } from "@prisma/client";
+// Remove Prisma import to fix build error
+// import { OrderStatus } from "@prisma/client";
 import { updateOrderStatus } from "@/actions/admin";
+
+// Define local type matching Prisma enum
+type OrderStatus = "PENDING" | "PROCESSING" | "DELIVERED" | "CANCELLED" | "REFUNDED";
 
 interface OrderStatusFormProps {
     orderId: string;
@@ -13,12 +17,12 @@ export function OrderStatusForm({ orderId, initialStatus }: OrderStatusFormProps
     const [status, setStatus] = useState<OrderStatus>(initialStatus);
     const [isLoading, setIsLoading] = useState(false);
 
-    const statusOptions = [
-        { value: OrderStatus.PENDING, label: "Pending Payment" },
-        { value: OrderStatus.PROCESSING, label: "Processing" },
-        { value: OrderStatus.DELIVERED, label: "Completed (Email Sent)" },
-        { value: OrderStatus.CANCELLED, label: "Cancelled" },
-        { value: OrderStatus.REFUNDED, label: "Refunded" },
+    const statusOptions: { value: OrderStatus, label: string }[] = [
+        { value: "PENDING", label: "Pending Payment" },
+        { value: "PROCESSING", label: "Processing" },
+        { value: "DELIVERED", label: "Completed (Email Sent)" },
+        { value: "CANCELLED", label: "Cancelled" },
+        { value: "REFUNDED", label: "Refunded" },
     ];
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -41,6 +45,7 @@ export function OrderStatusForm({ orderId, initialStatus }: OrderStatusFormProps
                     value={status}
                     onChange={(e) => setStatus(e.target.value as OrderStatus)}
                     disabled={isLoading}
+                    className="w-full bg-[#0f172a] border border-gray-700 text-white rounded-lg p-2.5"
                 >
                     {statusOptions.map((option) => (
                         <option key={option.value} value={option.value}>
