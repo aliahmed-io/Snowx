@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import { formatPrice } from "@/lib/utils";
+import { getChartData } from "@/lib/analytics";
 import { StatsCard } from "@/components/admin/StatsCard";
 import { SystemHealth } from "@/components/admin/SystemHealth";
 import { RecentSales } from "@/components/admin/RecentSales";
@@ -13,13 +14,27 @@ import {
 import { OrderStatus, Order, User } from "@prisma/client";
 
 async function getStats() {
-    // 1. Parallel data fetching
+    const now = new Date();
+    const oneWeekAgo = new Date(now);
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+    const twoWeeksAgo = new Date(now);
+    twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
+
+    // Parallel data fetching
     const [
         orderStats,
         userCount,
         productStats,
         recentOrders,
-        revenueByDay
+        chartData,
+        // This week's data
+        thisWeekRevenue,
+        thisWeekSales,
+        thisWeekUsers,
+        // Last week's data
+        lastWeekRevenue,
+        lastWeekSales,
+        lastWeekUsers
     ] = await Promise.all([
         // Order Stats (Total count and Revenue)
         db.order.aggregate({
@@ -40,36 +55,62 @@ async function getStats() {
             include: { User: true },
             where: { status: { not: OrderStatus.PENDING } }
         }) as Promise<(Order & { User: User | null })[]>,
-        // Revenue Graph Data
-        db.dailyStat.findMany({
-            take: 7,
-            orderBy: { date: 'asc' }
+        // Chart data from shared utility
+        getChartData(),
+        // This week's revenue
+        db.order.aggregate({
+            _sum: { total: true },
+            where: {
+                status: { not: OrderStatus.CANCELLED },
+                createdAt: { gte: oneWeekAgo }
+            }
+        }),
+        // This week's sales count
+        db.order.count({
+            where: {
+                status: { not: OrderStatus.CANCELLED },
+                createdAt: { gte: oneWeekAgo }
+            }
+        }),
+        // This week's new users
+        db.user.count({
+            where: { createdAt: { gte: oneWeekAgo } }
+        }),
+        // Last week's revenue
+        db.order.aggregate({
+            _sum: { total: true },
+            where: {
+                status: { not: OrderStatus.CANCELLED },
+                createdAt: { gte: twoWeeksAgo, lt: oneWeekAgo }
+            }
+        }),
+        // Last week's sales count
+        db.order.count({
+            where: {
+                status: { not: OrderStatus.CANCELLED },
+                createdAt: { gte: twoWeeksAgo, lt: oneWeekAgo }
+            }
+        }),
+        // Last week's new users
+        db.user.count({
+            where: { createdAt: { gte: twoWeeksAgo, lt: oneWeekAgo } }
         })
     ]);
 
-    // Format graph data
-    const revenueData = revenueByDay.length > 0
-        ? revenueByDay.map(d => ({ date: d.date.toISOString().split('T')[0], amount: Number(d.totalRevenue) }))
-        : [ // Placeholder if no daily stats exist yet
-            { date: 'Mon', amount: 0 },
-            { date: 'Tue', amount: 0 },
-            { date: 'Wed', amount: 0 },
-            { date: 'Thu', amount: 0 },
-            { date: 'Fri', amount: 0 },
-            { date: 'Sat', amount: 0 },
-            { date: 'Sun', amount: 0 },
-        ];
+    // Calculate percentage changes
+    const thisWeekRevenueVal = Number(thisWeekRevenue._sum.total || 0);
+    const lastWeekRevenueVal = Number(lastWeekRevenue._sum.total || 0);
+    const revenueChange = lastWeekRevenueVal > 0
+        ? Math.round(((thisWeekRevenueVal - lastWeekRevenueVal) / lastWeekRevenueVal) * 100)
+        : (thisWeekRevenueVal > 0 ? 100 : 0);
 
-    // Placeholder User Growth
-    const usersData = [
-        { date: 'Mon', users: 4 },
-        { date: 'Tue', users: 3 },
-        { date: 'Wed', users: 7 },
-        { date: 'Thu', users: 2 },
-        { date: 'Fri', users: 5 },
-        { date: 'Sat', users: 8 },
-        { date: 'Sun', users: 6 },
-    ];
+    const salesChange = lastWeekSales > 0
+        ? Math.round(((thisWeekSales - lastWeekSales) / lastWeekSales) * 100)
+        : (thisWeekSales > 0 ? 100 : 0);
+
+    const userChange = lastWeekUsers > 0
+        ? Math.round(((thisWeekUsers - lastWeekUsers) / lastWeekUsers) * 100)
+        : thisWeekUsers; // Show absolute count if no last week users
 
     return {
         totalSales: orderStats._count.id,
@@ -77,8 +118,13 @@ async function getStats() {
         totalUsers: userCount,
         totalProducts: productStats,
         recentOrders,
-        revenueData,
-        usersData
+        revenueData: chartData.revenueData,
+        usersData: chartData.usersData,
+        // Trend data
+        revenueChange,
+        salesChange,
+        thisWeekUsers,
+        userChange
     };
 }
 
@@ -96,14 +142,22 @@ export default async function AdminDashboard() {
                     value={formatPrice(stats.totalRevenue)}
                     icon={DollarSign}
                     description="Based on all charges"
-                    trend={{ value: 12, label: "vs last week", positive: true }}
+                    trend={stats.revenueChange !== 0 ? {
+                        value: Math.abs(stats.revenueChange),
+                        label: "vs last week",
+                        positive: stats.revenueChange >= 0
+                    } : undefined}
                 />
                 <StatsCard
                     title="Total Sales"
                     value={stats.totalSales}
                     icon={CreditCard}
                     description="Total Completed Sales"
-                    trend={{ value: 8, label: "vs last week", positive: true }}
+                    trend={stats.salesChange !== 0 ? {
+                        value: Math.abs(stats.salesChange),
+                        label: "vs last week",
+                        positive: stats.salesChange >= 0
+                    } : undefined}
                 />
                 <StatsCard
                     title="Total Products"
@@ -116,7 +170,11 @@ export default async function AdminDashboard() {
                     value={stats.totalUsers}
                     icon={Users}
                     description="Total Users Signed Up"
-                    trend={{ value: 2, label: "new users", positive: true }}
+                    trend={stats.thisWeekUsers > 0 ? {
+                        value: stats.thisWeekUsers,
+                        label: "new this week",
+                        positive: true
+                    } : undefined}
                 />
             </div>
 
@@ -135,3 +193,4 @@ export default async function AdminDashboard() {
         </div>
     );
 }
+

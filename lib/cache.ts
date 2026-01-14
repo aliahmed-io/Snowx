@@ -223,3 +223,17 @@ export const getCachedFeaturedProducts = unstable_cache(
     ["featured-products"],
     { revalidate: 300, tags: [CACHE_TAGS.products] }
 );
+
+/**
+ * Cached system settings query
+ */
+export const getCachedSettings = unstable_cache(
+    async () => {
+        const systemSetting = await db.systemSetting.findUnique({
+            where: { key: 'client-settings' }
+        });
+        return systemSetting;
+    },
+    ['client-settings'],
+    { revalidate: 3600, tags: ['settings'] }
+);

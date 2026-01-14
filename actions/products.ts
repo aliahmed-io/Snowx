@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 export async function getProducts(options?: {
     categorySlug?: string;
@@ -166,6 +166,8 @@ export async function createProduct(data: {
 
     revalidatePath("/admin/products");
     revalidatePath("/products");
+    // @ts-ignore
+    revalidateTag("products");
     return product;
 }
 
@@ -196,11 +198,22 @@ export async function updateProduct(
     revalidatePath("/admin/products");
     revalidatePath("/products");
     revalidatePath(`/products/${product.slug}`);
+    // @ts-ignore
+    revalidateTag("products");
+    // @ts-ignore
+    revalidateTag(`product-${product.slug}`);
     return product;
 }
 
 export async function deleteProduct(id: string) {
+    const product = await db.product.findUnique({ where: { id }, select: { slug: true } });
     await db.product.delete({ where: { id } });
     revalidatePath("/admin/products");
     revalidatePath("/products");
+    // @ts-ignore
+    revalidateTag("products");
+    if (product) {
+        // @ts-ignore
+        revalidateTag(`product-${product.slug}`);
+    }
 }

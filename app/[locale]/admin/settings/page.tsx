@@ -4,7 +4,7 @@ import {
     Save,
     Server
 } from "lucide-react";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 async function saveSettings(formData: FormData) {
     "use server";
@@ -21,6 +21,8 @@ async function saveSettings(formData: FormData) {
     }
 
     revalidatePath("/admin/settings");
+    // @ts-ignore
+    revalidateTag("settings");
 }
 
 export default async function SettingsPage() {

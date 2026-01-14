@@ -8,7 +8,6 @@ import { CartProvider } from "@/components/providers/CartProvider";
 import { notFound } from "next/navigation";
 import AppInitializer from "@/components/shared/app-initializer";
 import ClientProviders from "@/components/shared/client-providers";
-import { db } from "@/lib/db";
 import { ClientSetting } from "@/types";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { ConditionalLayout } from "@/components/layout/ConditionalLayout";
@@ -35,6 +34,15 @@ export const metadata: Metadata = {
   },
 };
 
+import { getCachedSettings } from "@/lib/cache";
+
+export async function generateStaticParams() {
+  return [
+    { locale: 'en-US' },
+    { locale: 'ar' }
+  ];
+}
+
 export default async function RootLayout({
   children,
   params
@@ -49,13 +57,11 @@ export default async function RootLayout({
     notFound();
   }
 
-  // Fetch settings from DB (or use default if none exist yet)
+  // Fetch settings from DB (cached)
   let setting: ClientSetting | null = null;
 
   try {
-    const systemSetting = await db.systemSetting.findUnique({
-      where: { key: 'client-settings' }
-    });
+    const systemSetting = await getCachedSettings();
 
     if (systemSetting && systemSetting.value) {
       setting = JSON.parse(systemSetting.value) as ClientSetting;

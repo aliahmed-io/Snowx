@@ -1,13 +1,13 @@
 import {
     Shield,
     Zap,
-    Clock,
     Headphones,
     Award,
     Users,
     Globe,
     Lock
 } from "lucide-react";
+import { Link } from "@/navigation";
 
 export async function generateMetadata() {
     return {
@@ -192,18 +192,18 @@ export default async function AboutPage() {
                             Join thousands of satisfied customers and discover the SnowX difference today.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                            <a
+                            <Link
                                 href="/products"
                                 className="inline-flex items-center justify-center px-8 py-3 rounded-xl bg-snow-accent text-[#020817] font-bold hover:bg-snow-accent/90 transition-colors"
                             >
                                 Browse Products
-                            </a>
-                            <a
+                            </Link>
+                            <Link
                                 href="/contact"
                                 className="inline-flex items-center justify-center px-8 py-3 rounded-xl border border-white/20 text-white font-medium hover:bg-white/5 transition-colors"
                             >
                                 Contact Us
-                            </a>
+                            </Link>
                         </div>
                     </div>
                 </div>

@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 export async function getCategories() {
     const categories = await db.category.findMany({
@@ -60,4 +60,6 @@ export async function deleteCategory(id: string) {
     revalidatePath("/admin/categories");
     revalidatePath("/admin/products");
     revalidatePath("/products");
+    // @ts-ignore
+    revalidateTag("categories");
 }

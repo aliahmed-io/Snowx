@@ -15,7 +15,15 @@ function createPrismaClient() {
   }
 
   try {
-    const pool = globalForPrisma.pool ?? new Pool({ connectionString });
+    // Use a smaller pool size for serverless/build environments to avoid exhausting connections
+    const poolConfig = {
+      connectionString,
+      max: process.env.DB_MAX_CONNECTIONS ? parseInt(process.env.DB_MAX_CONNECTIONS) : 2,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 5000,
+    };
+
+    const pool = globalForPrisma.pool ?? new Pool(poolConfig);
 
     // Handle unexpected pool errors to prevent crash
     pool.on('error', (err) => {

@@ -1,4 +1,4 @@
-import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
+import { requireAuth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { AdminHeader } from "@/components/admin/AdminHeader";
@@ -15,17 +15,8 @@ export default async function AdminLayout({
 }: {
     children: React.ReactNode;
 }) {
-    const { getUser, isAuthenticated } = getKindeServerSession();
-
-    if (!(await isAuthenticated())) {
-        redirect("/api/auth/login");
-    }
-
-    const user = await getUser();
-
-    if (!user) {
-        redirect("/api/auth/login");
-    }
+    // This ensures the user is created in the database if they don't exist
+    const user = await requireAuth();
 
     // Verify admin access via Environment Variable
     const adminEmails = process.env.ADMIN_EMAILS?.split(',') || [];

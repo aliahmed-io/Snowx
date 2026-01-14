@@ -1,7 +1,8 @@
 import { db } from "@/lib/db";
 import { AnalyticsCharts } from "@/components/admin/AnalyticsCharts";
 import { formatPrice } from "@/lib/utils";
-import { redis } from "@/lib/redis"; // Import Redis
+import { getChartData } from "@/lib/analytics";
+import { redis } from "@/lib/redis";
 import {
     TrendingUp,
     Users,
@@ -20,7 +21,7 @@ interface AnalyticsData {
 
 // Helper to fetch data with caching
 async function getAnalyticsData(): Promise<AnalyticsData> {
-    const CACHE_KEY = "analytics:dashboard-stats";
+    const CACHE_KEY = "analytics:dashboard-stats-v2";
 
     // 1. Try Cache
     try {
@@ -34,94 +35,29 @@ async function getAnalyticsData(): Promise<AnalyticsData> {
     }
 
     // 2. Fetch from DB if no cache
-    const totalRevenueResult = await db.order.aggregate({
-        _sum: { total: true },
-        where: { status: { not: 'CANCELLED' } }
-    });
-    const totalRevenue = Number(totalRevenueResult._sum.total || 0);
+    const [orderAggregates, totalOrders, totalUsers, chartData] = await Promise.all([
+        db.order.aggregate({
+            _sum: { total: true },
+            where: { status: { not: 'CANCELLED' } }
+        }),
+        db.order.count({
+            where: { status: { not: 'CANCELLED' } }
+        }),
+        db.user.count(),
+        // Use shared chart data utility - single source of truth
+        getChartData()
+    ]);
 
-    const totalOrders = await db.order.count({
-        where: { status: { not: 'CANCELLED' } }
-    });
-
-    const totalUsers = await db.user.count({
-        where: { role: 'CUSTOMER' }
-    });
-
-    const averageOrderValue = totalOrders > 0
-        ? totalRevenue / totalOrders
-        : 0;
-
-    // Revenue Trends (Last 7 days)
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-
-    const recentOrders = await db.order.findMany({
-        where: {
-            createdAt: { gte: sevenDaysAgo },
-            status: { not: 'CANCELLED' }
-        },
-        select: {
-            createdAt: true,
-            total: true
-        },
-        orderBy: { createdAt: 'asc' }
-    });
-
-    // Group by Date for Chart
-    const revenueMap = new Map<string, number>();
-    for (let i = 0; i < 7; i++) {
-        const d = new Date();
-        d.setDate(d.getDate() - (6 - i));
-        revenueMap.set(d.toLocaleDateString(), 0);
-    }
-
-    recentOrders.forEach(order => {
-        const date = new Date(order.createdAt).toLocaleDateString();
-        if (revenueMap.has(date)) {
-            revenueMap.set(date, (revenueMap.get(date) || 0) + Number(order.total));
-        }
-    });
-
-    const revenueData = Array.from(revenueMap.entries()).map(([date, amount]) => ({
-        date: date.split('/')[0] + '/' + date.split('/')[1], // Simple MM/DD
-        amount
-    }));
-
-    // User Growth (Last 7 days)
-    const recentUsers = await db.user.findMany({
-        where: {
-            createdAt: { gte: sevenDaysAgo }
-        },
-        select: { createdAt: true }
-    });
-
-    const usersMap = new Map<string, number>();
-    for (let i = 0; i < 7; i++) {
-        const d = new Date();
-        d.setDate(d.getDate() - (6 - i));
-        usersMap.set(d.toLocaleDateString(), 0);
-    }
-
-    recentUsers.forEach(user => {
-        const date = new Date(user.createdAt).toLocaleDateString();
-        if (usersMap.has(date)) {
-            usersMap.set(date, (usersMap.get(date) || 0) + 1);
-        }
-    });
-
-    const usersData = Array.from(usersMap.entries()).map(([date, users]) => ({
-        date: date.split('/')[0] + '/' + date.split('/')[1],
-        users
-    }));
+    const totalRevenue = Number(orderAggregates._sum.total || 0);
+    const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
 
     const data = {
         totalRevenue,
         totalOrders,
         totalUsers,
         averageOrderValue,
-        revenueData,
-        usersData
+        revenueData: chartData.revenueData,
+        usersData: chartData.usersData
     };
 
     // 3. Set Cache (Expire in 60 seconds)

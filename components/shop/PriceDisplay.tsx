@@ -21,7 +21,6 @@ export function PriceDisplay({
     amount,
     comparePrice,
     className = "",
-    showCurrency = true,
     size = "md",
 }: PriceDisplayProps) {
     const { formatPrice } = useCurrency();

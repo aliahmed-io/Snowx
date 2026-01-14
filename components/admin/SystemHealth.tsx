@@ -2,8 +2,9 @@ import { CheckCircle2 } from "lucide-react";
 
 const services = [
     { name: "Database", status: "operational" },
-    { name: "Stripe", status: "operational" },
+    { name: "PayPal", status: "operational" },
     { name: "Resend", status: "operational" },
+    { name: "UploadThing", status: "operational" },
 ];
 
 export function SystemHealth() {

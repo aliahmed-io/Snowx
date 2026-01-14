@@ -9,6 +9,16 @@ import { Link } from "@/navigation";
 // ISR: Regenerate product pages every 2 minutes
 export const revalidate = 120;
 
+// Allow ISR for products not generated at build time
+export const dynamicParams = true;
+
+export async function generateStaticParams() {
+    const { products } = await getProducts({ limit: 20 });
+    return products.map((product) => ({
+        slug: product.slug,
+    }));
+}
+
 interface ProductPageProps {
     params: Promise<{ slug: string }>;
 }
@@ -26,15 +36,11 @@ export async function generateMetadata({ params }: ProductPageProps) {
 
 export default async function ProductPage({ params }: ProductPageProps) {
     const { slug } = await params;
-    const product = await getProductBySlug(slug);
+    const product = await getCachedProductBySlug(slug);
 
     if (!product) {
         notFound();
     }
-
-    const discount = product.comparePrice
-        ? Math.round(((product.comparePrice - product.price) / product.comparePrice) * 100)
-        : 0;
 
     // Get related products
     const { products: relatedProducts } = await getProducts({

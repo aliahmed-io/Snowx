@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 export type FilterType = "duration" | "platform" | "price_settings";
 
@@ -60,6 +60,8 @@ export async function deleteFilterOption(id: string) {
     await db.filterOption.delete({ where: { id } });
     revalidatePath("/admin/filters");
     revalidatePath("/products");
+    // @ts-ignore
+    revalidateTag("filters");
 }
 
 export async function seedDefaultFilters() {

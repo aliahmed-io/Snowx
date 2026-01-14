@@ -80,6 +80,12 @@ export default async function SystemHealthPage() {
             status: "operational",
             latency: "~120ms",
             details: "CDN enabled"
+        },
+        {
+            name: "PayPal",
+            status: "operational",
+            latency: "~150ms",
+            details: "Payment gateway active"
         }
     ];
 
@@ -167,7 +173,7 @@ export default async function SystemHealthPage() {
                             </div>
                             <div className="text-right">
                                 <Badge variant="outline" className={`capitalize border-0 bg-opacity-10 ${system.status === 'operational' ? 'bg-green-500 text-green-500' :
-                                        system.status === 'degraded' ? 'bg-yellow-500 text-yellow-500' : 'bg-red-500 text-red-500'
+                                    system.status === 'degraded' ? 'bg-yellow-500 text-yellow-500' : 'bg-red-500 text-red-500'
                                     }`}>
                                     {system.status}
                                 </Badge>
