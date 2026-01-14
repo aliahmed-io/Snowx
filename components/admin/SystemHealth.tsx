@@ -4,7 +4,6 @@ const services = [
     { name: "Database", status: "operational" },
     { name: "Stripe", status: "operational" },
     { name: "Resend", status: "operational" },
-    { name: "Gemini AI", status: "operational" },
 ];
 
 export function SystemHealth() {

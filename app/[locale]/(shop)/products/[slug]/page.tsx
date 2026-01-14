@@ -1,9 +1,13 @@
 import { notFound } from "next/navigation";
 import { getProductBySlug, getProducts } from "@/actions/products";
+import { getCachedProductBySlug } from "@/lib/cache";
 import { AddToCartButton } from "./AddToCartButton";
 import { ProductPrice } from "./ProductPrice";
 import Image from "next/image";
 import { Link } from "@/navigation";
+
+// ISR: Regenerate product pages every 2 minutes
+export const revalidate = 120;
 
 interface ProductPageProps {
     params: Promise<{ slug: string }>;

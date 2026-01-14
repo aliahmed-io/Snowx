@@ -24,7 +24,7 @@ export function PriceDisplay({
     showCurrency = true,
     size = "md",
 }: PriceDisplayProps) {
-    const { formatPrice, convertPrice, symbol } = useCurrency();
+    const { formatPrice } = useCurrency();
 
     const formattedPrice = formatPrice(amount);
     const formattedCompare = comparePrice ? formatPrice(comparePrice) : null;

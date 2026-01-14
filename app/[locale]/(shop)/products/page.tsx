@@ -1,10 +1,12 @@
 import { getProducts } from "@/actions/products";
-import { getCategories } from "@/actions/categories";
-import { getFilterOptions } from "@/actions/filters";
+import { getCachedCategories, getCachedFilterOptions } from "@/lib/cache";
 import { InfiniteProductGrid } from "@/components/shop/InfiniteProductGrid";
 import { ProductSidebarFilters } from "@/components/shop/ProductSidebarFilters";
 import { SortSelector } from "@/components/shop/SortSelector";
 import { getTranslations } from "next-intl/server";
+
+// ISR: Regenerate products page every minute
+export const revalidate = 60;
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
     const { locale } = await params;
@@ -40,9 +42,9 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
             duration: resolvedSearchParams.duration,
             platforms: resolvedSearchParams.platforms ? resolvedSearchParams.platforms.split(',') : undefined,
         }),
-        getCategories(),
-        getFilterOptions("duration"),
-        getFilterOptions("platform")
+        getCachedCategories(),
+        getCachedFilterOptions("duration"),
+        getCachedFilterOptions("platform")
     ]);
 
     return (
