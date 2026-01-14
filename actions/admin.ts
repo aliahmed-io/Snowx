@@ -42,7 +42,7 @@ export async function getAdminStats() {
         orders: totalOrders,
         customers: totalCustomers,
         products: totalProducts,
-        recentOrders: recentOrders.map((o) => ({
+        recentOrders: recentOrders.map((o: typeof recentOrders[number]) => ({
             ...o,
             total: Number(o.total),
         })),
