@@ -47,7 +47,7 @@ export async function getAdminStats() {
             total: Number(o.total),
         })),
         ordersByStatus: ordersByStatus.reduce(
-            (acc, item) => {
+            (acc: Record<string, number>, item: typeof ordersByStatus[number]) => {
                 acc[item.status] = item._count;
                 return acc;
             },
