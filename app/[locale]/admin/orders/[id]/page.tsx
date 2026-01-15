@@ -255,7 +255,7 @@ export default async function OrderDetailsPage({ params }: OrderDetailsPageProps
                 {/* Sidebar Info */}
                 <div className="lg:col-span-1 space-y-6">
                     {/* Status Card */}
-                    <OrderStatusForm orderId={order.id} initialStatus={order.status} />
+                    <OrderStatusForm orderId={order.id} initialStatus={order.status as any} />
 
                     {/* Customer Info */}
                     <div className="bg-[#0a1628] border border-snow-primary/20 rounded-xl p-6">
