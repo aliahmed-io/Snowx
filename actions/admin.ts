@@ -70,7 +70,7 @@ export async function getCustomers(options?: { limit?: number }) {
         take: options?.limit,
     });
 
-    return customers.map((c) => ({
+    return customers.map((c: typeof customers[number]) => ({
         id: c.id,
         email: c.email,
         firstName: c.firstName,
