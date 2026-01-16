@@ -78,7 +78,7 @@ export async function getCustomers(options?: { limit?: number }) {
         profileImage: c.profileImage,
         createdAt: c.createdAt,
         orderCount: c._count.orders,
-        totalSpent: c.orders.reduce((acc: number, o) => acc + Number(o.total), 0),
+        totalSpent: c.orders.reduce((acc: number, o: typeof c.orders[number]) => acc + Number(o.total), 0),
     }));
 }
 import { OrderStatus } from "@prisma/client";
