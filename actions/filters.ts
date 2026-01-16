@@ -64,7 +64,7 @@ export async function deleteFilterOption(id: string) {
     await db.filterOption.delete({ where: { id } });
     revalidatePath("/admin/filters");
     revalidatePath("/products");
-    // @ts-ignore
+    // @ts-expect-error: next/cache type mismatch
     revalidateTag("filters");
 }
 

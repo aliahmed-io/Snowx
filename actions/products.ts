@@ -166,7 +166,7 @@ export async function createProduct(data: {
 
     revalidatePath("/admin/products");
     revalidatePath("/products");
-    // @ts-ignore
+    // @ts-expect-error: next/cache type mismatch
     revalidateTag("products");
     return product;
 }
@@ -198,9 +198,9 @@ export async function updateProduct(
     revalidatePath("/admin/products");
     revalidatePath("/products");
     revalidatePath(`/products/${product.slug}`);
-    // @ts-ignore
+    // @ts-expect-error: next/cache type mismatch
     revalidateTag("products");
-    // @ts-ignore
+    // @ts-expect-error: next/cache type mismatch
     revalidateTag(`product-${product.slug}`);
     return product;
 }
@@ -210,10 +210,10 @@ export async function deleteProduct(id: string) {
     await db.product.delete({ where: { id } });
     revalidatePath("/admin/products");
     revalidatePath("/products");
-    // @ts-ignore
+    // @ts-expect-error: next/cache type mismatch
     revalidateTag("products");
     if (product) {
-        // @ts-ignore
+        // @ts-expect-error: next/cache type mismatch
         revalidateTag(`product-${product.slug}`);
     }
 }

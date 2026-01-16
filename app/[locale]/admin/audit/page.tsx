@@ -15,6 +15,7 @@ import {
     Filter,
     Activity
 } from "lucide-react";
+import { Link } from "@/navigation";
 import {
     Table,
     TableBody,
@@ -243,7 +244,7 @@ export default async function AuditLogsPage({ searchParams }: AuditPageProps) {
                     <Filter className="w-4 h-4" />
                     <span>Filter by:</span>
                 </div>
-                <a
+                <Link
                     href="/admin/audit"
                     className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${!typeFilter && !severityFilter
                         ? 'bg-snow-accent text-[#020817]'
@@ -251,9 +252,9 @@ export default async function AuditLogsPage({ searchParams }: AuditPageProps) {
                         }`}
                 >
                     All
-                </a>
+                </Link>
                 {uniqueTypes.map(type => (
-                    <a
+                    <Link
                         key={type}
                         href={`/admin/audit?type=${type}`}
                         className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${typeFilter === type
@@ -262,10 +263,10 @@ export default async function AuditLogsPage({ searchParams }: AuditPageProps) {
                             }`}
                     >
                         {type}
-                    </a>
+                    </Link>
                 ))}
                 <div className="w-px h-6 bg-slate-700 mx-2" />
-                <a
+                <Link
                     href="/admin/audit?severity=critical"
                     className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${severityFilter === 'critical'
                         ? 'bg-red-500 text-white'
@@ -273,8 +274,8 @@ export default async function AuditLogsPage({ searchParams }: AuditPageProps) {
                         }`}
                 >
                     Critical Only
-                </a>
-                <a
+                </Link>
+                <Link
                     href="/admin/audit?severity=warning"
                     className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${severityFilter === 'warning'
                         ? 'bg-yellow-500 text-[#020817]'
@@ -282,7 +283,7 @@ export default async function AuditLogsPage({ searchParams }: AuditPageProps) {
                         }`}
                 >
                     Warnings
-                </a>
+                </Link>
             </div>
 
             {/* Logs Table */}

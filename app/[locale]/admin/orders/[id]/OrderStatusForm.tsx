@@ -6,7 +6,7 @@ import { useState } from "react";
 import { updateOrderStatus } from "@/actions/admin";
 
 // Define local type matching Prisma enum
-type OrderStatus = "PENDING" | "PROCESSING" | "DELIVERED" | "CANCELLED" | "REFUNDED";
+type OrderStatus = "PENDING" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED" | "REFUNDED";
 
 interface OrderStatusFormProps {
     orderId: string;
@@ -20,6 +20,7 @@ export function OrderStatusForm({ orderId, initialStatus }: OrderStatusFormProps
     const statusOptions: { value: OrderStatus, label: string }[] = [
         { value: "PENDING", label: "Pending Payment" },
         { value: "PROCESSING", label: "Processing" },
+        { value: "SHIPPED", label: "Shipped" },
         { value: "DELIVERED", label: "Completed (Email Sent)" },
         { value: "CANCELLED", label: "Cancelled" },
         { value: "REFUNDED", label: "Refunded" },

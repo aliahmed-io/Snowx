@@ -21,7 +21,7 @@ async function saveSettings(formData: FormData) {
     }
 
     revalidatePath("/admin/settings");
-    // @ts-ignore
+    // @ts-expect-error: next/cache type mismatch
     revalidateTag("settings");
 }
 

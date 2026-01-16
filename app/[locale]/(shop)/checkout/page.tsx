@@ -2,7 +2,7 @@
 
 import { useCart } from "@/components/providers/CartProvider";
 import { useState } from "react";
-import { Link, useRouter } from "@/navigation";
+import { Link } from "@/navigation";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { useCurrency } from "@/components/providers/CurrencyProvider";
@@ -11,12 +11,12 @@ import { createOrderForPayment } from "@/actions/payment";
 const SNOWX_GD_URL = process.env.NEXT_PUBLIC_SNOWX_GD_URL || "http://localhost:3001";
 
 export default function CheckoutPage() {
-    const { items, subtotal, clearCart } = useCart();
+    const { items, subtotal } = useCart();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const t = useTranslations('Checkout');
     const { formatPrice } = useCurrency();
-    const router = useRouter();
+
 
     const tax = subtotal * 0.1;
     const shipping = subtotal > 50 ? 0 : 5.99;
