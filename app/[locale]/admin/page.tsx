@@ -1,4 +1,6 @@
 import { db } from "@/lib/db";
+
+export const dynamic = 'force-dynamic';
 import { formatPrice } from "@/lib/utils";
 import { getChartData } from "@/lib/analytics";
 import { StatsCard } from "@/components/admin/StatsCard";
