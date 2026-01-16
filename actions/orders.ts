@@ -114,7 +114,6 @@ export async function createOrder(data: {
     tax: number;
     shipping: number;
     total: number;
-    stripePaymentId?: string;
 }) {
     const order = await db.order.create({
         data: {

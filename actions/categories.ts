@@ -64,7 +64,7 @@ export async function deleteCategory(id: string) {
     revalidatePath("/admin/categories");
     revalidatePath("/admin/products");
     revalidatePath("/products");
-    // @ts-ignore
+    // @ts-expect-error revalidateTag might change signature
     revalidateTag("categories");
 }
 

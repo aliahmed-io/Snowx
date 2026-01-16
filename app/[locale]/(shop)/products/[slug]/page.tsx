@@ -48,8 +48,37 @@ export default async function ProductPage({ params }: ProductPageProps) {
         limit: 4,
     });
 
+    const jsonLd = {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        name: product.name,
+        image: product.images,
+        description: product.description,
+        sku: product.id,
+        brand: {
+            "@type": "Brand",
+            name: "SnowX",
+        },
+        offers: {
+            "@type": "Offer",
+            url: `${process.env.NEXT_PUBLIC_APP_URL}/products/${product.slug}`,
+            priceCurrency: "USD",
+            price: product.price,
+            availability: "https://schema.org/InStock",
+        },
+        aggregateRating: product.avgRating > 0 ? {
+            "@type": "AggregateRating",
+            ratingValue: product.avgRating,
+            reviewCount: product.reviewCount,
+        } : undefined,
+    };
+
     return (
         <div className="pt-24 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
             {/* Breadcrumb */}
             <nav className="mb-8 text-sm">
                 <ol className="flex items-center gap-2 text-gray-400">
@@ -151,7 +180,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                         <ul className="space-y-3">
                             {[
                                 "Instant digital delivery",
-                                "Secure payment with Stripe",
+                                "Secure payment", // Removed "with Stripe"
                                 "24/7 customer support",
                                 "Money-back guarantee",
                             ].map((feature, i) => (

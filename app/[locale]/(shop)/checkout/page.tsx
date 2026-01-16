@@ -2,17 +2,21 @@
 
 import { useCart } from "@/components/providers/CartProvider";
 import { useState } from "react";
-import { Link } from "@/navigation";
+import { Link, useRouter } from "@/navigation";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { useCurrency } from "@/components/providers/CurrencyProvider";
+import { createOrderForPayment } from "@/actions/payment";
+
+const SNOWX_GD_URL = process.env.NEXT_PUBLIC_SNOWX_GD_URL || "http://localhost:3001";
 
 export default function CheckoutPage() {
-    const { items, subtotal } = useCart();
+    const { items, subtotal, clearCart } = useCart();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const t = useTranslations('Checkout');
     const { formatPrice } = useCurrency();
+    const router = useRouter();
 
     const tax = subtotal * 0.1;
     const shipping = subtotal > 50 ? 0 : 5.99;
@@ -25,32 +29,32 @@ export default function CheckoutPage() {
         setError(null);
 
         try {
-            const response = await fetch("/api/checkout", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    items: items.map((item) => ({
-                        id: item.id,
-                        name: item.name,
-                        price: item.price,
-                        quantity: item.quantity,
-                        image: item.image,
-                    })),
-                }),
-            });
+            // Create order in database via server action
+            const result = await createOrderForPayment(
+                items.map((item) => ({
+                    id: item.id,
+                    name: item.name,
+                    price: item.price,
+                    quantity: item.quantity,
+                    image: item.image,
+                })),
+                subtotal,
+                tax,
+                shipping
+            );
 
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.error || "Failed to create checkout session");
+            if (!result.success) {
+                throw new Error(result.error || "Failed to create order");
             }
 
-            // Redirect to Stripe checkout using the URL from the API
-            if (data.url) {
-                window.location.href = data.url;
-            } else {
-                throw new Error("No checkout URL returned");
-            }
+            // Redirect to SnowX GD for payment with token
+            const paymentUrl = `${SNOWX_GD_URL}/pay?order=${encodeURIComponent(result.orderNumber!)}&token=${encodeURIComponent(result.token!)}`;
+
+            // Use no-referrer for privacy
+            const a = document.createElement("a");
+            a.href = paymentUrl;
+            a.rel = "noreferrer noopener";
+            a.click();
         } catch (err) {
             setError(err instanceof Error ? err.message : "Something went wrong");
             setLoading(false);
