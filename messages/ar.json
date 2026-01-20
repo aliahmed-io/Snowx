@@ -2,7 +2,28 @@
     "Common": {
         "loading3DModel": "جاري تحميل النموذج ثلاثي الأبعاد...",
         "clickToInteract": "انقر للتفاعل",
-        "recovering3DView": "جاري استعادة العرض ثلاثي الأبعاد..."
+        "recovering3DView": "جاري استعادة العرض ثلاثي الأبعاد...",
+        "Checkout": "إتمام الشراء"
+    },
+    "Checkout": {
+        "title": "إتمام الشراء",
+        "nothingToCheckout": "لا يوجد شيء للدفع",
+        "addItems": "سلتك فارغة. أضف بعض المنتجات للبدء.",
+        "browseProducts": "تصفح المنتجات",
+        "orderSummary": "ملخص الطلب",
+        "subtotal": "المجموع الفرعي",
+        "tax": "الضريبة",
+        "shipping": "الشحن",
+        "total": "الإجمالي",
+        "payment": "الدفع",
+        "securePayment": "دفع آمن",
+        "redirectNotice": "سيتم توجيهك إلى شريك الدفع الآمن لدينا لإكمال عملية الشراء.",
+        "pay": "دفع",
+        "trust": {
+            "ssl": "SSL آمن",
+            "pci": "PCI متوافق",
+            "moneyBack": "ضمان استرجاع الأموال"
+        }
     },
     "Navbar": {
         "home": "الرئيسية",

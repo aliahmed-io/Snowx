@@ -4,6 +4,26 @@
         "clickToInteract": "Click to Interact",
         "recovering3DView": "Recovering 3D View..."
     },
+    "Checkout": {
+        "title": "Checkout",
+        "nothingToCheckout": "Nothing to checkout",
+        "addItems": "Your cart is empty. Add some items to get started.",
+        "browseProducts": "Browse Products",
+        "orderSummary": "Order Summary",
+        "subtotal": "Subtotal",
+        "tax": "Tax",
+        "shipping": "Shipping",
+        "total": "Total",
+        "payment": "Payment",
+        "securePayment": "Secure Payment",
+        "redirectNotice": "You will be redirected to our secure payment partner to complete your purchase.",
+        "pay": "Pay",
+        "trust": {
+            "ssl": "SSL Secure",
+            "pci": "PCI Compliant",
+            "moneyBack": "Money Back Guarantee"
+        }
+    },
     "Navbar": {
         "home": "Home",
         "products": "Products",
