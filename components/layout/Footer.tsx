@@ -80,9 +80,9 @@ export function Footer() {
                         <h3 className="text-white font-bold text-lg mb-6">{t('shop')}</h3>
                         <ul className="space-y-4">
                             <li><Link href="/products" className="text-snow-gray hover:text-snow-accent transition-colors">{tNav('products')}</Link></li>
-                            <li><Link href="/products/gpt-plus" className="text-snow-gray hover:text-snow-accent transition-colors">GPT Plus</Link></li>
-                            <li><Link href="/products/netflix-premium" className="text-snow-gray hover:text-snow-accent transition-colors">Netflix Premium</Link></li>
-                            <li><Link href="/products/spotify-premium" className="text-snow-gray hover:text-snow-accent transition-colors">Spotify Premium</Link></li>
+                            <li><Link href="/products" className="text-snow-gray hover:text-snow-accent transition-colors">GPT Plus</Link></li>
+                            <li><Link href="/products" className="text-snow-gray hover:text-snow-accent transition-colors">Netflix Premium</Link></li>
+                            <li><Link href="/products" className="text-snow-gray hover:text-snow-accent transition-colors">Spotify Premium</Link></li>
                         </ul>
                     </div>
 
