@@ -26,15 +26,14 @@ const SYMBOLS = {
     AED: "د.إ",
 };
 
-const LOCALE_MAP = {
-    USD: 'en-US',
-    SAR: 'ar-SA',
-    AED: 'ar-AE',
-};
+import { useLocale } from "next-intl";
+
+
 
 export function CurrencyProvider({ children }: { children: ReactNode }) {
     const [currency, setCurrency] = useState<CurrencyCode>("USD");
     const [isHydrated, setIsHydrated] = useState(false);
+    const locale = useLocale();
 
     useEffect(() => {
         // Use a timeout to move state updates out of the synchronous effect body
@@ -61,7 +60,7 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
 
     const formatPrice = (amount: number) => {
         const converted = convertPrice(amount);
-        return new Intl.NumberFormat(LOCALE_MAP[currency], {
+        return new Intl.NumberFormat(locale, {
             style: "currency",
             currency: currency,
         }).format(converted);
