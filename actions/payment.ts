@@ -128,22 +128,54 @@ export async function verifyPaymentComplete(orderNumber: string, token: string) 
             return { success: false, error: "Order not found" };
         }
 
-        // Check if payment is complete
+        // Check if payment is already complete
         const isPaid = order.payment?.status === "COMPLETED";
 
-        // Trigger fulfillment if paid and not fully processed (only if it needs assignment)
-        if (isPaid && (order.status === "PROCESSING" || order.status === "PENDING")) {
-            const { fulfillOrder } = await import("./fulfillment");
-            await fulfillOrder(order.id);
+        // CRITICAL FIX: Trust the signed token to update local status
+        // Since snowx-gd cannot access this DB, we must update ourselves if the token is valid
+        if (!isPaid) {
+            // Double check amount matches token to prevent tampering
+            if (parseFloat(tokenData.amount) === parseFloat(order.total.toString())) {
+                const { fulfillOrder } = await import("./fulfillment");
 
-            // Refresh order logic would be needed if we want to show accounts immediately
-            // But for now, user might need to refresh or we rely on the DB fetch above.
-            // Actually, we fetched 'order' BEFORE fulfillment. 
-            // So if we just fulfilled, 'order.accounts' is empty in current scope.
-            // We should refetch or assume "accounts generated".
-            // Since this is called on client load, a fast redirect/reload might handle it, 
-            // but better to re-fetch if we just fulfilled.
+                // Update DB to mark as paid
+                await db.$transaction(async (tx) => {
+                    // Create or update payment record
+                    await tx.payment.upsert({
+                        where: { orderId: order.id },
+                        create: {
+                            orderId: order.id,
+                            amount: order.total,
+                            currency: "USD",
+                            status: "COMPLETED",
+                            provider: "PAYPAL",
+                            transactionId: `SNX-GD-${Date.now()}`, // We don't have the real PP ID here easily without passing it in token, but token proves success
+                        },
+                        update: {
+                            status: "COMPLETED",
+                        }
+                    });
+
+                    // Update order status
+                    await tx.order.update({
+                        where: { id: order.id },
+                        data: { status: "PROCESSING" }
+                    });
+                });
+
+                // Trigger fulfillment
+                await fulfillOrder(order.id);
+
+                // We just paid, so isPaid is now true for the return object
+                // fetch updated accounts below
+            } else {
+                console.error("Token amount mismatch", tokenData.amount, order.total);
+                return { success: false, error: "Payment verification failed: Amount mismatch" };
+            }
         }
+
+        // Refresh order data after potential update
+        // We can just proceed to fetch accounts now, checking isPaid or assuming it allowed us through
 
         // Re-fetch if we suspect we just fulfilled it, OR just return what we have 
         // and let the user see "Processing" and then receive email. 
@@ -173,7 +205,7 @@ export async function verifyPaymentComplete(orderNumber: string, token: string) 
                 orderNumber: order.orderNumber,
                 status: order.status,
                 total: order.total.toString(),
-                isPaid,
+                isPaid: isPaid || true, // If we passed the checks above, it is paid
                 transactionId: order.payment?.transactionId || null,
                 items: order.orderItems.map((item) => ({
                     name: item.product.name,

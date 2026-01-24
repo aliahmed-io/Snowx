@@ -14,7 +14,7 @@ const defaultSettings: ClientSetting = {
         name: 'SnowX',
         description: 'SnowX Premium Ecommerce',
         keywords: 'SnowX, Ecommerce, Premium',
-        url: 'http://localhost:3000',
+        url: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
         logo: '/snowx2-icon.png',
         slogan: 'Premium Ice Experience',
         author: 'SnowX Team',

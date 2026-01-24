@@ -93,3 +93,36 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus) {
     revalidatePath(`/admin/orders/${orderId}`);
     revalidatePath(`/admin/orders`);
 }
+// ... existing code ...
+
+export async function getCustomerById(id: string) {
+    const customer = await db.user.findUnique({
+        where: { id, role: "CUSTOMER" },
+        include: {
+            orders: {
+                orderBy: { createdAt: "desc" },
+                include: {
+                    _count: { select: { orderItems: true } }
+                }
+            },
+            addresses: {
+                where: { isDefault: true }
+            },
+            _count: {
+                select: { orders: true, reviews: true }
+            }
+        }
+    });
+
+    if (!customer) return null;
+
+    const totalSpent = customer.orders.reduce((acc, order) => {
+        return order.status !== "CANCELLED" ? acc + Number(order.total) : acc;
+    }, 0);
+
+    return {
+        ...customer,
+        totalSpent,
+        address: customer.addresses[0] || null
+    };
+}
