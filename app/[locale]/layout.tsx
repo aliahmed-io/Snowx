@@ -43,6 +43,11 @@ export async function generateStaticParams() {
   ];
 }
 
+import { MaintenancePage } from "@/components/shared/MaintenancePage";
+import { defaultSettings } from "@/lib/settings";
+
+// ... existing imports
+
 export default async function RootLayout({
   children,
   params
@@ -71,22 +76,11 @@ export default async function RootLayout({
   }
 
   if (!setting) {
-    setting = {
-      common: { pageSize: 9, isMaintenanceMode: false, freeShippingMinPrice: 0, defaultTheme: "light", defaultColor: "gold" },
-      site: { name: "SnowX", slogan: "Premium Subscriptions", logo: "/snowx2-icon.png", url: "", description: "", keywords: "", email: "", phone: "", author: "", copyright: "", address: "" },
-      availableLanguages: [{ code: 'en-US', name: 'English' }, { code: 'ar', name: 'Arabic' }],
-      defaultLanguage: 'en-US',
-      availableCurrencies: [{ name: 'USD', code: 'USD', symbol: '$', convertRate: 1 }],
-      defaultCurrency: 'USD',
-      availablePaymentMethods: [{ name: 'Stripe', commission: 0 }],
-      defaultPaymentMethod: 'Stripe',
-      availableDeliveryDates: [],
-      defaultDeliveryDate: '',
-      carousels: [],
-      currency: 'USD'
-    };
+    setting = defaultSettings;
   } else {
-    setting.currency = setting.defaultCurrency;
+    // Ensure critical defaults exist if JSON is partial
+    setting = { ...defaultSettings, ...setting };
+    setting.currency = setting.defaultCurrency || 'USD';
   }
 
   const messages = await getMessages();
@@ -101,6 +95,18 @@ export default async function RootLayout({
     if (adminEmails.includes(kindeUser.email)) {
       userRole = 'ADMIN';
     }
+  }
+
+  // ENFORCE MAINTENANCE MODE
+  // If maintenance is on AND user is NOT an admin -> Show Maintenance Page
+  if (setting.common.isMaintenanceMode && userRole !== 'ADMIN') {
+    return (
+      <html lang={locale} dir={locale === 'ar' ? 'rtl' : 'ltr'}>
+        <body className={`${outfit.variable} ${plusJakarta.variable} font-jakarta antialiased`}>
+          <MaintenancePage />
+        </body>
+      </html>
+    );
   }
 
   return (

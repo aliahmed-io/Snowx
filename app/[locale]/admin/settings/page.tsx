@@ -6,11 +6,14 @@ import {
 } from "lucide-react";
 import { revalidatePath, revalidateTag } from "next/cache";
 
+import { defaultSettings } from "@/lib/settings";
+import { ClientSetting } from "@/types";
+
 async function saveSettings(formData: FormData) {
     "use server";
-    // Iterate over known settings keys
-    const settings = ['site_name', 'support_email', 'maintenance_mode'];
 
+    // 1. Save specific keys (Legacy/Backup)
+    const settings = ['site_name', 'support_email', 'maintenance_mode'];
     for (const key of settings) {
         const value = formData.get(key) as string;
         await db.systemSetting.upsert({
@@ -19,6 +22,32 @@ async function saveSettings(formData: FormData) {
             create: { key, value }
         });
     }
+
+    // 2. Update Main JSON Settings (The one actually used by the app)
+    const currentSettingsRaw = await db.systemSetting.findUnique({ where: { key: 'client-settings' } });
+    let clientSettings: ClientSetting = currentSettingsRaw?.value
+        ? JSON.parse(currentSettingsRaw.value)
+        : defaultSettings;
+
+    // Update fields
+    clientSettings = {
+        ...clientSettings,
+        site: {
+            ...clientSettings.site,
+            name: formData.get('site_name') as string || clientSettings.site.name,
+            email: formData.get('support_email') as string || clientSettings.site.email,
+        },
+        common: {
+            ...clientSettings.common,
+            isMaintenanceMode: formData.get('maintenance_mode') === 'true',
+        }
+    };
+
+    await db.systemSetting.upsert({
+        where: { key: 'client-settings' },
+        update: { value: JSON.stringify(clientSettings) },
+        create: { key: 'client-settings', value: JSON.stringify(clientSettings) }
+    });
 
     revalidatePath("/admin/settings");
     // @ts-expect-error: next/cache type mismatch
