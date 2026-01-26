@@ -23,7 +23,8 @@ export async function POST(req: Request) {
 
         if (event.type === "user.created") {
             const { user } = event.data;
-            const isAdmin = user.email === process.env.ADMIN_EMAIL;
+            const adminEmails = process.env.ADMIN_EMAILS?.split(",").map(e => e.trim()) || [];
+            const isAdmin = adminEmails.includes(user.email);
 
             // Create User in DB
             await db.user.create({

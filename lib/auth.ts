@@ -28,6 +28,7 @@ export async function getUser() {
                 firstName: kindeUser.given_name,
                 lastName: kindeUser.family_name,
                 profileImage: kindeUser.picture,
+                role: (process.env.ADMIN_EMAILS?.split(",") || []).map(e => e.trim()).includes(kindeUser.email || "") ? "ADMIN" : "CUSTOMER",
             },
         });
     }

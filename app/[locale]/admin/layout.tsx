@@ -22,10 +22,8 @@ export default async function AdminLayout({
     const user = await requireAuth();
 
     // Verify admin access via Environment Variable
-    const adminEmails = process.env.ADMIN_EMAILS?.split(',') || [];
-    if (process.env.ADMIN_EMAIL) {
-        adminEmails.push(process.env.ADMIN_EMAIL);
-    }
+    const adminEmails = process.env.ADMIN_EMAILS?.split(',').map(e => e.trim()) || [];
+
     const userEmail = user.email;
 
     if (!userEmail || !adminEmails.includes(userEmail)) {

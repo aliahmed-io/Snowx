@@ -39,9 +39,9 @@ export async function submitContactForm(prevState: { error?: string; success?: s
         });
 
         // 2. Send Email Notification (to Admin)
-        const adminEmail = process.env.ADMIN_EMAIL || "ali.ahmed.2001@outlook.com"; // Default to owner email
+        const adminEmails = process.env.ADMIN_EMAILS?.split(",").map(e => e.trim()) || ["ali.ahmed.2001@outlook.com"];
         await sendEmail({
-            to: adminEmail,
+            to: adminEmails,
             subject: `[SnowX Contact] ${validatedFields.data.subject}`,
             html: `
                 <h1>New Contact Message</h1>

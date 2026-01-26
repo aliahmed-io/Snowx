@@ -91,7 +91,7 @@ export default async function RootLayout({
   // Determine user role from environment variable
   let userRole: string | null = null;
   if (kindeUser && kindeUser.email) {
-    const adminEmails = process.env.ADMIN_EMAILS?.split(',') || [];
+    const adminEmails = process.env.ADMIN_EMAILS?.split(',').map(e => e.trim()) || [];
     if (adminEmails.includes(kindeUser.email)) {
       userRole = 'ADMIN';
     }
