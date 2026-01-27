@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 
 export async function getUserOrders() {
@@ -171,6 +171,6 @@ export async function createOrder(data: {
 
     revalidatePath("/admin/orders");
     revalidatePath("/products");
-    revalidateTag("products"); // Update cached product pages
+    // revalidateTag("products"); // Removed due to type error and redundancy with revalidatePath
     return order;
 }

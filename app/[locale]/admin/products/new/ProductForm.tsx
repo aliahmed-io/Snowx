@@ -15,6 +15,11 @@ import { Separator } from "@/components/ui/separator";
 import { ArrowLeft, Plus, Trash2, Percent } from "lucide-react";
 import { UploadDropzone } from "@/utils/uploadthing";
 
+interface Category {
+    id: string;
+    name: string;
+}
+
 interface FilterOption {
     id: string;
     value: string;

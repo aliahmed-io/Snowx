@@ -45,7 +45,7 @@ export function AuthSplitLayout({ children, image, quote, author }: AuthSplitLay
                 <div className="relative z-10 max-w-lg">
                     <blockquote className="space-y-4">
                         <p className="text-2xl font-medium text-gray-200 leading-relaxed">
-                            "{quote || "Experience the premium standard of digital subscriptions. Secure, fast, and reliable access to your favorite services."}"
+                            &quot;{quote || "Experience the premium standard of digital subscriptions. Secure, fast, and reliable access to your favorite services."}&quot;
                         </p>
                         <footer className="text-sm font-medium text-snow-accent">
                             {author || "The SnowX Team"}
