@@ -5,6 +5,7 @@ import { Navbar } from "./Navbar";
 import { Footer } from "./Footer";
 import { LiveChat } from "@/components/ui/LiveChat";
 import { CartSidebar } from "@/components/shop/CartSidebar";
+import useSettingStore from "@/hooks/use-setting-store";
 
 interface ConditionalLayoutProps {
     user: {
@@ -20,6 +21,7 @@ interface ConditionalLayoutProps {
 
 export function ConditionalLayout({ user, role, children }: ConditionalLayoutProps) {
     const pathname = usePathname();
+    const { setting } = useSettingStore();
 
     // Check if we're on an admin path (handles both /admin and /en-US/admin etc.)
     const isAdminPath = pathname.includes("/admin");
@@ -36,7 +38,7 @@ export function ConditionalLayout({ user, role, children }: ConditionalLayoutPro
             <CartSidebar />
             <main className="min-h-screen">{children}</main>
             <Footer />
-            <LiveChat />
+            {setting.common.enableLiveChat && <LiveChat />}
         </>
     );
 }

@@ -4,6 +4,7 @@ export const defaultSettings: ClientSetting = {
     common: {
         pageSize: 9,
         isMaintenanceMode: false,
+        enableLiveChat: true,
         freeShippingMinPrice: 0,
         defaultTheme: "light",
         defaultColor: "gold"

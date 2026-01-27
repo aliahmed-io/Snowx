@@ -44,6 +44,7 @@ export const SettingInputSchema = z.object({
             .number()
             .min(0, 'Free shipping min price must be at least 0')
             .default(0),
+        enableLiveChat: z.boolean().default(true),
         defaultTheme: z
             .string()
             .min(1, 'Default theme is required')

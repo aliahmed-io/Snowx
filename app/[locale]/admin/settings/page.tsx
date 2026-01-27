@@ -13,7 +13,7 @@ async function saveSettings(formData: FormData) {
     "use server";
 
     // 1. Save specific keys (Legacy/Backup)
-    const settings = ['site_name', 'support_email', 'maintenance_mode'];
+    const settings = ['site_name', 'support_email', 'maintenance_mode', 'enable_live_chat'];
     for (const key of settings) {
         const value = formData.get(key) as string;
         await db.systemSetting.upsert({
@@ -40,6 +40,7 @@ async function saveSettings(formData: FormData) {
         common: {
             ...clientSettings.common,
             isMaintenanceMode: formData.get('maintenance_mode') === 'true',
+            enableLiveChat: formData.get('enable_live_chat') === 'true',
         }
     };
 
@@ -112,6 +113,23 @@ export default async function SettingsPage() {
                                     name="maintenance_mode"
                                     value="true"
                                     defaultChecked={getSetting('maintenance_mode') === 'true'}
+                                    className="sr-only peer"
+                                />
+                                <div className="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-snow-accent"></div>
+                            </label>
+                        </div>
+
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h4 className="text-white font-medium">Enable Live Chat</h4>
+                                <p className="text-sm text-gray-500">Show contact popup on store pages</p>
+                            </div>
+                            <label className="relative inline-flex items-center cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    name="enable_live_chat"
+                                    value="true"
+                                    defaultChecked={getSetting('enable_live_chat') === 'true' || getSetting('enable_live_chat') === ''} // Default to true if not set
                                     className="sr-only peer"
                                 />
                                 <div className="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-snow-accent"></div>
