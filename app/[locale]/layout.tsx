@@ -85,16 +85,24 @@ export default async function RootLayout({
 
   const messages = await getMessages();
 
+  // Fetch user session safely
   const { getUser } = getKindeServerSession();
-  const kindeUser = await getUser();
-
-  // Determine user role from environment variable
+  let kindeUser = null;
   let userRole: string | null = null;
-  if (kindeUser && kindeUser.email) {
-    const adminEmails = process.env.ADMIN_EMAILS?.split(',').map(e => e.trim()) || [];
-    if (adminEmails.includes(kindeUser.email)) {
-      userRole = 'ADMIN';
+
+  try {
+    kindeUser = await getUser();
+
+    // Determine user role only if user exists
+    if (kindeUser && kindeUser.email) {
+      const adminEmails = process.env.ADMIN_EMAILS?.split(',').map(e => e.trim()) || [];
+      if (adminEmails.includes(kindeUser.email)) {
+        userRole = 'ADMIN';
+      }
     }
+  } catch (error) {
+    console.error("Failed to fetch Kinde session:", error);
+    // Continue rendering as guest
   }
 
   // ENFORCE MAINTENANCE MODE

@@ -54,8 +54,8 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                 <aside>
                     <ProductSidebarFilters
                         categories={categories}
-                        durations={durationOptions.map(d => d.value)}
-                        platforms={platformOptions.map(p => p.value)}
+                        durations={durationOptions}
+                        platforms={platformOptions}
                     />
                 </aside>
 

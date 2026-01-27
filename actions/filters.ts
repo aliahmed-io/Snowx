@@ -7,10 +7,25 @@ import { requireAdmin } from "@/lib/auth";
 export type FilterType = "duration" | "platform" | "price_settings";
 
 export async function getFilterOptions(type: FilterType) {
-    return db.filterOption.findMany({
+    const options = await db.filterOption.findMany({
         where: { type, isActive: true },
-        orderBy: { order: "asc" }
+        orderBy: { order: "asc" },
+        include: {
+            _count: {
+                select: {
+                    productsWithDuration: type === 'duration',
+                    productsWithPlatform: type === 'platform'
+                }
+            }
+        }
     });
+
+    return options.map(opt => ({
+        ...opt,
+        productCount: type === 'duration'
+            ? opt._count.productsWithDuration
+            : opt._count.productsWithPlatform
+    }));
 }
 
 export async function getAllFilterOptions(type: FilterType) {

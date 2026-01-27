@@ -57,7 +57,7 @@ export function ProductCard({
         >
             <div className="bg-white/5 rounded-xl overflow-hidden border border-white/10 hover:border-white/20 hover:bg-white/10 transition-all duration-300 flex flex-col h-full hover:-translate-y-1 group-hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)]">
                 {/* Image Section */}
-                <div className="relative aspect-square w-full bg-black/20 p-6 flex items-center justify-center overflow-hidden">
+                <div className="relative aspect-[1.25/1] w-full bg-black/20 p-6 flex items-center justify-center overflow-hidden">
                     {/* Hover Effect: Scale Image */}
                     <div className="relative w-full h-full transition-transform duration-500 group-hover:scale-105">
                         {image ? (

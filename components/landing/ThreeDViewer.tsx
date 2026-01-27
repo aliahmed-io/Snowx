@@ -301,9 +301,7 @@ export function ThreeDViewer() {
                 {/* OPTIMIZED: Reduced sparkle count */}
                 <Sparkles count={60} scale={10} size={1.5} speed={0.2} opacity={0.4} color="#ffffff" />
             </Canvas>
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-snow-accent/60 text-sm">
-                {t("clickToInteract")}
-            </div>
+
         </div>
     );
 }

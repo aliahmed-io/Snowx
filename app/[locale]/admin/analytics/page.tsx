@@ -2,8 +2,9 @@ import { db } from "@/lib/db";
 
 export const dynamic = 'force-dynamic';
 import { AnalyticsCharts } from "@/components/admin/AnalyticsCharts";
+import { RecentOrdersTable } from "@/components/admin/RecentOrdersTable";
 import { formatPrice } from "@/lib/utils";
-import { getChartData } from "@/lib/analytics";
+import { getChartData, getSalesByCategory, getSalesByPlatform, getTopProducts, getRecentOrders } from "@/lib/analytics";
 import { redis } from "@/lib/redis";
 import {
     TrendingUp,
@@ -19,11 +20,15 @@ interface AnalyticsData {
     averageOrderValue: number;
     revenueData: { date: string; amount: number }[];
     usersData: { date: string; users: number }[];
+    salesByCategory: { name: string; value: number }[];
+    salesByPlatform: { name: string; value: number }[];
+    topProducts: { name: string; sales: number; price: number }[];
+    recentOrders: any[];
 }
 
 // Helper to fetch data with caching
 async function getAnalyticsData(): Promise<AnalyticsData> {
-    const CACHE_KEY = "analytics:dashboard-stats-v2";
+    const CACHE_KEY = "analytics:dashboard-stats-v3";
 
     // 1. Try Cache
     try {
@@ -37,7 +42,7 @@ async function getAnalyticsData(): Promise<AnalyticsData> {
     }
 
     // 2. Fetch from DB if no cache
-    const [orderAggregates, totalOrders, totalUsers, chartData] = await Promise.all([
+    const [orderAggregates, totalOrders, totalUsers, chartData, salesByCategory, salesByPlatform, topProducts, recentOrders] = await Promise.all([
         db.order.aggregate({
             _sum: { total: true },
             where: { status: { not: 'CANCELLED' } }
@@ -46,8 +51,11 @@ async function getAnalyticsData(): Promise<AnalyticsData> {
             where: { status: { not: 'CANCELLED' } }
         }),
         db.user.count(),
-        // Use shared chart data utility - single source of truth
-        getChartData()
+        getChartData(),
+        getSalesByCategory(),
+        getSalesByPlatform(),
+        getTopProducts(),
+        getRecentOrders(10)
     ]);
 
     const totalRevenue = Number(orderAggregates._sum.total || 0);
@@ -59,7 +67,11 @@ async function getAnalyticsData(): Promise<AnalyticsData> {
         totalUsers,
         averageOrderValue,
         revenueData: chartData.revenueData,
-        usersData: chartData.usersData
+        usersData: chartData.usersData,
+        salesByCategory,
+        salesByPlatform,
+        topProducts,
+        recentOrders
     };
 
     // 3. Set Cache (Expire in 60 seconds)
@@ -79,7 +91,11 @@ export default async function AnalyticsPage() {
         totalUsers,
         averageOrderValue,
         revenueData,
-        usersData
+        usersData,
+        salesByCategory,
+        salesByPlatform,
+        topProducts,
+        recentOrders
     } = await getAnalyticsData();
 
     return (
@@ -141,7 +157,16 @@ export default async function AnalyticsPage() {
             </div>
 
             {/* Charts */}
-            <AnalyticsCharts revenueData={revenueData} usersData={usersData} />
+            <AnalyticsCharts
+                revenueData={revenueData}
+                usersData={usersData}
+                salesByCategory={salesByCategory}
+                salesByPlatform={salesByPlatform}
+                topProducts={topProducts}
+            />
+
+            {/* Recent Orders Table */}
+            <RecentOrdersTable orders={recentOrders} />
         </div>
     );
 }

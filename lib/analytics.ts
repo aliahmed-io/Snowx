@@ -80,3 +80,100 @@ export async function getChartData(): Promise<ChartData> {
 
     return { revenueData, usersData };
 }
+
+export async function getSalesByCategory() {
+    const data = await db.orderItem.findMany({
+        where: { order: { status: { not: OrderStatus.CANCELLED } } },
+        include: {
+            product: {
+                include: { category: true }
+            }
+        }
+    });
+
+    const map = new Map<string, number>();
+
+    data.forEach(item => {
+        const catName = item.product.category.name;
+        const amount = Number(item.price) * item.quantity;
+        map.set(catName, (map.get(catName) || 0) + amount);
+    });
+
+    return Array.from(map.entries())
+        .map(([name, value]) => ({ name, value }))
+        .sort((a, b) => b.value - a.value);
+}
+
+export async function getSalesByPlatform() {
+    const data = await db.orderItem.findMany({
+        where: { order: { status: { not: OrderStatus.CANCELLED } } },
+        include: {
+            product: {
+                include: { platformOption: true }
+            }
+        }
+    });
+
+    const map = new Map<string, number>();
+    // Also track legacy string platforms if any, or normalize them
+    // For now we trust migration or fallback to "Other"
+
+    data.forEach(item => {
+        let platformName = item.product.platformOption?.label || item.product.platformOption?.value;
+        if (!platformName && item.product.platform) {
+            platformName = item.product.platform; // Legacy fallback
+        }
+        if (!platformName) platformName = "Other";
+
+        const amount = Number(item.price) * item.quantity;
+        map.set(platformName, (map.get(platformName) || 0) + amount);
+    });
+
+    return Array.from(map.entries())
+        .map(([name, value]) => ({ name, value }))
+        .sort((a, b) => b.value - a.value);
+}
+
+export async function getTopProducts(limit = 5) {
+    const grouped = await db.orderItem.groupBy({
+        by: ['productId'],
+        _sum: { quantity: true },
+        where: { order: { status: { not: OrderStatus.CANCELLED } } },
+        orderBy: { _sum: { quantity: 'desc' } },
+        take: limit
+    });
+
+    const productIds = grouped.map(g => g.productId);
+    const products = await db.product.findMany({
+        where: { id: { in: productIds } },
+        select: { id: true, name: true, price: true }
+    });
+
+    return grouped.map(g => {
+        const p = products.find(prod => prod.id === g.productId);
+        return {
+            name: p?.name || 'Unknown',
+            sales: g._sum.quantity || 0,
+            price: Number(p?.price || 0)
+        };
+    });
+}
+
+export async function getRecentOrders(limit = 5) {
+    const orders = await db.order.findMany({
+        where: { status: { not: OrderStatus.CANCELLED } },
+        orderBy: { createdAt: 'desc' },
+        take: limit,
+        include: {
+            User: { select: { firstName: true, lastName: true, email: true } }
+        }
+    });
+
+    return orders.map(order => ({
+        ...order,
+        total: Number(order.total),
+        subtotal: Number(order.subtotal),
+        tax: Number(order.tax),
+        shipping: Number(order.shipping)
+    }));
+}

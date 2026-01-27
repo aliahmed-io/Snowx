@@ -53,12 +53,13 @@ export function CartSidebar() {
                                 <h3 className="text-white font-semibold text-lg">{t('emptyTitle')}</h3>
                                 <p className="text-gray-500 text-sm mt-1">{t('emptySubtitle')}</p>
                             </div>
-                            <button
+                            <Link
+                                href="/products"
                                 onClick={closeCart}
                                 className="bg-snow-accent text-gray-900 font-bold px-8 py-3 rounded-xl hover:bg-white transition-all shadow-lg shadow-snow-accent/20"
                             >
                                 {t('shopNow')}
-                            </button>
+                            </Link>
                         </div>
                     ) : (
                         <div className="space-y-4">

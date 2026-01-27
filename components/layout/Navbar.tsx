@@ -10,7 +10,7 @@ import { ShoppingCart, Search } from "lucide-react";
 import { useCart } from "@/components/providers/CartProvider";
 import { UserDropdown } from "./UserDropdown";
 
-const currencies: CurrencyCode[] = ["USD", "SAR", "AED"];
+const currencies: CurrencyCode[] = ["USD", "SAR"];
 const languages = [
     { code: "en-US", label: "EN" },
     { code: "ar", label: "AR" }

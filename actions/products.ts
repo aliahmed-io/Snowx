@@ -54,13 +54,21 @@ export async function getProducts(options?: {
     }
 
     // Platform Filtering - use exact field match
+    // Platform Filtering
     if (platforms && platforms.length > 0) {
-        where.platform = { in: platforms };
+        // Support both ID and legacy string matching during migration
+        where.OR = [
+            { platformId: { in: platforms } },
+            { platform: { in: platforms } }
+        ];
     }
 
-    // Duration Filtering - use exact field match
+    // Duration Filtering
     if (duration) {
-        where.duration = duration;
+        where.OR = [
+            { durationId: duration },
+            { duration: duration }
+        ];
     }
 
     let orderBy: Record<string, string> = { createdAt: "desc" };
@@ -144,6 +152,8 @@ export async function createProduct(data: {
     isFeatured: boolean;
     duration?: string;
     platform?: string;
+    durationId?: string;
+    platformId?: string;
 }) {
     const product = await db.product.create({
         data: {
@@ -159,8 +169,10 @@ export async function createProduct(data: {
             stockQuantity: data.inventory,
             isActive: data.isActive,
             isFeatured: data.isFeatured,
-            duration: data.duration,
-            platform: data.platform,
+            duration: data.duration, // Keep legacy string for now if needed, or remove
+            platform: data.platform, // Keep legacy string for now if needed, or remove
+            durationId: data.durationId, // New relation
+            platformId: data.platformId, // New relation
         },
     });
 
@@ -188,6 +200,8 @@ export async function updateProduct(
         isFeatured: boolean;
         duration: string | null;
         platform: string | null;
+        durationId: string | null;
+        platformId: string | null;
     }>
 ) {
     const product = await db.product.update({

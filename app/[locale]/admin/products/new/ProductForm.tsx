@@ -15,16 +15,16 @@ import { Separator } from "@/components/ui/separator";
 import { ArrowLeft, Plus, Trash2, Percent } from "lucide-react";
 import { UploadDropzone } from "@/utils/uploadthing";
 
-interface Category {
+interface FilterOption {
     id: string;
-    name: string;
-    slug: string;
+    value: string;
+    label?: string | null;
 }
 
 interface ProductFormProps {
     categories: Category[];
-    durations: string[];
-    platforms: string[];
+    durations: FilterOption[];
+    platforms: FilterOption[];
     product?: {
         id: string;
         name: string;
@@ -40,6 +40,8 @@ interface ProductFormProps {
         isActive: boolean;
         duration?: string | null;
         platform?: string | null;
+        durationId?: string | null;
+        platformId?: string | null;
     };
 }
 
@@ -51,8 +53,8 @@ export function ProductForm({ categories, durations, platforms, product }: Produ
     const [addingPlatform, setAddingPlatform] = useState(false);
     const [newDuration, setNewDuration] = useState("");
     const [newPlatform, setNewPlatform] = useState("");
-    const [localDurations, setLocalDurations] = useState<string[]>(durations);
-    const [localPlatforms, setLocalPlatforms] = useState<string[]>(platforms);
+    const [localDurations, setLocalDurations] = useState<FilterOption[]>(durations);
+    const [localPlatforms, setLocalPlatforms] = useState<FilterOption[]>(platforms);
 
     const [formData, setFormData] = useState({
         name: product?.name || "",
@@ -64,8 +66,8 @@ export function ProductForm({ categories, durations, platforms, product }: Produ
         categoryId: product?.categoryId || "",
         inventory: product?.inventory?.toString() || "0",
         isActive: product?.isActive ?? true,
-        duration: product?.duration || "",
-        platform: product?.platform || "",
+        durationId: product?.durationId || "", // Prefer ID
+        platformId: product?.platformId || "", // Prefer ID
     });
     const [images, setImages] = useState<string[]>(product?.images || []);
 
@@ -96,8 +98,10 @@ export function ProductForm({ categories, durations, platforms, product }: Produ
                 inventory: parseInt(formData.inventory),
                 isActive: formData.isActive,
                 isFeatured: false,
-                duration: formData.duration || undefined,
-                platform: formData.platform || undefined,
+                durationId: formData.durationId || undefined,
+                duration: formData.durationId ? localDurations.find(d => d.id === formData.durationId)?.value : undefined,
+                platformId: formData.platformId || undefined,
+                platform: formData.platformId ? localPlatforms.find(p => p.id === formData.platformId)?.value : undefined,
             };
 
             if (product) {
@@ -405,9 +409,9 @@ export function ProductForm({ categories, durations, platforms, product }: Produ
                                             className="bg-green-500/20 text-green-400 hover:bg-green-500/30 h-10"
                                             onClick={async () => {
                                                 if (!newDuration.trim()) return;
-                                                await createFilterOption({ type: "duration", value: newDuration.trim() });
-                                                setLocalDurations([...localDurations, newDuration.trim()]);
-                                                setFormData({ ...formData, duration: newDuration.trim() });
+                                                const opt = await createFilterOption({ type: "duration", value: newDuration.trim() });
+                                                setLocalDurations([...localDurations, opt]);
+                                                setFormData({ ...formData, durationId: opt.id });
                                                 setNewDuration("");
                                                 setAddingDuration(false);
                                             }}
@@ -427,14 +431,14 @@ export function ProductForm({ categories, durations, platforms, product }: Produ
                                 ) : (
                                     <select
                                         id="duration"
-                                        value={formData.duration}
-                                        onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
+                                        value={formData.durationId}
+                                        onChange={(e) => setFormData({ ...formData, durationId: e.target.value })}
                                         className="flex h-10 w-full rounded-md border border-white/10 bg-[#0f172a] px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-snow-accent cursor-pointer appearance-none"
                                         style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%239ca3af'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.75rem center', backgroundSize: '1rem' }}
                                     >
                                         <option value="">Select duration</option>
                                         {localDurations.map((d) => (
-                                            <option key={d} value={d}>{d}</option>
+                                            <option key={d.id} value={d.id}>{d.label || d.value}</option>
                                         ))}
                                     </select>
                                 )}
@@ -470,9 +474,9 @@ export function ProductForm({ categories, durations, platforms, product }: Produ
                                             className="bg-green-500/20 text-green-400 hover:bg-green-500/30 h-10"
                                             onClick={async () => {
                                                 if (!newPlatform.trim()) return;
-                                                await createFilterOption({ type: "platform", value: newPlatform.trim() });
-                                                setLocalPlatforms([...localPlatforms, newPlatform.trim()]);
-                                                setFormData({ ...formData, platform: newPlatform.trim() });
+                                                const opt = await createFilterOption({ type: "platform", value: newPlatform.trim() });
+                                                setLocalPlatforms([...localPlatforms, opt]);
+                                                setFormData({ ...formData, platformId: opt.id });
                                                 setNewPlatform("");
                                                 setAddingPlatform(false);
                                             }}
@@ -492,14 +496,14 @@ export function ProductForm({ categories, durations, platforms, product }: Produ
                                 ) : (
                                     <select
                                         id="platform"
-                                        value={formData.platform}
-                                        onChange={(e) => setFormData({ ...formData, platform: e.target.value })}
+                                        value={formData.platformId}
+                                        onChange={(e) => setFormData({ ...formData, platformId: e.target.value })}
                                         className="flex h-10 w-full rounded-md border border-white/10 bg-[#0f172a] px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-snow-accent cursor-pointer appearance-none"
                                         style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%239ca3af'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.75rem center', backgroundSize: '1rem' }}
                                     >
                                         <option value="">Select platform</option>
                                         {localPlatforms.map((p) => (
-                                            <option key={p} value={p}>{p}</option>
+                                            <option key={p.id} value={p.id}>{p.label || p.value}</option>
                                         ))}
                                     </select>
                                 )}

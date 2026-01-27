@@ -7,6 +7,7 @@ import {
     Search,
     Eye
 } from "lucide-react";
+import { AdminSearchInput } from "@/components/admin/AdminSearchInput";
 
 interface OrdersPageProps {
     searchParams: Promise<{
@@ -92,11 +93,10 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
                 </div>
 
                 <div className="relative w-full md:w-64">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-                    <input
-                        type="text"
+                    <AdminSearchInput
                         placeholder="Search ID or Email..."
-                        className="w-full bg-snow-primary/10 border border-snow-primary/20 rounded-lg pl-10 pr-4 py-2 text-sm text-gray-300 focus:outline-none focus:border-snow-accent/50 transition-colors"
+                        paramName="search"
+                        className="w-full"
                     />
                 </div>
             </div>

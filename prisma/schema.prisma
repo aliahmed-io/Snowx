@@ -64,8 +64,14 @@ model Product {
   isActive   Boolean  @default(true) // Kept from current for compatibility
 
   // Filter attributes
-  duration String? // e.g. "1 Month", "12 Months", "Lifetime"
-  platform String? // e.g. "Netflix", "Spotify", "Adobe"
+  duration String? // e.g. "1 Month", "12 Months", "Lifetime" (Deprecated)
+  platform String? // e.g. "Netflix", "Spotify", "Adobe" (Deprecated)
+
+  durationId     String?
+  durationOption FilterOption? @relation("ProductDuration", fields: [durationId], references: [id])
+
+  platformId     String?
+  platformOption FilterOption? @relation("ProductPlatform", fields: [platformId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -112,6 +118,9 @@ model FilterOption {
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  productsWithDuration Product[] @relation("ProductDuration")
+  productsWithPlatform Product[] @relation("ProductPlatform")
 
   @@unique([type, value])
   @@index([type])

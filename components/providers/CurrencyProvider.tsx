@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
-export type CurrencyCode = "USD" | "SAR" | "AED";
+export type CurrencyCode = "USD" | "SAR";
 
 interface CurrencyContextType {
     currency: CurrencyCode;
@@ -17,13 +17,11 @@ const CurrencyContext = createContext<CurrencyContextType | undefined>(undefined
 const RATES = {
     USD: 1,
     SAR: 3.75,
-    AED: 3.67,
 };
 
 const SYMBOLS = {
     USD: "$",
     SAR: "ر.س",
-    AED: "د.إ",
 };
 
 import { useLocale } from "next-intl";
@@ -40,7 +38,7 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
         // and avoid the react-hooks/set-state-in-effect warning.
         const timer = setTimeout(() => {
             const stored = localStorage.getItem("snowx-currency");
-            if (stored && (stored === "USD" || stored === "SAR" || stored === "AED")) {
+            if (stored && (stored === "USD" || stored === "SAR")) {
                 setCurrency(stored as CurrencyCode);
             }
             setIsHydrated(true);

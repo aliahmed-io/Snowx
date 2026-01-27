@@ -115,23 +115,62 @@ export async function createOrder(data: {
     shipping: number;
     total: number;
 }) {
-    const order = await db.order.create({
-        data: {
-            userId: data.userId,
-            subtotal: data.subtotal,
-            tax: data.tax,
-            shipping: data.shipping,
-            total: data.total,
-            orderItems: {
-                create: data.items.map((item) => ({
-                    productId: item.productId,
-                    quantity: item.quantity,
-                    price: item.price,
-                })),
+    const order = await db.$transaction(async (tx) => {
+        // Create order
+        const newOrder = await tx.order.create({
+            data: {
+                userId: data.userId,
+                subtotal: data.subtotal,
+                tax: data.tax,
+                shipping: data.shipping,
+                total: data.total,
+                status: "PENDING",
+                orderItems: {
+                    create: data.items.map((item) => ({
+                        productId: item.productId,
+                        quantity: item.quantity,
+                        price: item.price,
+                    })),
+                },
             },
-        },
+        });
+
+        // Decrement stock and check for low inventory
+        for (const item of data.items) {
+            const product = await tx.product.update({
+                where: { id: item.productId },
+                data: {
+                    stockQuantity: { decrement: item.quantity }
+                }
+            });
+
+            if (product.stockQuantity <= 0) {
+                // Trigger Alert (using create only since alert actions might not be in tx scope or simpler to just direct create)
+                await tx.alert.create({
+                    data: {
+                        type: "Inventory Warning",
+                        severity: "high",
+                        message: `Product "${product.name}" is now out of stock!`,
+                        isRead: false
+                    }
+                });
+            } else if (product.stockQuantity <= product.lowStockThreshold) {
+                await tx.alert.create({
+                    data: {
+                        type: "Low Stock Warning",
+                        severity: "medium",
+                        message: `Product "${product.name}" is running low (${product.stockQuantity} remaining).`,
+                        isRead: false
+                    }
+                });
+            }
+        }
+
+        return newOrder;
     });
 
     revalidatePath("/admin/orders");
+    revalidatePath("/products");
+    revalidateTag("products"); // Update cached product pages
     return order;
 }

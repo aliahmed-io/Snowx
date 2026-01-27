@@ -5,11 +5,15 @@ import { Badge } from "@/components/ui/badge";
 import {
     User,
     Download,
-    Upload
+    Upload,
+    Edit,
+    Trash
 } from "lucide-react";
 import { AccountStatus, Prisma } from "@prisma/client";
 import Image from "next/image";
 import { AdminSearchInput } from "@/components/admin/AdminSearchInput";
+import { InventoryForm } from "@/components/admin/InventoryForm";
+import { InventoryActions } from "@/components/admin/InventoryActions";
 
 export default async function InventoryPage({
     searchParams
@@ -33,18 +37,49 @@ export default async function InventoryPage({
         where.status = status as AccountStatus;
     }
 
-    const accounts = await db.account.findMany({
-        where,
-        include: {
-            product: true,
-            order: true,
-            user: true
-        },
-        orderBy: { createdAt: 'desc' },
-        take: 50
-    });
+    // Parallel fetch: Accounts + Products for the form
+    const [accounts, products] = await Promise.all([
+        db.account.findMany({
+            where,
+            include: {
+                product: true,
+                order: true,
+                user: true
+            },
+            orderBy: { createdAt: 'desc' },
+            take: 50
+        }),
+        db.product.findMany({
+            select: { id: true, name: true },
+            orderBy: { name: 'asc' }
+        })
+    ]);
 
     const statuses = ['ALL', ...Object.values(AccountStatus)];
+
+    // Necessary type casting for Prisma strict typing in components if needed
+    // but here we just pass the arrays.
+
+    // @ts-ignore: Prisma types are complex
+    const productsForForm = products.map(p => ({ ...p, images: [], price: 0, description: '', slug: '', categoryId: '' }));
+
+    // Serialize accounts to avoid Decimal errors in Client Components
+    const serializedAccounts = accounts.map(account => ({
+        ...account,
+        product: {
+            ...account.product,
+            price: Number(account.product.price),
+            comparePrice: account.product.comparePrice ? Number(account.product.comparePrice) : null,
+            averageRating: Number(account.product.averageRating),
+        },
+        order: account.order ? {
+            ...account.order,
+            total: Number(account.order.total),
+            subtotal: Number(account.order.subtotal),
+            tax: Number(account.order.tax),
+            shipping: Number(account.order.shipping),
+        } : null
+    }));
 
     return (
         <div className="space-y-8">
@@ -54,13 +89,8 @@ export default async function InventoryPage({
                     <p className="text-gray-400 mt-2">Manage credentials and subscription accounts.</p>
                 </div>
                 <div className="flex gap-2">
-                    <label
-                        className="flex items-center gap-2 bg-white/5 hover:bg-white/10 text-white px-4 py-2 rounded-lg transition-colors cursor-pointer"
-                    >
-                        <Upload className="w-4 h-4" />
-                        <span className="text-sm font-medium">Import CSV</span>
-                        <input type="file" accept=".csv" className="hidden" />
-                    </label>
+                    <InventoryForm products={products as any} />
+
                     <a
                         href={`/api/admin/export/inventory${status ? `?status=${status}` : ''}`}
                         download
@@ -112,7 +142,7 @@ export default async function InventoryPage({
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-snow-primary/10">
-                            {accounts.length === 0 ? (
+                            {serializedAccounts.length === 0 ? (
                                 <tr>
                                     <td colSpan={6} className="px-6 py-12 text-center">
                                         <div className="flex flex-col items-center justify-center text-gray-500">
@@ -122,8 +152,8 @@ export default async function InventoryPage({
                                     </td>
                                 </tr>
                             ) : (
-                                accounts.map((account) => (
-                                    <tr key={account.id} className="hover:bg-white/5 transition-colors">
+                                serializedAccounts.map((account) => (
+                                    <tr key={account.id} className="hover:bg-white/5 transition-colors group">
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-2">
                                                 {account.product.images[0] && (
@@ -165,9 +195,11 @@ export default async function InventoryPage({
                                             {account.purchaseDate ? new Date(account.purchaseDate).toLocaleDateString() : '-'}
                                         </td>
                                         <td className="px-6 py-4 text-right">
-                                            {/* Actions placeholder - e.g. Edit, Ban */}
-                                            <div className="flex justify-end gap-2">
-                                                {/* <Button variant="ghost" size="icon"><Edit className="w-4 h-4" /></Button> */}
+                                            <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <InventoryActions
+                                                    account={account}
+                                                    products={products as any}
+                                                />
                                             </div>
                                         </td>
                                     </tr>

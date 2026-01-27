@@ -2,7 +2,7 @@ import { db } from "@/lib/db";
 
 export const dynamic = 'force-dynamic';
 import { formatPrice } from "@/lib/utils";
-import { getChartData } from "@/lib/analytics";
+import { getChartData, getSalesByCategory, getSalesByPlatform, getTopProducts, getRecentOrders } from "@/lib/analytics";
 import { StatsCard } from "@/components/admin/StatsCard";
 import { SystemHealth } from "@/components/admin/SystemHealth";
 import { RecentSales } from "@/components/admin/RecentSales";
@@ -30,6 +30,9 @@ async function getStats() {
         productStats,
         recentOrders,
         chartData,
+        salesByCategory,
+        salesByPlatform,
+        topProducts,
         // This week's data
         thisWeekRevenue,
         thisWeekSales,
@@ -52,14 +55,13 @@ async function getStats() {
             where: { isActive: true }
         }),
         // Recent Orders
-        db.order.findMany({
-            take: 5,
-            orderBy: { createdAt: 'desc' },
-            include: { User: true },
-            where: { status: { not: OrderStatus.PENDING } }
-        }) as Promise<(Order & { User: User | null })[]>,
+        // Recent Orders
+        getRecentOrders(5),
         // Chart data from shared utility
         getChartData(),
+        getSalesByCategory(),
+        getSalesByPlatform(),
+        getTopProducts(),
         // This week's revenue
         db.order.aggregate({
             _sum: { total: true },
@@ -124,6 +126,9 @@ async function getStats() {
         recentOrders,
         revenueData: chartData.revenueData,
         usersData: chartData.usersData,
+        salesByCategory,
+        salesByPlatform,
+        topProducts,
         // Trend data
         revenueChange,
         salesChange,
@@ -187,7 +192,13 @@ export default async function AdminDashboard() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Charts Area - Takes 2 cols */}
                 <div className="lg:col-span-2 space-y-8">
-                    <AnalyticsCharts revenueData={stats.revenueData} usersData={stats.usersData} />
+                    <AnalyticsCharts
+                        revenueData={stats.revenueData}
+                        usersData={stats.usersData}
+                        salesByCategory={stats.salesByCategory}
+                        salesByPlatform={stats.salesByPlatform}
+                        topProducts={stats.topProducts}
+                    />
                 </div>
 
                 {/* Recent Sales Sidebar - Takes 1 col */}

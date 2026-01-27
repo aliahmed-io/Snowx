@@ -9,7 +9,6 @@ import {
     ShoppingBag,
     Package,
     Component,
-    Undo2,
     Activity,
     FileText,
     ShieldAlert,
@@ -65,11 +64,6 @@ const sidebarGroups = [
                 title: "Filters",
                 href: "/admin/filters",
                 icon: SlidersHorizontal
-            },
-            {
-                title: "Returns",
-                href: "/admin/returns",
-                icon: Undo2
             }
         ]
     },

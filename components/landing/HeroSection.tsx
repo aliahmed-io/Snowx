@@ -98,7 +98,7 @@ export function HeroSection() {
                 <h1 ref={titleRef} className="text-4xl sm:text-5xl md:text-7xl font-extrabold text-white mb-6 leading-tight tracking-tight drop-shadow-2xl opacity-0">
                     {t('title')}
                     <br />
-                    <span className="text-snow-accent bg-clip-text text-transparent bg-linear-to-r from-snow-accent to-snow-accent-light">
+                    <span className="bg-clip-text text-transparent bg-linear-to-r from-snow-accent to-snow-accent-light">
                         {t('subtitle')}
                     </span>
                 </h1>
@@ -125,8 +125,7 @@ export function HeroSection() {
             </div>
 
 
-            {/* Content gap filler - ensuring seamless dark transition */}
-            <div className="absolute bottom-0 left-0 right-0 h-16 bg-snow-primary z-10" />
+
         </section>
     );
 }

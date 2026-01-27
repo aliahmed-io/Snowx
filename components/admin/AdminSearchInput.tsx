@@ -67,7 +67,7 @@ export function AdminSearchInput({
 
     return (
         <div className={`relative ${className}`}>
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+            <Search className="absolute left-3 top-3 w-4 h-4 text-gray-500 pointer-events-none" />
             <input
                 type="text"
                 value={query}
@@ -78,7 +78,7 @@ export function AdminSearchInput({
             {query && (
                 <button
                     onClick={handleClear}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors"
+                    className="absolute right-3 top-3 text-gray-500 hover:text-gray-300 transition-colors"
                 >
                     <X className="w-4 h-4" />
                 </button>

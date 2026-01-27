@@ -114,7 +114,7 @@ export function Footer() {
                             <div className="space-y-2">
                                 <p className="text-snow-gray text-xs uppercase tracking-widest">{t('currency')}</p>
                                 <div className="flex flex-wrap gap-2">
-                                    {['USD', 'SAR', 'AED'].map(curr => (
+                                    {['USD', 'SAR'].map(curr => (
                                         <span key={curr} className="px-3 py-1 bg-white/5 border border-white/10 rounded-lg text-xs font-bold text-snow-gray hover:text-white hover:border-white/20 transition-all cursor-pointer">{curr}</span>
                                     ))}
                                 </div>
@@ -145,12 +145,29 @@ export function Footer() {
                     <p className="text-snow-gray text-sm">
                         {t('copyright')}
                     </p>
-                    <div className="flex items-center gap-6">
-                        <div className="flex flex-col items-end">
-                            <p className="text-xs text-snow-gray font-medium">{t('poweredBy')}</p>
-                            <span className="text-[10px] text-snow-accent font-bold tracking-tighter uppercase">SnowX Infrastructure</span>
+                    <div className="flex items-center gap-4">
+                        {/* Visa */}
+                        <div className="h-9 w-14 bg-white/5 border border-white/10 rounded flex items-center justify-center hover:border-snow-accent/50 transition-colors duration-300">
+                            <Image
+                                src="/visa.svg"
+                                alt="Visa"
+                                width={32}
+                                height={32}
+                                className="w-10 h-auto opacity-80"
+                            />
+                        </div>
+                        {/* Mastercard */}
+                        <div className="h-9 w-14 bg-white/5 border border-white/10 rounded flex items-center justify-center hover:border-snow-accent/50 transition-colors duration-300">
+                            <Image
+                                src="/Mastercard.svg"
+                                alt="Mastercard"
+                                width={32}
+                                height={32}
+                                className="w-8 h-auto opacity-80"
+                            />
                         </div>
                     </div>
+
                 </div>
             </div>
         </footer>

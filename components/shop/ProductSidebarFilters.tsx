@@ -13,10 +13,17 @@ interface Category {
     productCount: number;
 }
 
+interface FilterOption {
+    id: string;
+    value: string;
+    label?: string | null;
+    productCount?: number;
+}
+
 interface ProductSidebarFiltersProps {
     categories: Category[];
-    durations?: string[];
-    platforms?: string[];
+    durations?: FilterOption[];
+    platforms?: FilterOption[];
 }
 
 export function ProductSidebarFilters({ categories, durations = [], platforms = [] }: ProductSidebarFiltersProps) {
@@ -175,14 +182,14 @@ export function ProductSidebarFilters({ categories, durations = [], platforms = 
                 <div>
                     <h3 className="text-lg font-bold text-white mb-6">Duration</h3>
                     <div className="space-y-3">
-                        {durations.map((duration) => (
-                            <label key={duration} className="flex items-center gap-3 cursor-pointer group">
+                        {durations.filter(d => (d.productCount || 0) > 0).map((duration) => (
+                            <label key={duration.id} className="flex items-center gap-3 cursor-pointer group">
                                 <Checkbox
-                                    checked={searchParams.get('duration') === duration}
+                                    checked={searchParams.get('duration') === duration.id}
                                     onCheckedChange={(checked) => {
                                         const params = new URLSearchParams(searchParams.toString());
                                         if (checked) {
-                                            params.set('duration', duration);
+                                            params.set('duration', duration.id);
                                         } else {
                                             params.delete('duration');
                                         }
@@ -190,7 +197,10 @@ export function ProductSidebarFilters({ categories, durations = [], platforms = 
                                         router.push(`/products?${params.toString()}`, { scroll: false });
                                     }}
                                 />
-                                <span className={`text-sm transition-colors ${searchParams.get('duration') === duration ? 'text-snow-accent' : 'text-snow-gray group-hover:text-white'}`}>{duration}</span>
+                                <span className={`text-sm transition-colors ${searchParams.get('duration') === duration.id ? 'text-snow-accent' : 'text-snow-gray group-hover:text-white'}`}>
+                                    {duration.label || duration.value}
+                                    <span className="text-xs text-gray-500 ml-1">({duration.productCount || 0})</span>
+                                </span>
                             </label>
                         ))}
                     </div>
@@ -202,20 +212,20 @@ export function ProductSidebarFilters({ categories, durations = [], platforms = 
                 <div>
                     <h3 className="text-lg font-bold text-white mb-6">Platform</h3>
                     <div className="space-y-3">
-                        {platforms.map((platform) => {
+                        {platforms.filter(p => (p.productCount || 0) > 0).map((platform) => {
                             const currentPlatforms = searchParams.get('platforms')?.split(',') || [];
-                            const isActive = currentPlatforms.includes(platform);
+                            const isActive = currentPlatforms.includes(platform.id);
                             return (
-                                <label key={platform} className="flex items-center gap-3 cursor-pointer group">
+                                <label key={platform.id} className="flex items-center gap-3 cursor-pointer group">
                                     <Checkbox
                                         checked={isActive}
                                         onCheckedChange={(checked) => {
                                             const params = new URLSearchParams(searchParams.toString());
                                             let newPlatforms = [...currentPlatforms];
                                             if (checked) {
-                                                newPlatforms.push(platform);
+                                                newPlatforms.push(platform.id);
                                             } else {
-                                                newPlatforms = newPlatforms.filter(p => p !== platform);
+                                                newPlatforms = newPlatforms.filter(p => p !== platform.id);
                                             }
 
                                             if (newPlatforms.length > 0) {
@@ -227,7 +237,10 @@ export function ProductSidebarFilters({ categories, durations = [], platforms = 
                                             router.push(`/products?${params.toString()}`, { scroll: false });
                                         }}
                                     />
-                                    <span className={`text-sm transition-colors ${isActive ? 'text-snow-accent' : 'text-snow-gray group-hover:text-white'}`}>{platform}</span>
+                                    <span className={`text-sm transition-colors ${isActive ? 'text-snow-accent' : 'text-snow-gray group-hover:text-white'}`}>
+                                        {platform.label || platform.value}
+                                        <span className="text-xs text-gray-500 ml-1">({platform.productCount || 0})</span>
+                                    </span>
                                 </label>
                             );
                         })}

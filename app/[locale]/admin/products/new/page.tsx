@@ -18,8 +18,8 @@ export default async function NewProductPage() {
     return (
         <ProductForm
             categories={categories}
-            durations={durationOptions.map(d => d.value)}
-            platforms={platformOptions.map(p => p.value)}
+            durations={durationOptions}
+            platforms={platformOptions}
         />
     );
 }

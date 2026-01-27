@@ -188,6 +188,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                             price: product.price,
                             image: product.images[0] || "",
                         }}
+                        inventory={product.stockQuantity}
                     />
 
                     {/* Features */}
