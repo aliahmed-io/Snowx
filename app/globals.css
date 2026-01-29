@@ -34,6 +34,7 @@
   --font-sans: var(--font-jakarta), system-ui;
   --font-outfit: var(--font-outfit), sans-serif;
   --font-jakarta: var(--font-jakarta), sans-serif;
+  --z-index-100: 100;
 }
 
 body {

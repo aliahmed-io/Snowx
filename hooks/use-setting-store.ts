@@ -9,6 +9,7 @@ const defaultSettings: ClientSetting = {
         defaultTheme: 'light',
         defaultColor: 'gold',
         pageSize: 9,
+        enableLiveChat: true,
     },
     site: {
         name: 'SnowX',
