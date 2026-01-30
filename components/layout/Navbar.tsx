@@ -139,7 +139,11 @@ export function Navbar({ user, role }: NavbarProps) {
                                         />
                                         <button
                                             type="button"
-                                            onClick={() => { setSearchQuery(''); setIsSearchOpen(false); }}
+                                            onMouseDown={(e) => {
+                                                e.preventDefault();
+                                                setSearchQuery('');
+                                                setIsSearchOpen(false);
+                                            }}
                                             className="absolute right-2 top-1/2 -translate-y-1/2 text-white/50 hover:text-white"
                                         >
                                             <X className="w-4 h-4" />
@@ -276,13 +280,13 @@ export function Navbar({ user, role }: NavbarProps) {
 
             {/* Mobile Menu Overlay */}
             <div
-                className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-1000 md:hidden transition-opacity duration-300 ${mobileMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+                className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] md:hidden transition-opacity duration-300 cursor-pointer ${mobileMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"}`}
                 onClick={() => setMobileMenuOpen(false)}
             />
 
             {/* Mobile Menu Panel */}
             <div
-                className={`fixed top-0 right-0 h-full w-[85%] max-w-sm bg-snow-primary border-l border-white/10 z-1000 md:hidden transition-transform duration-300 ease-out ${mobileMenuOpen ? "translate-x-0" : "translate-x-full"}`}
+                className={`fixed top-0 right-0 h-full w-[85%] max-w-sm bg-snow-primary border-l border-white/10 z-[100] md:hidden transition-transform duration-300 ease-out ${mobileMenuOpen ? "translate-x-0" : "translate-x-full"}`}
             >
                 <div className="flex flex-col h-full">
                     {/* Mobile Menu Header */}
