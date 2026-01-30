@@ -68,7 +68,7 @@ export function HeroSection() {
     }, []);
 
     return (
-        <section className="relative min-h-[90vh] flex flex-col items-center justify-center overflow-hidden pt-24 pb-32 bg-snow-primary ice-texture-hero">
+        <section className="relative min-h-[85vh] flex flex-col items-center justify-center overflow-hidden pt-16 pb-20 md:pt-24 md:pb-32 bg-snow-primary ice-texture-hero">
 
             {/* Snow Particles */}
             <div className="absolute inset-0 z-10 pointer-events-none">
@@ -87,15 +87,15 @@ export function HeroSection() {
 
             {/* 3D Viewer Container with responsive scaling */}
             <div className="relative w-full max-w-7xl z-20 px-4 md:px-0 flex justify-center">
-                <div className="w-full aspect-square md:aspect-video lg:h-[60vh] flex items-center justify-center">
+                <div className="w-full aspect-4/3 md:aspect-video lg:h-[60vh] flex items-center justify-center">
                     <ThreeDViewer />
                 </div>
             </div>
 
             {/* Content */}
-            <div ref={contentRef} className="relative z-30 text-center px-6 max-w-5xl mx-auto -mt-4 md:-mt-12">
+            <div ref={contentRef} className="relative z-30 text-center px-4 md:px-6 max-w-5xl mx-auto -mt-8 md:-mt-12">
                 {/* Headline */}
-                <h1 ref={titleRef} className="text-4xl sm:text-5xl md:text-7xl font-extrabold text-white mb-6 leading-tight tracking-tight drop-shadow-2xl opacity-0">
+                <h1 ref={titleRef} className="text-3xl sm:text-5xl md:text-7xl font-extrabold text-white mb-4 md:mb-6 leading-tight tracking-tight drop-shadow-2xl opacity-0">
                     {t('title')}
                     <br />
                     <span className="bg-clip-text text-transparent bg-linear-to-r from-snow-accent to-snow-accent-light">
@@ -112,7 +112,7 @@ export function HeroSection() {
                 <div ref={btnRef} className="opacity-0">
                     <Link
                         href="/products"
-                        className="btn-primary text-xl px-12 py-5 inline-block group mb-[5px]"
+                        className="btn-primary text-lg md:text-xl px-10 py-4 md:px-12 md:py-5 inline-block group mb-[5px]"
                     >
                         <span className="relative z-10 flex items-center gap-2">
                             {t('cta')}
