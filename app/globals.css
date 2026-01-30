@@ -35,6 +35,7 @@
   --font-outfit: var(--font-outfit), sans-serif;
   --font-jakarta: var(--font-jakarta), sans-serif;
   --z-index-100: 100;
+  --z-index-1000: 1000;
 }
 
 body {
