@@ -297,10 +297,14 @@ export function Navbar({ user, role }: NavbarProps) {
                     <div className="flex items-center justify-between p-5 border-b border-white/10">
                         <span className="text-lg font-bold text-white">Menu</span>
                         <button
-                            onClick={() => setMobileMenuOpen(false)}
-                            className="p-2 bg-white/5 rounded-full hover:bg-white/10 transition-colors"
+                            onMouseDown={(e) => {
+                                e.preventDefault();
+                                setMobileMenuOpen(false);
+                            }}
+                            className="p-4 bg-white/5 rounded-full hover:bg-white/10 transition-colors z-50 cursor-pointer"
+                            aria-label="Close menu"
                         >
-                            <X className="w-5 h-5" />
+                            <X className="w-6 h-6" />
                         </button>
                     </div>
 
