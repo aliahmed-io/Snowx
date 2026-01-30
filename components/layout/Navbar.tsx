@@ -9,6 +9,8 @@ import { LoginLink, RegisterLink } from "@kinde-oss/kinde-auth-nextjs/components
 import { ShoppingCart, Search, Menu, X } from "lucide-react";
 import { useCart } from "@/components/providers/CartProvider";
 import { UserDropdown } from "./UserDropdown";
+import { useOnClickOutside } from "@/hooks/use-click-outside";
+import { useRef } from "react";
 
 const currencies: CurrencyCode[] = ["USD", "SAR"];
 const languages = [
@@ -74,6 +76,13 @@ export function Navbar({ user, role }: NavbarProps) {
 
     const [searchQuery, setSearchQuery] = useState("");
     const [isSearchOpen, setIsSearchOpen] = useState(false);
+    const searchRef = useRef<HTMLDivElement>(null);
+
+    useOnClickOutside(searchRef, () => {
+        if (!searchQuery) {
+            setIsSearchOpen(false);
+        }
+    });
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
@@ -125,7 +134,7 @@ export function Navbar({ user, role }: NavbarProps) {
                         {/* Actions */}
                         <div className="flex items-center gap-4">
                             {/* Search Bar - Expandable */}
-                            <div className={`flex items-center transition-all duration-300 ${isSearchOpen ? "w-64" : "w-10"}`}>
+                            <div ref={searchRef} className={`flex items-center transition-all duration-300 ${isSearchOpen ? "w-64" : "w-10"}`}>
                                 {isSearchOpen ? (
                                     <form onSubmit={handleSearch} className="w-full relative">
                                         <input
@@ -135,16 +144,11 @@ export function Navbar({ user, role }: NavbarProps) {
                                             placeholder="Search..."
                                             className="w-full bg-white/10 border border-white/20 rounded-full pl-4 pr-10 py-2 text-sm text-white focus:outline-none focus:border-snow-accent transition-all"
                                             autoFocus
-                                            onBlur={() => !searchQuery && setIsSearchOpen(false)}
                                         />
                                         <button
                                             type="button"
-                                            onMouseDown={(e) => {
-                                                e.preventDefault();
-                                                setSearchQuery('');
-                                                setIsSearchOpen(false);
-                                            }}
-                                            className="absolute right-2 top-1/2 -translate-y-1/2 text-white/50 hover:text-white"
+                                            onClick={() => { setSearchQuery(''); setIsSearchOpen(false); }}
+                                            className="absolute right-2 top-1/2 -translate-y-1/2 text-white/50 hover:text-white cursor-pointer z-10"
                                         >
                                             <X className="w-4 h-4" />
                                         </button>
@@ -280,13 +284,13 @@ export function Navbar({ user, role }: NavbarProps) {
 
             {/* Mobile Menu Overlay */}
             <div
-                className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] md:hidden transition-opacity duration-300 cursor-pointer ${mobileMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+                className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-[99999] md:hidden transition-opacity duration-300 cursor-pointer ${mobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
                 onClick={() => setMobileMenuOpen(false)}
             />
 
             {/* Mobile Menu Panel */}
             <div
-                className={`fixed top-0 right-0 h-full w-[85%] max-w-sm bg-snow-primary border-l border-white/10 z-[100] md:hidden transition-transform duration-300 ease-out ${mobileMenuOpen ? "translate-x-0" : "translate-x-full"}`}
+                className={`fixed top-0 right-0 h-full w-[85%] max-w-sm bg-snow-primary border-l border-white/10 z-[99999] md:hidden transition-transform duration-300 ease-out ${mobileMenuOpen ? "translate-x-0 pointer-events-auto" : "translate-x-full pointer-events-none"}`}
             >
                 <div className="flex flex-col h-full">
                     {/* Mobile Menu Header */}
