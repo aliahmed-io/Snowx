@@ -12,7 +12,7 @@ import {
 import { LogoutLink } from "@kinde-oss/kinde-auth-nextjs/components";
 import { User, Settings, ShoppingBag, LayoutDashboard, LogOut, ChevronDown } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/navigation";
 
 interface UserDropdownProps {
     user: {
