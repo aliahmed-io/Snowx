@@ -40,9 +40,9 @@ export function HowItWorks() {
 
             <div className="max-w-7xl mx-auto px-6 relative z-10">
                 {/* Section Header */}
-                <div className="text-center mb-20 space-y-4">
-                    <h2 className="text-4xl md:text-5xl font-bold text-white">
-                        Simple <span className="text-snow-accent">& Seamless</span>
+                <div className="text-center mb-12 md:mb-20 space-y-4">
+                    <h2 className="text-3xl md:text-5xl font-bold text-white">
+                        Simple <span className="text-snow-accent block md:inline">& Seamless</span>
                     </h2>
                     <p className="text-snow-gray max-w-2xl mx-auto text-lg">
                         Get up and running with your premium subscriptions in three easy steps.

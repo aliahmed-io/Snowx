@@ -57,8 +57,8 @@ export function FeaturedSubscriptions() {
                     <h4 className="text-snow-accent font-bold uppercase tracking-[0.2em] text-sm">
                         Curated Selection
                     </h4>
-                    <h2 className="text-4xl md:text-6xl font-bold text-white mb-4">
-                        Featured <span className="text-snow-accent">Subscriptions</span>
+                    <h2 className="text-3xl md:text-6xl font-bold text-white mb-4">
+                        Featured <span className="text-snow-accent block md:inline">Subscriptions</span>
                     </h2>
                     <p className="text-snow-gray max-w-2xl mx-auto text-lg">
                         Get premium access to your favorite services at a fraction of the cost.
@@ -66,7 +66,7 @@ export function FeaturedSubscriptions() {
                 </div>
 
                 {/* Products Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10">
                     {products.map((product) => (
                         <div
                             key={product.id}

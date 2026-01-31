@@ -284,22 +284,21 @@ export function Navbar({ user, role }: NavbarProps) {
 
             {/* Mobile Menu Overlay */}
             <div
-                className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-500 md:hidden transition-opacity duration-300 cursor-pointer ${mobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
+                className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-[99999] md:hidden transition-opacity duration-300 cursor-pointer ${mobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
                 onClick={() => setMobileMenuOpen(false)}
             />
 
             {/* Mobile Menu Panel */}
             <div
-                className={`fixed top-0 right-0 h-full w-[85%] max-w-sm bg-snow-primary border-l border-white/10 z-500 md:hidden transition-transform duration-300 ease-out ${mobileMenuOpen ? "translate-x-0 pointer-events-auto" : "translate-x-full pointer-events-none"}`}
+                className={`fixed top-0 right-0 h-full w-[85%] max-w-sm bg-snow-primary border-l border-white/10 z-[99999] md:hidden transition-transform duration-300 ease-out ${mobileMenuOpen ? "translate-x-0 pointer-events-auto" : "translate-x-full pointer-events-none"}`}
             >
                 <div className="flex flex-col h-full">
                     {/* Mobile Menu Header */}
                     <div className="flex items-center justify-between p-5 border-b border-white/10">
                         <span className="text-lg font-bold text-white">Menu</span>
                         <button
-                            type="button"
-                            onClick={(e) => {
-                                e.stopPropagation();
+                            onMouseDown={(e) => {
+                                e.preventDefault();
                                 setMobileMenuOpen(false);
                             }}
                             className="p-4 bg-white/5 rounded-full hover:bg-white/10 transition-colors z-50 cursor-pointer"
