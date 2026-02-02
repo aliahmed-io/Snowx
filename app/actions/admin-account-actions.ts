@@ -2,11 +2,11 @@
 
 import { AccountService } from "@/lib/services/account-service";
 import { revalidatePath } from "next/cache";
+import { requireAdmin } from "@/lib/auth";
 
 export async function replaceAccountAction(oldAccountId: string, reason: string) {
-    // Ideally add Admin Auth check here if not covered by middleware/layout
-    // const session = await getKindeServerSession().getUser();
-    // if (!isAdmin(session)) throw new Error("Unauthorized");
+    // Verify Admin Auth
+    await requireAdmin();
 
     try {
         const newAccount = await AccountService.replaceAccount(oldAccountId, reason);

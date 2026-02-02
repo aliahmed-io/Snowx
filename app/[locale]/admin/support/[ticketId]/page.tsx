@@ -28,7 +28,7 @@ async function updateTicketStatus(formData: FormData) {
 async function sendReply(formData: FormData) {
     "use server";
     // Mock reply - in real app would send email/save to db
-    console.log("Reply sent:", formData.get("message"));
+    // TODO: Implement reply logic
 }
 
 export default async function TicketDetailsPage({ params }: { params: Promise<{ ticketId: string }> }) {

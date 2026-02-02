@@ -237,7 +237,6 @@ export function ThreeDViewer() {
     }, []);
 
     const handleContextRestored = useCallback(() => {
-        console.log("WebGL context restored");
         setContextLost(false);
         setKey(prev => prev + 1);
     }, []);

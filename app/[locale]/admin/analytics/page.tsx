@@ -34,7 +34,6 @@ async function getAnalyticsData(): Promise<AnalyticsData> {
     try {
         const cached = await redis.get(CACHE_KEY);
         if (cached) {
-            console.log("Serving Analytics from Redis Cache");
             return cached as AnalyticsData;
         }
     } catch (e) {

@@ -49,7 +49,7 @@ export function MobileNavbar({ user }: MobileNavbarProps) {
 
     useEffect(() => {
         setMenuOpen(false);
-    }, [pathname]);
+    }, [pathname, setMenuOpen]);
 
     useScrollLock(menuOpen);
 
