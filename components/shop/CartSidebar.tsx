@@ -12,8 +12,8 @@ import {
     Minus,
     Trash2
 } from "lucide-react";
-// Imported from Navbar to consolidate files as requested
-import { BodyPortal, useScrollLock } from "@/components/layout/Navbar";
+import { Portal } from "@/components/ui/portal";
+import { useScrollLock } from "@/hooks/useScrollLock";
 
 export function CartSidebar() {
     const { items, removeItem, updateQuantity, subtotal, itemCount, isOpen, closeCart, clearCart } = useCart();
@@ -25,8 +25,8 @@ export function CartSidebar() {
     if (!isOpen) return null;
 
     return (
-        <BodyPortal>
-            <div className="fixed inset-0 z-[60] flex justify-end">
+        <Portal>
+            <div className="fixed inset-0 z-60 flex justify-end">
                 <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={closeCart} />
 
                 <div className="relative w-full max-w-md bg-[#020817] h-full shadow-2xl border-l border-white/10 flex flex-col animate-in slide-in-from-right duration-300">
@@ -114,7 +114,7 @@ export function CartSidebar() {
                     )}
                 </div>
             </div>
-        </BodyPortal>
+        </Portal>
     );
 }
 

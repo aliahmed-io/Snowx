@@ -4,7 +4,6 @@ import { usePathname } from "next/navigation";
 import { Navbar } from "./Navbar";
 import { Footer } from "./Footer";
 import { LiveChat } from "@/components/ui/LiveChat";
-import { CartSidebar } from "@/components/shop/CartSidebar";
 import useSettingStore from "@/hooks/use-setting-store";
 
 interface ConditionalLayoutProps {
@@ -35,10 +34,10 @@ export function ConditionalLayout({ user, role, children }: ConditionalLayoutPro
     return (
         <>
             <Navbar user={user} role={role} />
-            <CartSidebar />
             <main className="min-h-screen">{children}</main>
             <Footer />
             {setting.common.enableLiveChat && <LiveChat />}
         </>
     );
 }
+
