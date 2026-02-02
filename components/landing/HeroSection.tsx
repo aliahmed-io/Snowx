@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import Image from "next/image";
 import { useMemo, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/navigation";
@@ -45,16 +46,23 @@ export function HeroSection() {
     const titleRef = useRef<HTMLHeadingElement>(null);
     const descRef = useRef<HTMLParagraphElement>(null);
     const btnRef = useRef<HTMLDivElement>(null);
+    const logoRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         if (!contentRef.current) return;
 
         const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
-        tl.fromTo(titleRef.current,
-            { opacity: 0, y: 30 },
-            { opacity: 1, y: 0, duration: 1, delay: 0.5 }
+        // Animate logo first
+        tl.fromTo(logoRef.current,
+            { opacity: 0, scale: 0.8, x: -20 },
+            { opacity: 1, scale: 1, x: 0, duration: 0.8, delay: 0.3 }
         )
+            .fromTo(titleRef.current,
+                { opacity: 0, y: 30 },
+                { opacity: 1, y: 0, duration: 1 },
+                "-=0.4"
+            )
             .fromTo(descRef.current,
                 { opacity: 0, y: 20 },
                 { opacity: 1, y: 0, duration: 0.8 },
@@ -69,6 +77,23 @@ export function HeroSection() {
 
     return (
         <section className="relative min-h-[85vh] flex flex-col items-center justify-center overflow-hidden pt-16 pb-20 md:pt-24 md:pb-32 bg-snow-primary ice-texture-hero">
+
+            {/* Logo - Top Left Area */}
+            <div
+                ref={logoRef}
+                className="hidden md:block absolute top-5 md:top-6 left-6 md:left-12 z-40 opacity-0"
+            >
+                <Link href="/" className="block group">
+                    <Image
+                        src="/snowx2-icon.png"
+                        alt="SnowX"
+                        width={120}
+                        height={120}
+                        className="w-20 h-20 md:w-28 md:h-28 lg:w-32 lg:h-32 object-contain drop-shadow-2xl transition-transform duration-500 group-hover:scale-110"
+                        priority
+                    />
+                </Link>
+            </div>
 
             {/* Snow Particles */}
             <div className="absolute inset-0 z-10 pointer-events-none">

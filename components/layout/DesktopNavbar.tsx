@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { Link, usePathname, useRouter } from "@/navigation";
 import { useCurrency, CurrencyCode } from "@/components/providers/CurrencyProvider";
 import { useLocale, useTranslations } from "next-intl";
@@ -79,29 +78,19 @@ export function DesktopNavbar({ user, role }: DesktopNavbarProps) {
 
     const navLinks = [
         { label: t("home"), href: "/" },
-        { label: "All Products", href: "/products" },
-        { label: "About", href: "/about" },
-        { label: "Contact", href: "/contact" },
+        { label: t("products"), href: "/products" },
+        { label: t("about"), href: "/about" },
+        { label: t("contact"), href: "/contact" },
     ];
 
     return (
         <nav
             className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? "py-2" : "py-4"}`}
         >
-            <div className="max-w-7xl mx-auto px-4 md:px-6">
-                <div className="relative flex items-center justify-between h-20 px-4 md:px-6 rounded-3xl transition-all duration-500 bg-snow-primary/80 backdrop-blur-xl border border-white/10 shadow-2xl">
-                    {/* Logo */}
-                    <Link href="/" className="flex items-center group shrink-0">
-                        <Image
-                            src="/snowx2-icon.png"
-                            alt="SnowX"
-                            width={64}
-                            height={64}
-                            className="w-14 h-14 md:w-16 md:h-16 object-contain transform group-hover:scale-110 transition-transform duration-500"
-                        />
-                    </Link>
+            <div className="max-w-5xl mx-auto px-4 md:px-6">
+                <div className="relative flex items-center justify-between h-14 px-6 md:px-8 rounded-full transition-all duration-500 bg-snow-primary/80 backdrop-blur-xl border border-white/10 shadow-2xl">
 
-                    {/* Navigation Links */}
+                    {/* Navigation Links - Left/Center */}
                     <div className="flex items-center gap-6 lg:gap-8">
                         {navLinks.map((link) => (
                             <Link
@@ -114,7 +103,7 @@ export function DesktopNavbar({ user, role }: DesktopNavbarProps) {
                             >
                                 {link.label}
                                 {isLinkActive(link.href) && (
-                                    <div className="h-1 w-full bg-snow-accent rounded-full mt-1" />
+                                    <div className="h-0.5 w-full bg-snow-accent rounded-full mt-1" />
                                 )}
                             </Link>
                         ))}

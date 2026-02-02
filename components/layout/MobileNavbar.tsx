@@ -60,9 +60,9 @@ export function MobileNavbar({ user }: MobileNavbarProps) {
 
     const navLinks = [
         { label: t("home"), href: "/" },
-        { label: "All Products", href: "/products" },
-        { label: "About", href: "/about" },
-        { label: "Contact", href: "/contact" },
+        { label: t("products"), href: "/products" },
+        { label: t("about"), href: "/about" },
+        { label: t("contact"), href: "/contact" },
     ];
 
     return (
@@ -72,9 +72,10 @@ export function MobileNavbar({ user }: MobileNavbarProps) {
                 className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? "py-2" : "py-4"}`}
             >
                 <div className="mx-auto px-4">
-                    <div className="relative flex items-center justify-between h-16 px-4 rounded-2xl transition-all duration-500 bg-snow-primary/80 backdrop-blur-xl border border-white/10 shadow-2xl">
+                    <div className="relative flex items-center justify-between h-14 px-4 rounded-full transition-all duration-500 bg-snow-primary/80 backdrop-blur-xl border border-white/10 shadow-2xl">
+
                         {/* Logo */}
-                        <Link href="/" className="flex items-center group shrink-0">
+                        <Link href="/" className="flex items-center shrink-0">
                             <Image
                                 src="/snowx2-icon.png"
                                 alt="SnowX"
