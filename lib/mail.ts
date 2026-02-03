@@ -10,9 +10,11 @@ interface SendEmailProps {
     subject: string;
     html: string;
     from?: string;
+    bcc?: string | string[];
+    cc?: string | string[];
 }
 
-export async function sendEmail({ to, subject, html, from }: SendEmailProps) {
+export async function sendEmail({ to, subject, html, from, bcc, cc }: SendEmailProps) {
     if (!process.env.RESEND_API_KEY) {
         console.warn("RESEND_API_KEY is not set. Email simulation:");
         console.log(`To: ${to}, Subject: ${subject}`);
@@ -23,6 +25,8 @@ export async function sendEmail({ to, subject, html, from }: SendEmailProps) {
         const data = await resend.emails.send({
             from: from || DEFAULT_FROM,
             to,
+            bcc,
+            cc,
             subject,
             html,
         });

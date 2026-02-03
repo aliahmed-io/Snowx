@@ -195,7 +195,7 @@ export default async function InventoryPage({
                                             <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                                 <InventoryActions
                                                     account={account}
-                                                    products={products as unknown as typeof products}
+                                                    products={products}
                                                 />
                                             </div>
                                         </td>

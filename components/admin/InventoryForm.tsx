@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Plus, Loader2 } from "lucide-react";
 import { createAccount, updateAccount } from "@/actions/inventory";
-import { Product, AccountStatus } from "@prisma/client";
+import { AccountStatus } from "@prisma/client";
 import { toast } from "sonner"; // Assuming sonner is used, or generic alert
 
 interface Account {
@@ -25,8 +25,13 @@ interface Account {
     notes?: string | null;
 }
 
+interface SlimProduct {
+    id: string;
+    name: string;
+}
+
 interface InventoryFormProps {
-    products: Product[];
+    products: SlimProduct[];
     account?: Account; // If passed, we are in Edit mode
     open?: boolean;
     onOpenChange?: (open: boolean) => void;

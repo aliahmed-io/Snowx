@@ -21,15 +21,22 @@ async function sendBroadcast(formData: FormData) {
         select: { email: true }
     });
 
-    const recipients = users.map(u => u.email);
+    const recipients = users.map(u => u.email).filter(Boolean) as string[];
 
     if (recipients.length > 0) {
-        // Send email (for demo purposes we slice to avoid limiting issues on free tier)
-        await sendEmail({
-            to: recipients.slice(0, 50),
-            subject,
-            html: `<p>${message.replace(/\n/g, "<br>")}</p>`
-        });
+        // Batch sending to avoid limits and ensure privacy via BCC
+        const BATCH_SIZE = 50;
+
+        for (let i = 0; i < recipients.length; i += BATCH_SIZE) {
+            const batch = recipients.slice(i, i + BATCH_SIZE);
+
+            await sendEmail({
+                to: "noreply@snowx.com", // Hidden recipient
+                bcc: batch,
+                subject,
+                html: `<p>${message.replace(/\n/g, "<br>")}</p>`
+            });
+        }
     }
 
     await db.broadcast.create({

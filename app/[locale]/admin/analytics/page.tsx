@@ -23,7 +23,13 @@ interface AnalyticsData {
     salesByCategory: { name: string; value: number }[];
     salesByPlatform: { name: string; value: number }[];
     topProducts: { name: string; sales: number; price: number }[];
-    recentOrders: { id: string; total: number | string; User?: { firstName?: string | null; email?: string | null; profileImage?: string | null } | null }[];
+    recentOrders: {
+        id: string;
+        total: number | string;
+        status: string;
+        createdAt: Date | string;
+        User: { firstName: string | null; lastName: string | null; email: string; profileImage?: string | null } | null;
+    }[];
 }
 
 // Helper to fetch data with caching

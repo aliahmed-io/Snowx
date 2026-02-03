@@ -37,7 +37,10 @@ export default function CheckoutPage() {
                     price: item.price,
                     quantity: item.quantity,
                     image: item.image,
-                }))
+                })),
+                subtotal,
+                tax,
+                shipping
             );
 
             if (!result.success) {

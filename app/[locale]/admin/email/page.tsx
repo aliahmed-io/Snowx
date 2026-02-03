@@ -2,7 +2,9 @@ import { db } from "@/lib/db";
 import {
     Send,
     RefreshCw,
-    Download
+    Download,
+    ChevronLeft,
+    ChevronRight
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -26,16 +28,23 @@ import { SubscriberTable } from "./SubscriberTable";
 
 export const dynamic = "force-dynamic";
 
-async function getEmailData() {
-    const [subscribers, campaigns] = await Promise.all([
+const PAGE_SIZE = 20;
+
+async function getEmailData(page: number = 1) {
+    const skip = (page - 1) * PAGE_SIZE;
+
+    const [subscribers, totalSubscribers, campaigns] = await Promise.all([
         db.newsletterSubscriber.findMany({
             orderBy: { createdAt: "desc" },
+            take: PAGE_SIZE,
+            skip: skip,
             include: {
                 user: {
                     select: { firstName: true, lastName: true }
                 }
             }
         }),
+        db.newsletterSubscriber.count(),
         db.broadcast.findMany({
             where: { type: "EMAIL" },
             orderBy: { createdAt: "desc" },
@@ -43,13 +52,21 @@ async function getEmailData() {
         })
     ]);
 
-    return { subscribers, campaigns };
+    return { subscribers, totalSubscribers, campaigns };
 }
 
-export default async function EmailPage() {
-    const { subscribers, campaigns } = await getEmailData();
+interface EmailPageProps {
+    searchParams: Promise<{ page?: string }>;
+}
 
-    const activeSubscribers = subscribers.filter(s => s.status === "subscribed");
+export default async function EmailPage({ searchParams }: EmailPageProps) {
+    const params = await searchParams;
+    const currentPage = Number(params.page) || 1;
+    const { subscribers, totalSubscribers, campaigns } = await getEmailData(currentPage);
+
+    // Note: This filter happens post-fetch on the current page, which is acceptable for display stats
+    // but ideally we'd fetch stats separately. For now, we display total subscribers count.
+    const activeSubscribersCount = await db.newsletterSubscriber.count({ where: { status: "subscribed" } });
 
     return (
         <div className="space-y-6">
@@ -71,7 +88,7 @@ export default async function EmailPage() {
                 <TabsList className="bg-[#0f172a] border border-[#1e293b]">
                     <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
                     <TabsTrigger value="subscribers">
-                        Subscribers ({activeSubscribers.length})
+                        Subscribers ({totalSubscribers})
                     </TabsTrigger>
                 </TabsList>
 
@@ -86,11 +103,11 @@ export default async function EmailPage() {
                                     New Campaign
                                 </CardTitle>
                                 <CardDescription className="text-slate-400">
-                                    Create and send emails to your {activeSubscribers.length} subscribers
+                                    Create and send emails to your {activeSubscribersCount} subscribers
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>
-                                <CampaignForm subscriberCount={activeSubscribers.length} />
+                                <CampaignForm subscriberCount={activeSubscribersCount} />
                             </CardContent>
                         </Card>
 
@@ -149,6 +166,26 @@ export default async function EmailPage() {
                                 userName: s.user ? `${s.user.firstName || ''} ${s.user.lastName || ''}`.trim() : null,
                                 joinedAt: s.createdAt.toISOString()
                             }))} />
+
+                            <div className="flex items-center justify-between pt-4 mt-4 border-t border-[#1e293b]">
+                                <div className="text-sm text-slate-500">
+                                    Showing {subscribers.length} of {totalSubscribers} subscribers
+                                </div>
+                                <div className="flex gap-2">
+                                    <Button variant="outline" size="sm" disabled={currentPage <= 1} className="border-[#1e293b] text-slate-300 hover:text-white" asChild>
+                                        <Link href={`/admin/email?page=${currentPage - 1}`}>
+                                            <ChevronLeft className="w-4 h-4 mr-1" />
+                                            Previous
+                                        </Link>
+                                    </Button>
+                                    <Button variant="outline" size="sm" disabled={currentPage * PAGE_SIZE >= totalSubscribers} className="border-[#1e293b] text-slate-300 hover:text-white" asChild>
+                                        <Link href={`/admin/email?page=${currentPage + 1}`}>
+                                            Next
+                                            <ChevronRight className="w-4 h-4 ml-1" />
+                                        </Link>
+                                    </Button>
+                                </div>
+                            </div>
                         </CardContent>
                     </Card>
                 </TabsContent>

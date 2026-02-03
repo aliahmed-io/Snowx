@@ -1,28 +1,14 @@
 import { db } from "@/lib/db";
-// import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server"; // Commented out for dev/mock
+import { requireAuth } from "@/lib/auth";
 import { CredentialList } from "./credential-list";
 
 export default async function MyLicensesPage() {
-    // Mock Auth for Dev - User ID from seed
-    // const { getUser } = getKindeServerSession();
-    // const user = await getUser();
-    // if (!user) return null; // redirect("/api/auth/login");
-
-    // Hardcoded Demo User ID from seed
-    const demoUser = await db.user.findFirst({ where: { email: "demo@snowx.com" } });
-
-    if (!demoUser) {
-        return (
-            <div className="container mx-auto py-20 text-center">
-                <h1 className="text-2xl font-bold">Demo User not found</h1>
-                <p>Please seed the database.</p>
-            </div>
-        );
-    }
+    // Real Auth
+    const user = await requireAuth();
 
     const accounts = await db.account.findMany({
         where: {
-            userId: demoUser.id
+            userId: user.id
         },
         include: {
             product: true,

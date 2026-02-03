@@ -20,6 +20,7 @@ interface Product {
     category: { name: string };
     avgRating: number;
     reviewCount: number;
+    description?: string;
 }
 
 interface InfiniteProductGridProps {
@@ -131,6 +132,7 @@ export function InfiniteProductGrid({
                         comparePrice={product.comparePrice}
                         image={product.images[0] || ""}
                         category={product.category.name}
+                        description={product.description}
                     />
                 ))}
             </div>

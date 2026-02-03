@@ -22,7 +22,10 @@ interface CreateOrderResult {
 
 // Create an order and return a payment token for redirect to SnowX GD
 export async function createOrderForPayment(
-    items: CartItem[]
+    items: CartItem[],
+    clientSubtotal: number,
+    clientTax: number,
+    clientShipping: number
 ): Promise<CreateOrderResult> {
     try {
         const { getUser } = getKindeServerSession();
@@ -42,7 +45,7 @@ export async function createOrderForPayment(
         for (const item of items) {
             const product = dbProducts.find(p => p.id === item.id);
             if (!product) {
-                return { success: false, error: `Product not found: ${item.id}` }; // Should probably handle this gracefully
+                return { success: false, error: `Product not found: ${item.id}` };
             }
             if (product.stockQuantity < item.quantity) {
                 return { success: false, error: `Not enough stock for: ${product.name}` };
@@ -62,6 +65,22 @@ export async function createOrderForPayment(
         const tax = calculatedSubtotal * 0.1;
         const shipping = calculatedSubtotal > 50 ? 0 : 5.99;
         const total = calculatedSubtotal + tax + shipping;
+
+        // Security / Integrity Check (Production Level Logging)
+        // We do not reject the order to preserve UX, but we log if the client attempted to send different values
+        // This is useful for detecting potential tampering or frontend bugs.
+        const tolerance = 0.05; // 5 cents tolerance
+        if (
+            Math.abs(clientSubtotal - calculatedSubtotal) > tolerance ||
+            Math.abs(clientTax - tax) > tolerance ||
+            Math.abs(clientShipping - shipping) > tolerance
+        ) {
+            console.warn("[PAYMENT ACTION] Price Mismatch Detected:", {
+                client: { subtotal: clientSubtotal, tax: clientTax, shipping: clientShipping },
+                server: { subtotal: calculatedSubtotal, tax, shipping },
+                user: kindeUser?.email
+            });
+        }
 
         // Find the user in our database if logged in
         let userId: string | null = null;

@@ -16,7 +16,7 @@ interface RecentOrder {
     id: string;
     total: number | string | { toNumber: () => number };
     status: string;
-    createdAt: Date;
+    createdAt: Date | string;
     User: {
         firstName: string | null;
         lastName: string | null;

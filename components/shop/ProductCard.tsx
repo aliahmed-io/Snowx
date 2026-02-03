@@ -17,6 +17,7 @@ interface ProductCardProps {
     comparePrice?: number | null;
     image: string;
     category: string;
+    description?: string;
 }
 
 export function ProductCard({
@@ -27,6 +28,7 @@ export function ProductCard({
     comparePrice,
     image,
     category,
+    description,
 }: ProductCardProps) {
     const t = useTranslations('Shop');
     const { addItem } = useCart();
@@ -84,9 +86,9 @@ export function ProductCard({
                         {name}
                     </h3>
 
-                    {/* Subtitle/Description (Mock for visual match) */}
+                    {/* Subtitle/Description */}
                     <p className="text-sm text-gray-500 mb-3 line-clamp-1">
-                        Premium Subscription
+                        {description || "Premium Subscription"}
                     </p>
 
                     {/* Savings Badge & Price */}

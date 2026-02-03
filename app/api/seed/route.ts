@@ -4,6 +4,10 @@ import { db } from "@/lib/db";
 import { OrderStatus, PaymentStatus, ProductStatus } from "@prisma/client";
 
 export async function GET() {
+    if (process.env.NODE_ENV === "production") {
+        return NextResponse.json({ error: "Seeding is disabled in production" }, { status: 403 });
+    }
+
     try {
         console.log('🌱 Starting seed via API...');
 

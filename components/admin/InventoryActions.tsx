@@ -1,5 +1,7 @@
 "use client";
 
+import { AccountStatus } from "@prisma/client";
+
 import { useState } from "react";
 import { Edit, Trash, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -16,7 +18,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Product } from "@prisma/client";
+
 
 interface Account {
     id: string;
@@ -24,13 +26,18 @@ interface Account {
     serviceType: string;
     username: string;
     password: string;
-    status: string;
+    status: AccountStatus;
     notes?: string | null;
+}
+
+interface SlimProduct {
+    id: string;
+    name: string;
 }
 
 interface InventoryActionsProps {
     account: Account;
-    products: Product[];
+    products: SlimProduct[];
 }
 
 export function InventoryActions({ account, products }: InventoryActionsProps) {
