@@ -4,7 +4,6 @@ import { Link } from "@/navigation";
 import Image from "next/image";
 import { Prisma, OrderStatus } from "@prisma/client";
 import {
-    Search,
     Eye
 } from "lucide-react";
 import { AdminSearchInput } from "@/components/admin/AdminSearchInput";

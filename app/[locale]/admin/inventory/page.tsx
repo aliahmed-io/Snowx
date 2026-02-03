@@ -4,10 +4,7 @@ import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import {
     User,
-    Download,
-    Upload,
-    Edit,
-    Trash
+    Download
 } from "lucide-react";
 import { AccountStatus, Prisma } from "@prisma/client";
 import Image from "next/image";
@@ -60,8 +57,7 @@ export default async function InventoryPage({
     // Necessary type casting for Prisma strict typing in components if needed
     // but here we just pass the arrays.
 
-    // @ts-ignore: Prisma types are complex
-    const productsForForm = products.map(p => ({ ...p, images: [], price: 0, description: '', slug: '', categoryId: '' }));
+    // Prisma types are complex, but map functions inferred correctly here
 
     // Serialize accounts to avoid Decimal errors in Client Components
     const serializedAccounts = accounts.map(account => ({
@@ -89,6 +85,7 @@ export default async function InventoryPage({
                     <p className="text-gray-400 mt-2">Manage credentials and subscription accounts.</p>
                 </div>
                 <div className="flex gap-2">
+                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                     <InventoryForm products={products as any} />
 
                     <a
@@ -198,7 +195,7 @@ export default async function InventoryPage({
                                             <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                                 <InventoryActions
                                                     account={account}
-                                                    products={products as any}
+                                                    products={products as unknown as typeof products}
                                                 />
                                             </div>
                                         </td>

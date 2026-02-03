@@ -50,10 +50,17 @@ export function DesktopNavbar({ user, role }: DesktopNavbarProps) {
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
 
+    const prevPathnameRef = useRef(pathname);
+
+    /* eslint-disable react-hooks/set-state-in-effect */
     useEffect(() => {
-        setSearchOpen(false);
-        setSearchQuery("");
+        if (prevPathnameRef.current !== pathname) {
+            prevPathnameRef.current = pathname;
+            setSearchOpen(false);
+            setSearchQuery("");
+        }
     }, [pathname]);
+    /* eslint-enable react-hooks/set-state-in-effect */
 
     const handleLanguageChange = (newLocale: string) => {
         router.push(pathname, { locale: newLocale });

@@ -7,7 +7,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { LoginLink, RegisterLink } from "@kinde-oss/kinde-auth-nextjs/components";
 import { ShoppingCart, Menu, X } from "lucide-react";
 import { useCart } from "@/components/providers/CartProvider";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Portal } from "@/components/ui/portal";
 import { useScrollLock } from "@/hooks/useScrollLock";
 
@@ -47,9 +47,16 @@ export function MobileNavbar({ user }: MobileNavbarProps) {
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
 
+    const prevPathnameRef = useRef(pathname);
+
+    /* eslint-disable react-hooks/set-state-in-effect */
     useEffect(() => {
-        setMenuOpen(false);
-    }, [pathname, setMenuOpen]);
+        if (prevPathnameRef.current !== pathname) {
+            prevPathnameRef.current = pathname;
+            setMenuOpen(false);
+        }
+    }, [pathname]);
+    /* eslint-enable react-hooks/set-state-in-effect */
 
     useScrollLock(menuOpen);
 

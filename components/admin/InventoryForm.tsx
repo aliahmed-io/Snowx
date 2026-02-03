@@ -12,12 +12,22 @@ import {
 import { Button } from "@/components/ui/button";
 import { Plus, Loader2 } from "lucide-react";
 import { createAccount, updateAccount } from "@/actions/inventory";
-import { Product } from "@prisma/client";
+import { Product, AccountStatus } from "@prisma/client";
 import { toast } from "sonner"; // Assuming sonner is used, or generic alert
+
+interface Account {
+    id: string;
+    productId: string;
+    serviceType: string;
+    username: string;
+    password: string;
+    status: AccountStatus;
+    notes?: string | null;
+}
 
 interface InventoryFormProps {
     products: Product[];
-    account?: any; // If passed, we are in Edit mode
+    account?: Account; // If passed, we are in Edit mode
     open?: boolean;
     onOpenChange?: (open: boolean) => void;
     children?: React.ReactNode;
@@ -63,7 +73,7 @@ export function InventoryForm({ products, account, open, onOpenChange, children 
         }
     };
 
-    const selectedProduct = products.find(p => p.id === formData.productId);
+
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -152,7 +162,7 @@ export function InventoryForm({ products, account, open, onOpenChange, children 
                                 <select
                                     className="flex h-10 w-full items-center justify-between rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-snow-accent/50"
                                     value={formData.status}
-                                    onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
+                                    onChange={(e) => setFormData({ ...formData, status: e.target.value as AccountStatus })}
                                 >
                                     <option value="AVAILABLE" className="bg-[#0f172a]">Available</option>
                                     <option value="SOLD" className="bg-[#0f172a]">Sold</option>

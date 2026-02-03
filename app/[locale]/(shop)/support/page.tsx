@@ -1,4 +1,3 @@
-import { Metadata } from 'next';
 import { Mail, MessageCircle, FileText } from 'lucide-react';
 import { Link } from '@/navigation';
 import { useTranslations } from 'next-intl';

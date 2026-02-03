@@ -22,7 +22,7 @@ export async function GET() {
         let updated = 0;
 
         for (const p of products) {
-            let data: any = {};
+            const data: { durationId?: string; platformId?: string } = {};
 
             if (p.duration && !p.durationId) {
                 const match = durationOptions.find(o => o.value === p.duration || o.label === p.duration);
@@ -41,7 +41,8 @@ export async function GET() {
         }
 
         return NextResponse.json({ success: true, updated, total: products.length });
-    } catch (e: any) {
-        return NextResponse.json({ success: false, error: e.message }, { status: 500 });
+    } catch (e) {
+        const message = e instanceof Error ? e.message : 'Unknown error';
+        return NextResponse.json({ success: false, error: message }, { status: 500 });
     }
 }

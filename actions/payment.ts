@@ -20,14 +20,9 @@ interface CreateOrderResult {
     total?: string;
 }
 
-/**
- * Create an order and return a payment token for redirect to SnowX GD
- */
+// Create an order and return a payment token for redirect to SnowX GD
 export async function createOrderForPayment(
-    items: CartItem[],
-    _clientSubtotal: number, // Ignored
-    _clientTax: number,      // Ignored
-    _clientShipping: number  // Ignored
+    items: CartItem[]
 ): Promise<CreateOrderResult> {
     try {
         const { getUser } = getKindeServerSession();

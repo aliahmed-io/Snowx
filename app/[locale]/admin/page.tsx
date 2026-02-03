@@ -14,7 +14,7 @@ import {
     Package,
     CreditCard
 } from "lucide-react";
-import { OrderStatus, Order, User } from "@prisma/client";
+import { OrderStatus } from "@prisma/client";
 
 async function getStats() {
     const now = new Date();

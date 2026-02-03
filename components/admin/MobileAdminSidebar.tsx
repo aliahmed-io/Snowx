@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { Link, usePathname } from "@/navigation";
 import { cn } from "@/lib/utils";
@@ -68,10 +68,17 @@ export function MobileAdminSidebar() {
     const pathname = usePathname();
     const [isOpen, setIsOpen] = useState(false);
 
+    const prevPathnameRef = useRef(pathname);
+
     // Close on route change
+    /* eslint-disable react-hooks/set-state-in-effect */
     useEffect(() => {
-        setIsOpen(false);
+        if (prevPathnameRef.current !== pathname) {
+            prevPathnameRef.current = pathname;
+            setIsOpen(false);
+        }
     }, [pathname]);
+    /* eslint-enable react-hooks/set-state-in-effect */
 
     // Prevent body scroll when open
     useEffect(() => {

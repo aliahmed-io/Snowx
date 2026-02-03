@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import { cn } from "@/lib/utils";
 
 interface AuthSplitLayoutProps {
     children: React.ReactNode;
@@ -10,7 +9,7 @@ interface AuthSplitLayoutProps {
     author?: string;
 }
 
-export function AuthSplitLayout({ children, image, quote, author }: AuthSplitLayoutProps) {
+export function AuthSplitLayout({ children, quote, author }: AuthSplitLayoutProps) {
     return (
         <div className="min-h-screen grid grid-cols-1 md:grid-cols-2">
             {/* Left Side - Branding (Hidden on mobile) */}

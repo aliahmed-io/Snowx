@@ -11,31 +11,102 @@ import { notFound } from "next/navigation";
 import { TicketStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { cn } from "@/lib/utils";
+import { requireAdmin } from "@/lib/auth";
+import { sendEmail } from "@/lib/mail";
 
 async function updateTicketStatus(formData: FormData) {
     "use server";
     const ticketId = formData.get("ticketId") as string;
     const status = formData.get("status") as TicketStatus;
 
-    await db.ticket.update({
-        where: { id: ticketId },
-        data: { status }
-    });
+    // Ensure admin
+    await requireAdmin();
 
-    revalidatePath(`/admin/support/${ticketId}`);
+    try {
+        await db.ticket.update({
+            where: { id: ticketId },
+            data: { status }
+        });
+
+        revalidatePath(`/admin/support/${ticketId}`);
+        revalidatePath("/admin/support");
+    } catch (error) {
+        console.error("Failed to update ticket status:", error);
+        throw new Error("Failed to update ticket status");
+    }
 }
 
 async function sendReply(formData: FormData) {
     "use server";
-    // Mock reply - in real app would send email/save to db
-    // TODO: Implement reply logic
+    const ticketId = formData.get("ticketId") as string;
+    const message = formData.get("message") as string;
+
+    if (!ticketId || !message || !message.trim()) return;
+
+    // 1. Auth check
+    const admin = await requireAdmin();
+
+    try {
+        // 2. Create Reply in DB
+        const reply = await db.ticketReply.create({
+            data: {
+                ticketId,
+                userId: admin.id,
+                message: message.trim()
+            },
+            include: {
+                ticket: {
+                    include: { user: true }
+                }
+            }
+        });
+
+        // 3. Update Status (optional, but good practice to move to PENDING or CLOSED)
+        await db.ticket.update({
+            where: { id: ticketId },
+            data: { status: TicketStatus.PENDING, updatedAt: new Date() }
+        });
+
+        // 4. Send Email Notification
+        const customerEmail = reply.ticket.user.email;
+        if (customerEmail) {
+            await sendEmail({
+                to: customerEmail,
+                subject: `[Ticket #${ticketId.slice(-6)}] New Reply: ${reply.ticket.subject}`,
+                html: `
+                    <div style="font-family: sans-serif; color: #333;">
+                        <p>Hello ${reply.ticket.user.firstName || 'Customer'},</p>
+                        <p>You have received a new reply to your support ticket.</p>
+                        <div style="background: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                            <strong>Admin:</strong><br/>
+                            ${message.replace(/\n/g, '<br/>')}
+                        </div>
+                        <p>You can view the full conversation by logging into your account.</p>
+                        <p>Best regards,<br/>Snow X Support</p>
+                    </div>
+                `
+            });
+        }
+
+        revalidatePath(`/admin/support/${ticketId}`);
+        revalidatePath("/admin/support");
+    } catch (error) {
+        console.error("Failed to send reply:", error);
+        throw new Error("Failed to send reply");
+    }
 }
 
 export default async function TicketDetailsPage({ params }: { params: Promise<{ ticketId: string }> }) {
     const { ticketId } = await params;
     const ticket = await db.ticket.findUnique({
         where: { id: ticketId },
-        include: { user: true }
+        include: {
+            user: true,
+            replies: {
+                include: { user: true },
+                orderBy: { createdAt: 'asc' }
+            }
+        }
     });
 
     if (!ticket) notFound();
@@ -95,7 +166,7 @@ export default async function TicketDetailsPage({ params }: { params: Promise<{ 
                     <h3 className="font-semibold text-white text-lg">{ticket.subject}</h3>
                 </div>
                 <div className="p-8 space-y-8">
-                    {/* User Message */}
+                    {/* User Message (Original) */}
                     <div className="flex gap-4">
                         <div className="w-10 h-10 rounded-full bg-snow-accent/20 shrink-0 flex items-center justify-center text-snow-accent">
                             <User className="w-5 h-5" />
@@ -111,20 +182,50 @@ export default async function TicketDetailsPage({ params }: { params: Promise<{ 
                         </div>
                     </div>
 
+                    {/* Replies */}
+                    {ticket.replies.map((reply) => (
+                        <div key={reply.id} className="flex gap-4">
+                            <div className={cn(
+                                "w-10 h-10 rounded-full shrink-0 flex items-center justify-center",
+                                reply.user.role === 'ADMIN' ? "bg-snow-accent text-[#020817]" : "bg-snow-accent/20 text-snow-accent"
+                            )}>
+                                {reply.user.role === 'ADMIN' ? <MessageSquare className="w-5 h-5" /> : <User className="w-5 h-5" />}
+                            </div>
+                            <div className="flex-1 space-y-2">
+                                <div className="flex items-baseline justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <span className="font-medium text-white">
+                                            {reply.user.firstName} {reply.user.lastName}
+                                        </span>
+                                        {reply.user.role === 'ADMIN' && (
+                                            <span className="text-[10px] bg-snow-accent/20 text-snow-accent px-1.5 py-0.5 rounded font-semibold">
+                                                ADMIN
+                                            </span>
+                                        )}
+                                    </div>
+                                    <span className="text-xs text-gray-500">{new Date(reply.createdAt).toLocaleString()}</span>
+                                </div>
+                                <div className={cn(
+                                    "rounded-lg p-4 text-gray-300 leading-relaxed whitespace-pre-wrap",
+                                    reply.user.role === 'ADMIN' ? "bg-snow-accent/5 border border-snow-accent/10" : "bg-white/5"
+                                )}>
+                                    {reply.message}
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+
                     {/* Divider */}
-                    <div className="relative">
+                    <div className="relative py-4">
                         <div className="absolute inset-0 flex items-center">
                             <div className="w-full border-t border-snow-primary/20"></div>
-                        </div>
-                        <div className="relative flex justify-center text-xs uppercase">
-                            <span className="bg-[#0a1628] px-2 text-gray-500">Reply chain placeholder</span>
                         </div>
                     </div>
 
                     {/* Reply Box */}
                     <div className="flex gap-4">
                         <div className="w-10 h-10 rounded-full bg-snow-accent shrink-0 flex items-center justify-center text-[#020817]">
-                            <MessageSquare className="w-5 h-5" />
+                            <Send className="w-5 h-5" />
                         </div>
                         <div className="flex-1">
                             <form action={sendReply} className="space-y-4">

@@ -27,6 +27,7 @@ model User {
   wishlist               WishlistItem[]
   tickets                Ticket[] // Kept for potential compatibility or future use
   accounts               Account[]
+  ticketReplies          TicketReply[]
 }
 
 enum Role {
@@ -424,6 +425,22 @@ model Ticket {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  replies TicketReply[]
+
+  @@index([userId])
+}
+
+model TicketReply {
+  id        String   @id @default(cuid())
+  ticketId  String
+  userId    String
+  message   String   @db.Text
+  createdAt DateTime @default(now())
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@index([ticketId])
   @@index([userId])
 }
 

@@ -18,8 +18,18 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Product } from "@prisma/client";
 
+interface Account {
+    id: string;
+    productId: string;
+    serviceType: string;
+    username: string;
+    password: string;
+    status: string;
+    notes?: string | null;
+}
+
 interface InventoryActionsProps {
-    account: any;
+    account: Account;
     products: Product[];
 }
 

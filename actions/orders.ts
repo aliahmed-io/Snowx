@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { requireAdmin, requireAuth } from "@/lib/auth";
 
@@ -71,6 +71,7 @@ export async function getAllOrders(options?: {
     status?: string;
     limit?: number;
 }) {
+    await requireAdmin();
     const where: Record<string, unknown> = {};
 
     if (options?.status && options.status !== "all") {
@@ -98,6 +99,7 @@ export async function updateOrderStatus(
     orderId: string,
     status: "PENDING" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED" | "REFUNDED"
 ) {
+    await requireAdmin();
     const order = await db.order.update({
         where: { id: orderId },
         data: { status },
@@ -117,6 +119,7 @@ export async function createOrder(data: {
     shipping: number;
     total: number;
 }) {
+    await requireAdmin();
     const order = await db.$transaction(async (tx) => {
         // Create order
         const newOrder = await tx.order.create({

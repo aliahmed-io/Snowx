@@ -15,6 +15,13 @@ const eslintConfig = defineConfig([
     ".vercel/**",
     "node_modules/**",
   ]),
+  // Custom rule overrides
+  {
+    rules: {
+      // Downgrade set-state-in-effect to warning - pattern is valid for close-on-route-change
+      "react-hooks/set-state-in-effect": "warn",
+    },
+  },
 ]);
 
 export default eslintConfig;

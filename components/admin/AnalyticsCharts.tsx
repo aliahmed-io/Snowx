@@ -16,7 +16,6 @@ import {
     Legend
 } from 'recharts';
 import { formatPrice } from '@/lib/utils';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface RevenueData {
     date: string;
@@ -31,20 +30,20 @@ interface UserData {
 interface CategoryData {
     name: string;
     value: number;
-    [key: string]: any;
+    [key: string]: string | number;
 }
 
 interface PlatformData {
     name: string;
     value: number;
-    [key: string]: any;
+    [key: string]: string | number;
 }
 
 interface ProductData {
     name: string;
     sales: number;
     price: number;
-    [key: string]: any;
+    [key: string]: string | number;
 }
 
 interface AnalyticsChartsProps {
@@ -98,7 +97,7 @@ export function AnalyticsCharts({
                                     width={55}
                                 />
                                 <Tooltip
-                                    formatter={(value: any) => formatPrice(Number(value || 0))}
+                                    formatter={(value: number | undefined) => formatPrice(Number(value || 0))}
                                     contentStyle={{
                                         backgroundColor: '#0f172a',
                                         borderColor: 'rgba(255,255,255,0.1)',
@@ -189,7 +188,7 @@ export function AnalyticsCharts({
                                     ))}
                                 </Pie>
                                 <Tooltip
-                                    formatter={(value: any) => formatPrice(Number(value || 0))}
+                                    formatter={(value: number | undefined) => formatPrice(Number(value || 0))}
                                     contentStyle={{
                                         backgroundColor: '#0f172a',
                                         borderColor: 'rgba(255,255,255,0.1)',
@@ -214,7 +213,7 @@ export function AnalyticsCharts({
                                 <XAxis type="number" tickFormatter={(val) => `$${val}`} stroke="#64748b" />
                                 <YAxis dataKey="name" type="category" width={100} stroke="#64748b" tick={{ fill: '#cbd5e1' }} />
                                 <Tooltip
-                                    formatter={(value: any) => formatPrice(Number(value || 0))}
+                                    formatter={(value: number | undefined) => formatPrice(Number(value || 0))}
                                     cursor={{ fill: 'rgba(255,255,255,0.05)' }}
                                     contentStyle={{
                                         backgroundColor: '#0f172a',

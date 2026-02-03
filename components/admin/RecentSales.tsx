@@ -1,12 +1,23 @@
-import { Order, User } from "@prisma/client";
 import { formatPrice } from "@/lib/utils";
 import Image from "next/image";
 import { User as UserIcon } from "lucide-react";
 
 import { Link } from "@/navigation";
 
+interface RecentOrderUser {
+    firstName?: string | null;
+    email?: string | null;
+    profileImage?: string | null;
+}
+
+interface RecentOrder {
+    id: string;
+    total: number | string;
+    User?: RecentOrderUser | null;
+}
+
 interface RecentSalesProps {
-    orders: any[];
+    orders: RecentOrder[];
 }
 
 export function RecentSales({ orders }: RecentSalesProps) {
