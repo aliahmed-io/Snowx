@@ -10,36 +10,52 @@ import {
     Key
 } from "lucide-react";
 import { AdminSearchInput } from "@/components/admin/AdminSearchInput";
+import { AdminPagination } from "@/components/admin/AdminPagination";
 
-async function getProducts(search?: string) {
-    const products = await db.product.findMany({
-        where: search ? {
-            OR: [
-                { name: { contains: search, mode: 'insensitive' } },
-                { description: { contains: search, mode: 'insensitive' } },
-                { slug: { contains: search, mode: 'insensitive' } }
-            ]
-        } : undefined,
-        include: {
-            category: true,
-            _count: {
-                select: { accounts: { where: { status: 'AVAILABLE' } } }
-            }
-        },
-        orderBy: { createdAt: 'desc' }
-    });
-    return products;
-}
+
 
 interface ProductsPageProps {
     searchParams: Promise<{
         search?: string;
+        page?: string;
     }>;
 }
 
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
-    const { search } = await searchParams;
-    const products = await getProducts(search);
+    const { search, page: pageParam } = await searchParams;
+    const page = Number(pageParam) || 1;
+    const PAGE_SIZE = 20;
+    const skip = (page - 1) * PAGE_SIZE;
+
+    const [products, totalProducts] = await Promise.all([
+        db.product.findMany({
+            where: search ? {
+                OR: [
+                    { name: { contains: search, mode: 'insensitive' } },
+                    { description: { contains: search, mode: 'insensitive' } },
+                    { slug: { contains: search, mode: 'insensitive' } }
+                ]
+            } : undefined,
+            include: {
+                category: true,
+                _count: {
+                    select: { accounts: { where: { status: 'AVAILABLE' } } }
+                }
+            },
+            orderBy: { createdAt: 'desc' },
+            take: PAGE_SIZE,
+            skip
+        }),
+        db.product.count({
+            where: search ? {
+                OR: [
+                    { name: { contains: search, mode: 'insensitive' } },
+                    { description: { contains: search, mode: 'insensitive' } },
+                    { slug: { contains: search, mode: 'insensitive' } }
+                ]
+            } : undefined
+        })
+    ]);
 
     return (
         <div className="space-y-8">
@@ -175,6 +191,8 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                     </table>
                 </div>
             </div>
+
+            <AdminPagination currentPage={page} totalItems={totalProducts} pageSize={PAGE_SIZE} />
         </div>
     );
 }

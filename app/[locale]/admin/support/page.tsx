@@ -8,22 +8,32 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export default async function SupportPage({ searchParams }: { searchParams: Promise<{ status?: string }> }) {
-    const status = (await searchParams).status as TicketStatus | undefined;
+import { AdminPagination } from "@/components/admin/AdminPagination";
+
+export default async function SupportPage({ searchParams }: { searchParams: Promise<{ status?: string; page?: string }> }) {
+    const { status: statusParam, page: pageParam } = await searchParams;
+    const status = statusParam as TicketStatus | undefined;
+    const page = Number(pageParam) || 1;
+    const PAGE_SIZE = 20;
+    const skip = (page - 1) * PAGE_SIZE;
 
     const where: Prisma.TicketWhereInput = {};
     if (status) {
         where.status = status;
     }
 
-    const tickets = await db.ticket.findMany({
-        where,
-        include: {
-            user: true
-        },
-        orderBy: { createdAt: 'desc' },
-        take: 50
-    });
+    const [tickets, totalTickets] = await Promise.all([
+        db.ticket.findMany({
+            where,
+            include: {
+                user: true
+            },
+            orderBy: { createdAt: 'desc' },
+            take: PAGE_SIZE,
+            skip
+        }),
+        db.ticket.count({ where })
+    ]);
 
     const statusColors = {
         [TicketStatus.OPEN]: "bg-green-500/10 text-green-400",
@@ -89,6 +99,7 @@ export default async function SupportPage({ searchParams }: { searchParams: Prom
                     ))
                 )}
             </div>
+            <AdminPagination currentPage={page} totalItems={totalTickets} pageSize={PAGE_SIZE} />
         </div>
     );
 }

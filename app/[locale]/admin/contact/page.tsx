@@ -13,29 +13,43 @@ import { ContactActions } from "./ContactActions";
 
 export const dynamic = "force-dynamic";
 
-interface PageProps {
-    searchParams: Promise<{ search?: string }>;
-}
+import { AdminPagination } from "@/components/admin/AdminPagination";
 
-async function getContacts(search?: string) {
-    return db.contact.findMany({
-        orderBy: { createdAt: "desc" },
-        where: search ? {
-            OR: [
-                { name: { contains: search, mode: 'insensitive' } },
-                { email: { contains: search, mode: 'insensitive' } },
-                { subject: { contains: search, mode: 'insensitive' } }
-            ]
-        } : undefined
-    });
+interface PageProps {
+    searchParams: Promise<{ search?: string; page?: string }>;
 }
 
 export default async function ContactPage({ searchParams }: PageProps) {
-    const { search } = await searchParams;
-    const messages = await getContacts(search);
+    const { search, page: pageParam } = await searchParams;
+    const page = Number(pageParam) || 1;
+    const PAGE_SIZE = 20;
+    const skip = (page - 1) * PAGE_SIZE;
 
-    const pendingCount = messages.filter(m => m.status === "PENDING").length;
-    const completedCount = messages.filter(m => m.status === "COMPLETED").length;
+    const [messages, totalMessages, pendingCount, completedCount] = await Promise.all([
+        db.contact.findMany({
+            orderBy: { createdAt: "desc" },
+            where: search ? {
+                OR: [
+                    { name: { contains: search, mode: 'insensitive' } },
+                    { email: { contains: search, mode: 'insensitive' } },
+                    { subject: { contains: search, mode: 'insensitive' } }
+                ]
+            } : undefined,
+            take: PAGE_SIZE,
+            skip
+        }),
+        db.contact.count({
+            where: search ? {
+                OR: [
+                    { name: { contains: search, mode: 'insensitive' } },
+                    { email: { contains: search, mode: 'insensitive' } },
+                    { subject: { contains: search, mode: 'insensitive' } }
+                ]
+            } : undefined
+        }),
+        db.contact.count({ where: { status: "PENDING" } }),
+        db.contact.count({ where: { status: "COMPLETED" } })
+    ]);
 
     return (
         <div className="h-[calc(100vh-100px)] flex flex-col space-y-4">
@@ -101,6 +115,8 @@ export default async function ContactPage({ searchParams }: PageProps) {
                     </div>
                 </Card>
             </div>
+
+            <AdminPagination currentPage={page} totalItems={totalMessages} pageSize={PAGE_SIZE} />
         </div>
     );
 }

@@ -20,26 +20,7 @@ import { ReturnActions } from "./ReturnActions";
 
 export const dynamic = "force-dynamic";
 
-async function getReturns() {
-    return db.returnRequest.findMany({
-        orderBy: { createdAt: "desc" },
-        include: {
-            order: {
-                select: {
-                    orderNumber: true,
-                    total: true
-                }
-            },
-            user: {
-                select: {
-                    email: true,
-                    firstName: true,
-                    lastName: true
-                }
-            }
-        }
-    });
-}
+
 
 function getStatusBadge(status: string) {
     switch (status) {
@@ -56,8 +37,50 @@ function getStatusBadge(status: string) {
     }
 }
 
-export default async function ReturnsPage() {
-    const returns = await getReturns();
+import { AdminPagination } from "@/components/admin/AdminPagination";
+
+export default async function ReturnsPage({ searchParams }: { searchParams: Promise<{ page?: string; search?: string }> }) {
+    const { page: pageParam, search } = await searchParams;
+    const page = Number(pageParam) || 1;
+    const PAGE_SIZE = 20;
+    const skip = (page - 1) * PAGE_SIZE;
+
+    const [returns, totalReturns] = await Promise.all([
+        db.returnRequest.findMany({
+            orderBy: { createdAt: "desc" },
+            where: search ? {
+                OR: [
+                    { order: { orderNumber: { contains: search, mode: 'insensitive' } } },
+                    { user: { email: { contains: search, mode: 'insensitive' } } }
+                ]
+            } : undefined,
+            include: {
+                order: {
+                    select: {
+                        orderNumber: true,
+                        total: true
+                    }
+                },
+                user: {
+                    select: {
+                        email: true,
+                        firstName: true,
+                        lastName: true
+                    }
+                }
+            },
+            take: PAGE_SIZE,
+            skip
+        }),
+        db.returnRequest.count({
+            where: search ? {
+                OR: [
+                    { order: { orderNumber: { contains: search, mode: 'insensitive' } } },
+                    { user: { email: { contains: search, mode: 'insensitive' } } }
+                ]
+            } : undefined
+        })
+    ]);
 
     return (
         <div className="space-y-6">
@@ -145,6 +168,8 @@ export default async function ReturnsPage() {
                     </TableBody>
                 </Table>
             </div>
+
+            <AdminPagination currentPage={page} totalItems={totalReturns} pageSize={PAGE_SIZE} />
         </div>
     );
 }

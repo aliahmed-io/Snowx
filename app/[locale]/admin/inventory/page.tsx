@@ -11,13 +11,17 @@ import Image from "next/image";
 import { AdminSearchInput } from "@/components/admin/AdminSearchInput";
 import { InventoryForm } from "@/components/admin/InventoryForm";
 import { InventoryActions } from "@/components/admin/InventoryActions";
+import { AdminPagination } from "@/components/admin/AdminPagination";
 
 export default async function InventoryPage({
     searchParams
 }: {
-    searchParams: Promise<{ q?: string; status?: string }>
+    searchParams: Promise<{ q?: string; status?: string; page?: string }>
 }) {
-    const { q, status } = await searchParams;
+    const { page: pageParam, q, status } = await searchParams;
+    const page = Number(pageParam) || 1;
+    const PAGE_SIZE = 20;
+    const skip = (page - 1) * PAGE_SIZE;
 
     const where: Prisma.AccountWhereInput = {};
 
@@ -34,8 +38,8 @@ export default async function InventoryPage({
         where.status = status as AccountStatus;
     }
 
-    // Parallel fetch: Accounts + Products for the form
-    const [accounts, products] = await Promise.all([
+    // Parallel fetch: Accounts + Products for the form + Total Count
+    const [accounts, totalAccounts, products] = await Promise.all([
         db.account.findMany({
             where,
             include: {
@@ -44,8 +48,10 @@ export default async function InventoryPage({
                 user: true
             },
             orderBy: { createdAt: 'desc' },
-            take: 50
+            take: PAGE_SIZE,
+            skip
         }),
+        db.account.count({ where }),
         db.product.findMany({
             select: { id: true, name: true },
             orderBy: { name: 'asc' }
@@ -54,10 +60,8 @@ export default async function InventoryPage({
 
     const statuses = ['ALL', ...Object.values(AccountStatus)];
 
-    // Necessary type casting for Prisma strict typing in components if needed
-    // but here we just pass the arrays.
-
-    // Prisma types are complex, but map functions inferred correctly here
+    // No type casting needed if interfaces match SlimProduct
+    // InventoryForm expects SlimProduct[] which products matches
 
     // Serialize accounts to avoid Decimal errors in Client Components
     const serializedAccounts = accounts.map(account => ({
@@ -85,8 +89,7 @@ export default async function InventoryPage({
                     <p className="text-gray-400 mt-2">Manage credentials and subscription accounts.</p>
                 </div>
                 <div className="flex gap-2">
-                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                    <InventoryForm products={products as any} />
+                    <InventoryForm products={products} />
 
                     <a
                         href={`/api/admin/export/inventory${status ? `?status=${status}` : ''}`}

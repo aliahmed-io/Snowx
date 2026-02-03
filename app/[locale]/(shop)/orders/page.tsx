@@ -3,12 +3,13 @@ import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { redirect } from "next/navigation";
 import Image from "next/image";
 import { Link } from "@/navigation";
+import { ShopPagination } from "@/components/shop/ShopPagination";
 
 export const metadata = {
     title: "My Orders | SnowX",
 };
 
-export default async function OrdersPage() {
+export default async function OrdersPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
     const { getUser } = getKindeServerSession();
     const user = await getUser();
 
@@ -16,7 +17,11 @@ export default async function OrdersPage() {
         redirect("/api/auth/login");
     }
 
-    const orders = await getUserOrders();
+    const { page: pageParam } = await searchParams;
+    const page = Number(pageParam) || 1;
+    const PAGE_SIZE = 10;
+
+    const { orders, total } = await getUserOrders({ page, limit: PAGE_SIZE });
 
     return (
         <div className="pt-24 pb-16 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
@@ -98,6 +103,8 @@ export default async function OrdersPage() {
                             </div>
                         </div>
                     ))}
+
+                    <ShopPagination currentPage={page} totalItems={total} pageSize={PAGE_SIZE} />
                 </div>
             )}
         </div>

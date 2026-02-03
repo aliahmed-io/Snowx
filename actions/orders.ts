@@ -5,30 +5,39 @@ import { revalidatePath } from "next/cache";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { requireAdmin, requireAuth } from "@/lib/auth";
 
-export async function getUserOrders() {
+export async function getUserOrders(options: { page?: number; limit?: number } = {}) {
     await requireAuth();
     const { getUser } = getKindeServerSession();
     const kindeUser = await getUser();
 
-    if (!kindeUser?.id) return [];
+    if (!kindeUser?.id) return { orders: [], total: 0 };
 
     const user = await db.user.findUnique({
         where: { kindeId: kindeUser.id },
     });
 
-    if (!user) return [];
+    if (!user) return { orders: [], total: 0 };
 
-    const orders = await db.order.findMany({
-        where: { userId: user.id },
-        include: {
-            orderItems: {
-                include: { product: { select: { name: true, images: true, slug: true } } },
+    const page = options.page || 1;
+    const limit = options.limit || 10;
+    const skip = (page - 1) * limit;
+
+    const [orders, total] = await Promise.all([
+        db.order.findMany({
+            where: { userId: user.id },
+            include: {
+                orderItems: {
+                    include: { product: { select: { name: true, images: true, slug: true } } },
+                },
             },
-        },
-        orderBy: { createdAt: "desc" },
-    });
+            orderBy: { createdAt: "desc" },
+            skip,
+            take: limit
+        }),
+        db.order.count({ where: { userId: user.id } })
+    ]);
 
-    return orders.map((o) => ({
+    const mappedOrders = orders.map((o) => ({
         ...o,
         total: Number(o.total),
         subtotal: Number(o.subtotal),
@@ -39,6 +48,8 @@ export async function getUserOrders() {
             price: Number(i.price),
         })),
     }));
+
+    return { orders: mappedOrders, total };
 }
 
 export async function getOrderById(orderId: string) {

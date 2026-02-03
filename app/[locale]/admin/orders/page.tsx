@@ -7,6 +7,7 @@ import {
     Eye
 } from "lucide-react";
 import { AdminSearchInput } from "@/components/admin/AdminSearchInput";
+import { AdminPagination } from "@/components/admin/AdminPagination";
 
 interface OrdersPageProps {
     searchParams: Promise<{
@@ -17,8 +18,11 @@ interface OrdersPageProps {
 }
 
 export default async function OrdersPage({ searchParams }: OrdersPageProps) {
-    const { status: statusParam, search } = await searchParams;
+    const { status: statusParam, search, page: pageParam } = await searchParams;
     const status = statusParam as OrderStatus | undefined;
+    const page = Number(pageParam) || 1;
+    const PAGE_SIZE = 20;
+    const skip = (page - 1) * PAGE_SIZE;
 
     // Build where clause
     const where: Prisma.OrderWhereInput = {};
@@ -32,15 +36,19 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
         ];
     }
 
-    const orders = await db.order.findMany({
-        where,
-        include: {
-            User: true,
-            _count: { select: { orderItems: true } }
-        },
-        orderBy: { createdAt: 'desc' },
-        take: 50 // Limit for now
-    });
+    const [orders, totalOrders] = await Promise.all([
+        db.order.findMany({
+            where,
+            include: {
+                User: true,
+                _count: { select: { orderItems: true } }
+            },
+            orderBy: { createdAt: 'desc' },
+            take: PAGE_SIZE,
+            skip
+        }),
+        db.order.count({ where })
+    ]);
 
     const statusLabels: Record<string, string> = {
         [OrderStatus.PENDING]: "Pending",
@@ -186,6 +194,8 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
                     </table>
                 </div>
             </div>
+
+            <AdminPagination currentPage={page} totalItems={totalOrders} pageSize={PAGE_SIZE} />
         </div>
     );
 }

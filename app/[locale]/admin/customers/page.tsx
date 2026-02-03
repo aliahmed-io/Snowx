@@ -1,17 +1,50 @@
-import { getCustomers } from "@/actions/admin";
+import { db } from "@/lib/db";
+import { Role } from "@prisma/client";
 import { Link } from "@/navigation";
 import Image from "next/image";
+import { AdminPagination } from "@/components/admin/AdminPagination";
 
-// ... (Metadata stays same)
+export default async function AdminCustomersPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
+    const { page: pageParam } = await searchParams;
+    const page = Number(pageParam) || 1;
+    const PAGE_SIZE = 20;
+    const skip = (page - 1) * PAGE_SIZE;
 
-export default async function AdminCustomersPage() {
-    const customers = await getCustomers();
+    const [customers, totalCustomers] = await Promise.all([
+        db.user.findMany({
+            where: { role: Role.CUSTOMER },
+            include: {
+                _count: {
+                    select: { orders: true }
+                },
+                orders: {
+                    select: { total: true }
+                }
+            },
+            orderBy: { createdAt: "desc" },
+            take: PAGE_SIZE,
+            skip
+        }),
+        db.user.count({ where: { role: Role.CUSTOMER } })
+    ]);
+
+    // Map to shape expected by UI
+    const mappedCustomers = customers.map(customer => ({
+        id: customer.id,
+        firstName: customer.firstName,
+        lastName: customer.lastName,
+        email: customer.email,
+        profileImage: customer.profileImage,
+        createdAt: customer.createdAt,
+        orderCount: customer._count.orders,
+        totalSpent: customer.orders.reduce((acc, order) => acc + Number(order.total), 0)
+    }));
 
     return (
         <div>
             <h1 className="text-3xl font-bold text-white mb-8">Customers</h1>
 
-            {customers.length === 0 ? (
+            {mappedCustomers.length === 0 ? (
                 // ... (Empty state stays same)
                 <div className="text-center py-20 bg-white/5 rounded-xl border border-white/10">
                     <svg className="w-16 h-16 mx-auto text-gray-600 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -32,7 +65,7 @@ export default async function AdminCustomersPage() {
                             </tr>
                         </thead>
                         <tbody>
-                            {customers.map((customer) => (
+                            {mappedCustomers.map((customer) => (
                                 <tr key={customer.id} className="border-b border-white/5 hover:bg-white/5 transition-colors group">
                                     <td className="p-4">
                                         <Link href={`/admin/customers/${customer.id}`} className="flex items-center gap-3">

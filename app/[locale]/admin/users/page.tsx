@@ -5,6 +5,7 @@ import {
     Search,
     ShoppingBag
 } from "lucide-react";
+import { AdminPagination } from "@/components/admin/AdminPagination";
 
 export default async function UsersPage({ searchParams }: { searchParams: Promise<{ search?: string }> }) {
     const search = (await searchParams).search;
@@ -115,6 +116,11 @@ export default async function UsersPage({ searchParams }: { searchParams: Promis
                     </table>
                 </div>
             </div>
+
+            <AdminPagination currentPage={page} totalItems={totalUsers} pageSize={PAGE_SIZE} />
         </div>
     );
 }
+
+// Helper removed as we inline logic
+
