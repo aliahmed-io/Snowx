@@ -3,8 +3,10 @@
 import { db } from "@/lib/db";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
+import { requireAdmin, requireAuth } from "@/lib/auth";
 
 export async function getUserOrders() {
+    await requireAuth();
     const { getUser } = getKindeServerSession();
     const kindeUser = await getUser();
 

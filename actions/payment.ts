@@ -25,13 +25,48 @@ interface CreateOrderResult {
  */
 export async function createOrderForPayment(
     items: CartItem[],
-    subtotal: number,
-    tax: number,
-    shipping: number
+    _clientSubtotal: number, // Ignored
+    _clientTax: number,      // Ignored
+    _clientShipping: number  // Ignored
 ): Promise<CreateOrderResult> {
     try {
         const { getUser } = getKindeServerSession();
         const kindeUser = await getUser();
+
+        // 1. Fetch valid products from DB to get real prices
+        const productIds = items.map(i => i.id);
+        const dbProducts = await db.product.findMany({
+            where: { id: { in: productIds } },
+            select: { id: true, price: true, name: true, stockQuantity: true }
+        });
+
+        // 2. Validate items and Calculate Subtotal
+        let calculatedSubtotal = 0;
+        const finalItems = [];
+
+        for (const item of items) {
+            const product = dbProducts.find(p => p.id === item.id);
+            if (!product) {
+                return { success: false, error: `Product not found: ${item.id}` }; // Should probably handle this gracefully
+            }
+            if (product.stockQuantity < item.quantity) {
+                return { success: false, error: `Not enough stock for: ${product.name}` };
+            }
+
+            const price = Number(product.price);
+            calculatedSubtotal += price * item.quantity;
+
+            finalItems.push({
+                productId: product.id,
+                quantity: item.quantity,
+                price: price // Use SERVER price
+            });
+        }
+
+        // 3. Calculate Tax and Shipping (Matching Client Logic)
+        const tax = calculatedSubtotal * 0.1;
+        const shipping = calculatedSubtotal > 50 ? 0 : 5.99;
+        const total = calculatedSubtotal + tax + shipping;
 
         // Find the user in our database if logged in
         let userId: string | null = null;
@@ -43,8 +78,6 @@ export async function createOrderForPayment(
             userId = user?.id || null;
         }
 
-        const total = subtotal + tax + shipping;
-
         // Create the order with a unique order number
         const orderNumber = `SNX-${Date.now()}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
 
@@ -53,13 +86,13 @@ export async function createOrderForPayment(
                 orderNumber,
                 status: "PENDING",
                 total,
-                subtotal,
+                subtotal: calculatedSubtotal,
                 tax,
                 shipping,
                 userId,
                 orderItems: {
-                    create: items.map((item) => ({
-                        productId: item.id,
+                    create: finalItems.map((item) => ({
+                        productId: item.productId,
                         quantity: item.quantity,
                         price: item.price,
                     })),

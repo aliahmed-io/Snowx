@@ -1,8 +1,11 @@
 "use server";
 
 import { db } from "@/lib/db";
+import { requireAdmin } from "@/lib/auth";
 
 export async function getAdminStats() {
+    await requireAdmin();
+
     const [
         totalRevenue,
         totalOrders,
@@ -57,6 +60,7 @@ export async function getAdminStats() {
 }
 
 export async function getCustomers(options?: { limit?: number }) {
+    await requireAdmin();
     const customers = await db.user.findMany({
         where: { role: "CUSTOMER" },
         include: {
@@ -85,6 +89,7 @@ import { OrderStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
 export async function updateOrderStatus(orderId: string, status: OrderStatus) {
+    await requireAdmin();
     await db.order.update({
         where: { id: orderId },
         data: { status }
@@ -96,6 +101,7 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus) {
 // ... existing code ...
 
 export async function getCustomerById(id: string) {
+    await requireAdmin();
     const customer = await db.user.findUnique({
         where: { id, role: "CUSTOMER" },
         include: {
