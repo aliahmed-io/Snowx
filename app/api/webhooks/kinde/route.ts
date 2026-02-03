@@ -37,8 +37,6 @@ export async function POST(req: Request) {
                     role: isAdmin ? "ADMIN" : "CUSTOMER"
                 }
             });
-
-            console.log(`User created: ${user.email} (Admin: ${isAdmin})`);
         }
 
         return NextResponse.json({ received: true });

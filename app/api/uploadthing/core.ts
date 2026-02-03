@@ -9,11 +9,6 @@ const auth = async () => {
         const user = await getUser();
         const permissions = await getPermissions();
 
-        console.log("UploadThing Auth:", {
-            userId: user?.id,
-            permissions: permissions?.permissions
-        });
-
         if (!user) throw new Error("Unauthorized: User not found");
         // if (!permissions?.permissions?.includes("admin:access")) throw new Error("Unauthorized: Missing admin permission");
 
@@ -38,8 +33,6 @@ export const ourFileRouter = {
         })
         .onUploadComplete(async ({ metadata, file }) => {
             // This code RUNS ON YOUR SERVER after upload
-            console.log("Upload complete for userId:", metadata.userId);
-            console.log("file url", file.url);
             // !!! Whatever is returned here is sent to the clientside `onClientUploadComplete` callback
             return { uploadedBy: metadata.userId };
         }),

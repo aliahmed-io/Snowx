@@ -4,9 +4,7 @@ import { db } from '@/lib/db';
 
 export async function GET() {
     try {
-        console.log('Starting migration via API...');
-
-        // 1. Fetch products with legacy strings but no IDs
+        // 1. Fetch products with legacy strings but no ids
         const products = await db.product.findMany({
             where: {
                 OR: [
